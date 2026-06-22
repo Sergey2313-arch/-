@@ -1,0 +1,37 @@
+<svg width="1200" height="700" viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.78 0 1 0 0 0.06 0 0 1 0 1 0 0 0 0.9 0" result="purple"/>
+      <feMerge>
+        <feMergeNode in="purple"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="neon" x1="250" y1="120" x2="950" y2="440" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3CFF"/>
+      <stop offset="0.55" stop-color="#C026FF"/>
+      <stop offset="1" stop-color="#FF2BD6"/>
+    </linearGradient>
+    <linearGradient id="text" x1="170" y1="515" x2="1020" y2="515" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#FF2BD6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="700" fill="#050509"/>
+  <g filter="url(#glow)">
+    <path d="M305 165H650C712 165 752 196 752 252C752 306 711 339 650 339H558L705 462H594L450 340H392V462H300V285H635C655 285 670 272 670 254C670 234 655 222 635 222H342L305 165Z" fill="url(#neon)"/>
+    <path d="M710 356L848 220H930L790 356L930 462H826L710 356Z" fill="url(#neon)"/>
+    <path d="M872 160H1000L976 292L945 223L830 342L790 300L912 190L872 160Z" fill="url(#neon)"/>
+    <path d="M160 250H292" stroke="#9B2CFF" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+    <path d="M120 300H295" stroke="#C026FF" stroke-width="5" stroke-linecap="round" opacity="0.55"/>
+    <path d="M210 350H315" stroke="#FF2BD6" stroke-width="5" stroke-linecap="round" opacity="0.5"/>
+    <path d="M430 560H526L548 610H652L674 560H770" stroke="#C026FF" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+    <path d="M548 610H648" stroke="#C026FF" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+    <circle cx="566" cy="632" r="7" fill="#C026FF"/>
+    <circle cx="632" cy="632" r="7" fill="#C026FF"/>
+  </g>
+
+  <text x="600" y="545" text-anchor="middle" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="92" font-weight="800" letter-spacing="1" fill="url(#text)" filter="url(#glow)">ReviMarket</text>
+</svg>
