@@ -17,6 +17,37 @@
 
 Это пока **frontend beta без backend и настоящей базы данных**. Данные работают в браузере через `localStorage`, а пользователь перед входом принимает или отклоняет сохранение демо-данных.
 
+## GitHub Pages
+
+Проект подготовлен для публикации через **GitHub Pages**.
+
+В репозиторий добавлен workflow:
+
+```text
+.github/workflows/pages.yml
+```
+
+После включения Pages сайт будет доступен примерно по адресу:
+
+```text
+https://sergey2313-arch.github.io/-/
+```
+
+Если репозиторий переименовать в `revimarket`, адрес станет лучше:
+
+```text
+https://sergey2313-arch.github.io/revimarket/
+```
+
+## Как включить GitHub Pages
+
+1. Открой репозиторий на GitHub.
+2. Перейди в **Settings**.
+3. Открой раздел **Pages**.
+4. В **Build and deployment** выбери **GitHub Actions**.
+5. Сохрани настройки.
+6. Перейди во вкладку **Actions** и дождись успешного деплоя.
+
 ## Что есть в beta
 
 - главный экран в неоновом стиле;
@@ -105,8 +136,10 @@ Ctrl + `
 - CSS
 - JavaScript
 - localStorage
+- GitHub Pages
+- GitHub Actions
 
-## Запуск
+## Запуск локально
 
 Открой файл:
 
@@ -132,6 +165,8 @@ offer.js
 bugfix.js
 dev-logs.js
 web.config
+.nojekyll
+.github/workflows/pages.yml
 assets/
   revimarket-logo.svg
   revimarket-icon.svg
@@ -146,7 +181,8 @@ assets/
 - добавлена кнопка сброса demo-данных в профиле;
 - повреждённые данные в `localStorage` не ломают интерфейс;
 - добавлена dev-панель логов для отладки;
-- добавлена demo-оферта с правилами и комиссиями.
+- добавлена demo-оферта с правилами и комиссиями;
+- добавлен деплой через GitHub Pages.
 
 ## Важно по безопасности
 
