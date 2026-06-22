@@ -8,6 +8,7 @@
   <link rel="icon" href="assets/revimarket-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="logo-fix.css" />
+  <link rel="stylesheet" href="privacy.css" />
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -159,6 +160,29 @@
       <select id="itemCategory"></select>
       <button class="btn btn-primary" type="submit">Опубликовать</button>
     </form>
+  </div>
+
+  <div class="privacy-modal hidden" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+    <div class="privacy-backdrop"></div>
+    <div class="privacy-box">
+      <p class="eyebrow">privacy / beta</p>
+      <h2 id="privacyTitle">Конфиденциальность ReviMarket</h2>
+      <p>
+        Это beta-версия. Мы не просим настоящий пароль и не принимаем реальные платежи.
+        Для демо сайт может сохранять имя, email, роль и созданные тестовые записи в браузере.
+      </p>
+      <ul class="privacy-list">
+        <li>Пароли не используются и не сохраняются.</li>
+        <li>Демо-данные хранятся только в твоём браузере.</li>
+        <li>Поля проходят простую проверку перед выводом на экран.</li>
+        <li>При отклонении сохранение данных и демо-вход отключаются.</li>
+      </ul>
+      <div class="privacy-actions">
+        <button class="btn btn-primary" id="acceptPrivacyBtn">Принять</button>
+        <button class="btn btn-soft" id="declinePrivacyBtn">Отклонить</button>
+      </div>
+      <div class="privacy-note">Позже, когда будет backend, добавим полноценную защиту аккаунтов, ролей и базы данных.</div>
+    </div>
   </div>
 
   <div class="toast hidden" id="toast"></div>
