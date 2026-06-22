@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReviMarket — freelance, design, goods</title>
+  <meta name="description" content="ReviMarket — фриланс-биржа, заказы для дизайнеров и маркет товаров." />
+  <link rel="icon" href="assets/revimarket-logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb-one"></div>
+  <div class="orb orb-two"></div>
+
+  <header class="header">
+    <a class="brand" href="#home" data-page="home">
+      <span class="brand-icon">RM</span>
+      <span>
+        <b>ReviMarket</b>
+        <small>freelance • design • goods</small>
+      </span>
+    </a>
+
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+    <nav class="nav" id="nav">
+      <a href="#orders" data-page="orders">Заказы</a>
+      <a href="#freelance" data-page="freelance">Фриланс</a>
+      <a href="#shop" data-page="shop">Товары</a>
+      <a href="#creators" data-page="creators">Исполнители</a>
+      <a href="#profile" data-page="profile" class="auth-only hidden">Профиль</a>
+    </nav>
+
+    <button class="btn btn-soft auth-only hidden" id="logoutBtn">Выйти</button>
+    <button class="btn btn-primary guest-only" id="loginBtn">Войти</button>
+  </header>
+
+  <main>
+    <section class="page hero" id="page-home">
+      <div class="hero-info">
+        <p class="eyebrow">black / purple neon beta</p>
+        <h1>Фриланс, дизайн и товары в одном месте</h1>
+        <p class="hero-text">
+          ReviMarket — молодёжная beta-платформа, где заказчики публикуют задачи,
+          исполнители берут работу, а продавцы добавляют цифровые товары и услуги.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-big" data-go="freelance">Смотреть фриланс</button>
+          <button class="btn btn-soft btn-big" data-go="shop">Открыть товары</button>
+        </div>
+        <div class="metrics">
+          <div><b id="countOrders">0</b><span>заказов</span></div>
+          <div><b id="countProducts">0</b><span>товаров</span></div>
+          <div><b>Beta</b><span>статус</span></div>
+        </div>
+      </div>
+
+      <div class="hero-logo neon-card">
+        <img src="assets/revimarket-logo.svg" alt="ReviMarket logo" />
+      </div>
+    </section>
+
+    <section class="page hidden" id="page-orders">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">design board</p>
+          <h2>Заказы для дизайнеров</h2>
+          <p>Карточки WB/Ozon, баннеры, визуал, соцсети и оформление товаров.</p>
+        </div>
+        <button class="btn btn-primary auth-only hidden" data-create="order">+ Заказ</button>
+      </div>
+      <div class="toolbar neon-card">
+        <input id="ordersSearch" placeholder="Поиск: WB, Ozon, баннер..." />
+        <select id="ordersFilter"><option value="all">Все</option><option value="cards">Карточки</option><option value="banner">Баннеры</option><option value="social">Соцсети</option></select>
+      </div>
+      <div class="grid" id="ordersGrid"></div>
+    </section>
+
+    <section class="page hidden" id="page-freelance">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">freelance board</p>
+          <h2>Фриланс-биржа</h2>
+          <p>Задачи по сайтам, дизайну, текстам, монтажу и простым IT-работам.</p>
+        </div>
+        <button class="btn btn-primary auth-only hidden" data-create="freelance">+ Фриланс</button>
+      </div>
+      <div class="toolbar neon-card">
+        <input id="freelanceSearch" placeholder="Поиск: сайт, логотип, монтаж..." />
+        <select id="freelanceFilter"><option value="all">Все</option><option value="web">Сайты</option><option value="design">Дизайн</option><option value="content">Контент</option><option value="video">Видео</option></select>
+      </div>
+      <div class="grid" id="freelanceGrid"></div>
+    </section>
+
+    <section class="page hidden" id="page-shop">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">revi shop</p>
+          <h2>Товары и услуги</h2>
+          <p>Цифровые товары, шаблоны, макеты, аудит карточек и разные объявления.</p>
+        </div>
+        <button class="btn btn-primary auth-only hidden" data-create="product">+ Товар</button>
+      </div>
+      <div class="toolbar neon-card">
+        <input id="productsSearch" placeholder="Поиск: шаблон, макет, аудит..." />
+        <select id="productsFilter"><option value="all">Все</option><option value="template">Шаблоны</option><option value="digital">Цифровое</option><option value="service">Услуги</option></select>
+      </div>
+      <div class="grid" id="productsGrid"></div>
+    </section>
+
+    <section class="page hidden" id="page-creators">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">top creators</p>
+          <h2>Исполнители по рейтингу</h2>
+          <p>Дизайнеры, фрилансеры и продавцы услуг в одном списке.</p>
+        </div>
+      </div>
+      <div class="creator-list" id="creatorsGrid"></div>
+    </section>
+
+    <section class="page hidden" id="page-profile">
+      <div class="profile neon-card">
+        <div class="avatar" id="avatar">RM</div>
+        <div>
+          <p class="eyebrow">account</p>
+          <h2 id="profileName">Гость</h2>
+          <p id="profileInfo">Войди в beta-режим, чтобы создавать заказы и товары.</p>
+          <div class="hero-actions" id="profileActions"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal hidden" id="authModal">
+    <div class="modal-bg" data-close></div>
+    <form class="modal-box neon-card" id="authForm">
+      <button class="close" type="button" data-close>×</button>
+      <p class="eyebrow">demo login</p>
+      <h2>Вход в ReviMarket</h2>
+      <input id="nameInput" placeholder="Имя" required />
+      <input id="emailInput" type="email" placeholder="Почта" required />
+      <select id="roleInput"><option value="customer">Заказчик</option><option value="creator">Исполнитель</option></select>
+      <button class="btn btn-primary" type="submit">Войти</button>
+    </form>
+  </div>
+
+  <div class="modal hidden" id="createModal">
+    <div class="modal-bg" data-close></div>
+    <form class="modal-box neon-card" id="createForm">
+      <button class="close" type="button" data-close>×</button>
+      <p class="eyebrow" id="createType">create</p>
+      <h2 id="createTitle">Создать</h2>
+      <input id="itemTitle" placeholder="Название" required />
+      <textarea id="itemDesc" placeholder="Описание" required></textarea>
+      <input id="itemPrice" type="number" min="100" step="100" value="3000" required />
+      <select id="itemCategory"></select>
+      <button class="btn btn-primary" type="submit">Опубликовать</button>
+    </form>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
