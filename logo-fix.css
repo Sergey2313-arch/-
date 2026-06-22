@@ -1,3 +1,5 @@
+@import url("final-polish.css");
+
 /* Fix for ReviMarket neon icon size */
 .header {
   z-index: 1000;
