@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="logo-fix.css" />
   <link rel="stylesheet" href="privacy.css" />
+  <link rel="stylesheet" href="chat.css" />
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -31,6 +32,7 @@
       <a href="#freelance" data-page="freelance">Фриланс</a>
       <a href="#shop" data-page="shop">Товары</a>
       <a href="#creators" data-page="creators">Исполнители</a>
+      <a href="#chat" data-page="chat">Чат</a>
       <a href="#profile" data-page="profile" class="auth-only hidden">Профиль</a>
     </nav>
 
@@ -120,6 +122,30 @@
         </div>
       </div>
       <div class="creator-list" id="creatorsGrid"></div>
+    </section>
+
+    <section class="page hidden" id="page-chat">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">deal chat</p>
+          <h2>Чат заказчика и исполнителя</h2>
+          <p>Демо-переписка по заказам. В полной версии сообщения будут храниться на сервере и привязываться к сделке.</p>
+        </div>
+      </div>
+      <div class="chat-layout">
+        <aside class="chat-sidebar neon-card" id="chatThreads"></aside>
+        <section class="chat-window neon-card">
+          <div class="chat-head">
+            <h3 id="chatTitle">Выбери диалог</h3>
+            <p id="chatSubtitle">Заказчик ↔ исполнитель</p>
+          </div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <form class="chat-form" id="chatForm">
+            <input id="chatInput" placeholder="Напиши сообщение по заказу..." autocomplete="off" maxlength="240" />
+            <button class="btn btn-primary" type="submit">Отправить</button>
+          </form>
+        </section>
+      </div>
     </section>
 
     <section class="page hidden" id="page-profile">
