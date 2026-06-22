@@ -1,0 +1,142 @@
+.chat-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+}
+
+.chat-sidebar,
+.chat-window {
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.chat-sidebar {
+  padding: 14px;
+}
+
+.chat-thread {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  margin-bottom: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 18px;
+  color: white;
+  background: rgba(255, 255, 255, .055);
+}
+
+.chat-thread.active,
+.chat-thread:hover {
+  border-color: rgba(255, 43, 214, .45);
+  box-shadow: 0 0 20px rgba(255, 43, 214, .14);
+}
+
+.chat-thread b {
+  font-size: 15px;
+}
+
+.chat-thread span {
+  color: #a995bd;
+  font-size: 13px;
+}
+
+.chat-window {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 620px;
+}
+
+.chat-head {
+  padding: 18px;
+  border-bottom: 1px solid rgba(204, 65, 255, .24);
+}
+
+.chat-head h3 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.chat-head p {
+  margin: 0;
+  color: #a995bd;
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  overflow-y: auto;
+  max-height: 460px;
+}
+
+.message {
+  max-width: 76%;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.07);
+}
+
+.message.me {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(75, 22, 255, .55), rgba(255, 43, 214, .32));
+  border-color: rgba(255, 43, 214, .34);
+}
+
+.message.other {
+  align-self: flex-start;
+}
+
+.message b {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #f2b2ff;
+}
+
+.message p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.message small {
+  display: block;
+  margin-top: 6px;
+  color: #bfa9cf;
+  font-size: 11px;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid rgba(204, 65, 255, .24);
+}
+
+.chat-form input {
+  min-height: 48px;
+}
+
+@media (max-width: 920px) {
+  .chat-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-window {
+    min-height: 560px;
+  }
+}
+
+@media (max-width: 620px) {
+  .message {
+    max-width: 92%;
+  }
+
+  .chat-form {
+    grid-template-columns: 1fr;
+  }
+}
