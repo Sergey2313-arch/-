@@ -54,7 +54,14 @@ const defaults = {
         {from:'creator', text:'Посмотрю визуал, оффер, первый экран и преимущества. Потом дам список правок.', time:'14:44'}
       ]
     }
-  ]
+  ],
+  support: {
+    ticket:'SUP-1001',
+    messages:[
+      {from:'support', text:'Здравствуйте! Это поддержка ReviMarket. Опишите проблему: заказ, исполнитель, товар, аккаунт или конфиденциальность.', time:'09:00'},
+      {from:'support', text:'В beta-версии это демо-чат. В полной версии обращения будут храниться на сервере и иметь статус обработки.', time:'09:01'}
+    ]
+  }
 };
 
 function readData(key, fallback){
@@ -79,6 +86,7 @@ const state = {
   freelance: readData('rm_freelance', defaults.freelance),
   products: readData('rm_products', defaults.products),
   chats: readData('rm_chats', defaults.chats),
+  support: readData('rm_support', defaults.support),
   creators: [
     {name:'Nika Visual',role:'Дизайнер карточек WB/Ozon',rating:'4.98',orders:142,tags:['WB','Ozon','Figma']},
     {name:'Max Neon',role:'Баннеры и молодежный визуал',rating:'4.91',orders:88,tags:['VK','PSD','Promo']},
@@ -88,7 +96,7 @@ const state = {
 };
 
 function clearDemoStorage(){
-  ['rm_user','rm_orders','rm_freelance','rm_products','rm_chats'].forEach(k => localStorage.removeItem(k));
+  ['rm_user','rm_orders','rm_freelance','rm_products','rm_chats','rm_support'].forEach(k => localStorage.removeItem(k));
 }
 
 function save(){
@@ -97,6 +105,7 @@ function save(){
   localStorage.setItem('rm_freelance', JSON.stringify(state.freelance));
   localStorage.setItem('rm_products', JSON.stringify(state.products));
   localStorage.setItem('rm_chats', JSON.stringify(state.chats));
+  localStorage.setItem('rm_support', JSON.stringify(state.support));
   if(state.user) localStorage.setItem('rm_user', JSON.stringify({name:state.user.name,email:state.user.email,role:state.user.role}));
   else localStorage.removeItem('rm_user');
 }
@@ -131,8 +140,60 @@ function declinePrivacy(){
   toast('Сохранение демо-данных отключено');
 }
 
+function ensureSupportPage(){
+  const nav = $('#nav');
+  if(nav && !nav.querySelector('[data-page="support"]')){
+    const link = document.createElement('a');
+    link.href = '#support';
+    link.dataset.page = 'support';
+    link.textContent = 'Поддержка';
+    nav.insertBefore(link, nav.querySelector('[data-page="profile"]'));
+  }
+
+  if(!$('#page-support')){
+    const section = document.createElement('section');
+    section.className = 'page hidden';
+    section.id = 'page-support';
+    section.innerHTML = `
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">support center</p>
+          <h2>Чат с поддержкой</h2>
+          <p>Демо-обращения по заказам, товарам, аккаунту и безопасности. В полной версии тут будут тикеты и статусы.</p>
+        </div>
+      </div>
+      <div class="support-layout">
+        <aside class="support-panel neon-card">
+          <h3>ReviMarket Support</h3>
+          <p>Выбери тему или напиши сообщение. Поддержка автоматически создаст демо-ответ.</p>
+          <div class="support-status" id="supportTicket">Тикет открыт</div>
+          <div class="support-tags">
+            <button type="button" data-support-template="Проблема с заказом">Проблема с заказом</button>
+            <button type="button" data-support-template="Не могу связаться с исполнителем">Связь с исполнителем</button>
+            <button type="button" data-support-template="Вопрос по оплате">Оплата</button>
+            <button type="button" data-support-template="Вопрос по аккаунту">Аккаунт</button>
+            <button type="button" data-support-template="Хочу удалить демо-данные">Удалить данные</button>
+          </div>
+        </aside>
+        <section class="support-window neon-card">
+          <div class="chat-head">
+            <h3>Поддержка ReviMarket</h3>
+            <p>Пользователь ↔ Support</p>
+          </div>
+          <div class="chat-messages" id="supportMessages"></div>
+          <form class="chat-form" id="supportForm">
+            <input id="supportInput" placeholder="Напиши в поддержку..." autocomplete="off" maxlength="240" />
+            <button class="btn btn-primary" type="submit">Отправить</button>
+          </form>
+        </section>
+      </div>
+    `;
+    $('main').appendChild(section);
+  }
+}
+
 function route(page){
-  const id = ['home','orders','freelance','shop','creators','chat','profile'].includes(page)?page:'home';
+  const id = ['home','orders','freelance','shop','creators','chat','support','profile'].includes(page)?page:'home';
   $$('.page').forEach(p=>p.classList.add('hidden'));
   $('#page-'+id).classList.remove('hidden');
   $$('[data-page]').forEach(a=>a.classList.toggle('active',a.dataset.page===id));
@@ -143,6 +204,7 @@ function route(page){
   if(id==='shop') renderCards('products');
   if(id==='creators') renderCreators();
   if(id==='chat') renderChat();
+  if(id==='support') renderSupport();
   if(id==='profile') renderProfile();
 }
 
@@ -186,7 +248,7 @@ function renderChat(){
     <button class="chat-thread ${chat.id === active.id ? 'active' : ''}" data-chat-id="${esc(chat.id)}">
       <b>${esc(chat.title)}</b>
       <span>${esc(chat.customer)} ↔ ${esc(chat.creator)}</span>
-      <span>${esc(chat.messages.at(-1)?.text || 'Нет сообщений')}</span>
+      <span>${esc(chat.messages[chat.messages.length - 1]?.text || 'Нет сообщений')}</span>
     </button>
   `).join('');
 
@@ -218,12 +280,63 @@ function sendChatMessage(text){
   renderChat();
 }
 
+function renderSupport(){
+  const box = $('#supportMessages');
+  if(!box) return;
+  $('#supportTicket').textContent = `${state.support.ticket} • открыт`;
+  box.innerHTML = state.support.messages.map(msg => {
+    const isMe = msg.from === 'user';
+    const name = isMe ? (state.user ? clean(state.user.name, 30) : 'Пользователь') : 'Support';
+    return `<div class="message ${isMe ? 'me' : 'other'}"><b>${esc(name)}</b><p>${esc(msg.text)}</p><small>${esc(msg.time)}</small></div>`;
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function sendSupportMessage(text){
+  if(!requirePrivacy()) return;
+  if(!state.user){openAuth();toast('Сначала войди, чтобы писать в поддержку');return;}
+  const time = new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+  state.support.messages.push({from:'user', text:clean(text,240), time});
+  state.support.messages.push({from:'support', text:'Спасибо, обращение принято. В полной версии поддержка ответит оператором и присвоит статус заявке.', time});
+  save();
+  renderSupport();
+}
+
+function userStatsHtml(){
+  const username = state.user ? clean(state.user.name,40) : '';
+  const createdOrders = [...state.orders, ...state.freelance, ...state.products].filter(x => clean(x.meta,40) === username).length;
+  const dealMessages = state.chats.reduce((sum, chat) => sum + chat.messages.length, 0);
+  const supportMessages = state.support.messages.filter(m => m.from === 'user').length;
+  const role = state.user ? (state.user.role === 'customer' ? 'Заказчик' : 'Исполнитель') : 'Гость';
+  const privacy = hasAcceptedPrivacy() ? 'Принято' : 'Не принято';
+
+  return `<div class="stats-grid">
+    <div class="stat-card"><b>${esc(role)}</b><span>роль</span></div>
+    <div class="stat-card"><b>${createdOrders}</b><span>моих публикаций</span></div>
+    <div class="stat-card"><b>${dealMessages}</b><span>сообщений в сделках</span></div>
+    <div class="stat-card"><b>${supportMessages}</b><span>обращений в поддержку</span></div>
+    <div class="stat-card"><b>${state.orders.length + state.freelance.length}</b><span>заказов на платформе</span></div>
+    <div class="stat-card"><b>${state.products.length}</b><span>товаров</span></div>
+    <div class="stat-card"><b>${state.creators.length}</b><span>исполнителей</span></div>
+    <div class="stat-card"><b>${privacy}</b><span>конфиденциальность</span></div>
+  </div>`;
+}
+
 function renderProfile(){
-  if(!state.user){$('#avatar').textContent='RM';$('#profileName').textContent='Гость';$('#profileInfo').textContent=hasAcceptedPrivacy()?'Войди в beta-режим, чтобы создавать заказы и товары.':'Сначала прими конфиденциальность для демо-входа.';$('#profileActions').innerHTML='<button class="btn btn-primary" id="profileLogin">Войти</button><button class="btn btn-soft" id="profilePrivacy">Конфиденциальность</button>';$('#profileLogin').onclick=openAuth;$('#profilePrivacy').onclick=openPrivacy;return}
+  if(!state.user){
+    $('#avatar').textContent='RM';
+    $('#profileName').textContent='Гость';
+    $('#profileInfo').textContent=hasAcceptedPrivacy()?'Войди в beta-режим, чтобы создавать заказы и товары.':'Сначала прими конфиденциальность для демо-входа.';
+    $('#profileActions').innerHTML=`${userStatsHtml()}<button class="btn btn-primary" id="profileLogin">Войти</button><button class="btn btn-soft" id="profilePrivacy">Конфиденциальность</button><button class="btn btn-soft" data-go="support">Поддержка</button>`;
+    $('#profileLogin').onclick=openAuth;
+    $('#profilePrivacy').onclick=openPrivacy;
+    $$('[data-go]').forEach(b=>b.onclick=()=>route(b.dataset.go));
+    return;
+  }
   $('#avatar').textContent=clean(state.user.name,1).toUpperCase() || 'U';
   $('#profileName').textContent=clean(state.user.name,40);
   $('#profileInfo').textContent=(state.user.role==='customer'?'Заказчик':'Исполнитель')+' • данные скрыты в beta';
-  $('#profileActions').innerHTML='<button class="btn btn-primary" data-create="order">Создать заказ</button><button class="btn btn-soft" data-create="freelance">Фриланс-заказ</button><button class="btn btn-soft" data-create="product">Добавить товар</button><button class="btn btn-soft" data-go="chat">Открыть чат</button>';
+  $('#profileActions').innerHTML=`${userStatsHtml()}<button class="btn btn-primary" data-create="order">Создать заказ</button><button class="btn btn-soft" data-create="freelance">Фриланс-заказ</button><button class="btn btn-soft" data-create="product">Добавить товар</button><button class="btn btn-soft" data-go="chat">Открыть чат</button><button class="btn btn-soft" data-go="support">Поддержка</button>`;
   bindCreate();
   $$('[data-go]').forEach(b=>b.onclick=()=>route(b.dataset.go));
 }
@@ -246,9 +359,11 @@ function openCreate(type){
 function bindCreate(){ $$('[data-create]').forEach(b=>b.onclick=()=>openCreate(b.dataset.create)) }
 
 function init(){
-  authUi();renderCards('orders');renderCards('freelance');renderCards('products');renderCreators();renderProfile();renderChat();
+  ensureSupportPage();
+  authUi();renderCards('orders');renderCards('freelance');renderCards('products');renderCreators();renderProfile();renderChat();renderSupport();
   $$('[data-page]').forEach(a=>a.onclick=e=>{e.preventDefault();route(a.dataset.page)});
   $$('[data-go]').forEach(b=>b.onclick=()=>route(b.dataset.go));
+  $$('[data-support-template]').forEach(b=>b.onclick=()=>{$('#supportInput').value=b.dataset.supportTemplate;$('#supportInput').focus();});
   $('#menuBtn').onclick=()=>$('#nav').classList.toggle('open');
   $('#loginBtn').onclick=openAuth;
   $('#logoutBtn').onclick=()=>{state.user=null;save();authUi();renderProfile();toast('Ты вышел');route('home')};
@@ -256,6 +371,7 @@ function init(){
   $('#acceptPrivacyBtn').onclick=acceptPrivacy;
   $('#declinePrivacyBtn').onclick=declinePrivacy;
   $('#chatForm').onsubmit=e=>{e.preventDefault();const input=$('#chatInput');const text=clean(input.value,240);if(!text){toast('Сообщение пустое');return;}sendChatMessage(text);input.value='';};
+  $('#supportForm').onsubmit=e=>{e.preventDefault();const input=$('#supportInput');const text=clean(input.value,240);if(!text){toast('Сообщение пустое');return;}sendSupportMessage(text);input.value='';};
   $('#authForm').onsubmit=e=>{e.preventDefault();if(!requirePrivacy()) return;state.user={name:clean($('#nameInput').value,40),email:clean($('#emailInput').value,80),role:$('#roleInput').value};save();authUi();closeModals();renderProfile();toast('Добро пожаловать, '+state.user.name);route('profile')};
   $('#createForm').onsubmit=e=>{e.preventDefault();if(!requirePrivacy()) return;const item={title:clean($('#itemTitle').value,80),desc:clean($('#itemDesc').value,300),price:Math.max(0, Math.min(Number($('#itemPrice').value)||0, 10000000)),cat:$('#itemCategory').value,tags:['New','Beta'],meta:clean(state.user.name,40)};if(state.createType==='order'){state.orders.unshift(item);route('orders')}if(state.createType==='freelance'){state.freelance.unshift(item);route('freelance')}if(state.createType==='product'){state.products.unshift(item);route('shop')}save();authUi();closeModals();$('#createForm').reset();toast('Опубликовано')};
   ['orders','freelance','products'].forEach(type=>{const map={orders:['#ordersSearch','#ordersFilter'],freelance:['#freelanceSearch','#freelanceFilter'],products:['#productsSearch','#productsFilter']}[type];map.forEach(id=>$(id).oninput=()=>renderCards(type));});
