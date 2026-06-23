@@ -1,0 +1,28 @@
+@model MarketItem
+@{
+    ViewData["Title"] = "Добавить товар";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">new catalog item</p>
+    <h1>Добавить товар / услугу</h1>
+
+    <form asp-action="Create" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <label>Название</label>
+        <input asp-for="Title" />
+
+        <label>Описание</label>
+        <textarea asp-for="Description"></textarea>
+
+        <label>Цена</label>
+        <input asp-for="Price" type="number" min="0" step="100" />
+
+        <label>Категория</label>
+        <input asp-for="Category" placeholder="Шаблоны, аудит, карточки..." />
+
+        <button class="btn btn-primary" type="submit">Опубликовать</button>
+    </form>
+</section>
