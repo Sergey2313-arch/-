@@ -1,0 +1,29 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Вход";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">login</p>
+    <h1>Вход в ReviMarket</h1>
+
+    <form asp-action="Login" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <label>Email</label>
+        <input asp-for="Email" placeholder="mail@example.com" />
+        <span asp-validation-for="Email" class="validation"></span>
+
+        <label>Пароль</label>
+        <input asp-for="Password" />
+        <span asp-validation-for="Password" class="validation"></span>
+
+        <label class="checkbox">
+            <input asp-for="RememberMe" /> Запомнить меня
+        </label>
+
+        <button class="btn btn-primary" type="submit">Войти</button>
+        <a class="btn btn-soft" asp-controller="Account" asp-action="Register">Создать аккаунт</a>
+    </form>
+</section>
