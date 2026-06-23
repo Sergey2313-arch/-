@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,6 @@ using ReviMarket.Web.Models;
 
 namespace ReviMarket.Web.Controllers;
 
-[Authorize]
 public class ProfileController : Controller
 {
     private readonly ApplicationDbContext _db;
@@ -21,6 +19,12 @@ public class ProfileController : Controller
 
     public async Task<IActionResult> Index()
     {
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            ViewBag.User = null;
+            return View(new List<MarketItem>());
+        }
+
         var userId = _userManager.GetUserId(User);
         var user = await _userManager.GetUserAsync(User);
         var items = await _db.MarketItems
