@@ -1,32 +1,12 @@
 (() => {
-  const START_HASH = window.__RM_START_HASH || location.hash || '#home';
-
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => [...document.querySelectorAll(selector)];
-
-  function toast(text) {
-    const el = $('#toast');
-    if (!el) return;
-    el.textContent = String(text).slice(0, 140);
-    el.classList.remove('hidden');
-    clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => el.classList.add('hidden'), 2200);
-  }
-
-  function safeJson(key, fallback) {
-    try {
-      return JSON.parse(localStorage.getItem(key) || 'null') || fallback;
-    } catch {
-      localStorage.removeItem(key);
-      return fallback;
-    }
-  }
+  const startHash = window.__RM_START_HASH || location.hash || '#home';
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
 
   function showPage(page) {
-    const id = page.replace('#', '') || 'home';
+    const id = String(page || 'home').replace('#', '') || 'home';
     const target = $(`#page-${id}`);
     if (!target) return false;
-
     $$('.page').forEach((item) => item.classList.add('hidden'));
     target.classList.remove('hidden');
     $$('[data-page]').forEach((link) => link.classList.toggle('active', link.dataset.page === id));
@@ -48,76 +28,7 @@
     });
   }
 
-  function normalizeDemoData() {
-    const privacy = localStorage.getItem('rm_privacy');
-    if (privacy !== 'accepted') return;
-
-    const required = {
-      rm_orders: [],
-      rm_freelance: [],
-      rm_products: [],
-      rm_chats: [],
-      rm_support: { ticket: 'SUP-1001', messages: [] }
-    };
-
-    Object.entries(required).forEach(([key, fallback]) => safeJson(key, fallback));
-  }
-
-  function fixForms() {
-    ['chatInput', 'supportInput', 'itemTitle', 'itemDesc', 'nameInput', 'emailInput'].forEach((id) => {
-      const input = document.getElementById(id);
-      if (!input || input.dataset.fixed === '1') return;
-      input.dataset.fixed = '1';
-      input.addEventListener('input', () => {
-        input.value = input.value.replace(/[<>`]/g, '').slice(0, Number(input.maxLength) > 0 ? Number(input.maxLength) : 300);
-      });
-    });
-  }
-
-  function fixSupportTemplates() {
-    $$('[data-support-template]').forEach((btn) => {
-      if (btn.dataset.templateFixed === '1') return;
-      btn.dataset.templateFixed = '1';
-      btn.addEventListener('click', () => {
-        const input = $('#supportInput');
-        if (!input) return;
-        input.value = btn.dataset.supportTemplate || '';
-        input.focus();
-      });
-    });
-  }
-
-  function addRecoveryActions() {
-    const profileActions = $('#profileActions');
-    if (!profileActions || $('#resetDemoBtn')) return;
-
-    const button = document.createElement('button');
-    button.className = 'btn btn-soft';
-    button.id = 'resetDemoBtn';
-    button.type = 'button';
-    button.textContent = 'Сбросить demo';
-    button.addEventListener('click', () => {
-      ['rm_orders', 'rm_freelance', 'rm_products', 'rm_chats', 'rm_support'].forEach((key) => localStorage.removeItem(key));
-      toast('Demo-данные сброшены. Обнови страницу.');
-    });
-
-    profileActions.appendChild(button);
-  }
-
-  function handleStartHash() {
-    const hash = START_HASH.replace('#', '') || 'home';
-    if (hash === 'stats') {
-      setTimeout(() => document.querySelector('[data-page="stats"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })), 80);
-      return;
-    }
-    if (hash === 'support') {
-      setTimeout(() => document.querySelector('[data-page="support"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })), 80);
-      return;
-    }
-    if ($(`#page-${hash}`)) setTimeout(() => showPage(hash), 80);
-  }
-
-  function polishMobile() {
+  function fixMobileMenu() {
     const menu = $('#menuBtn');
     const nav = $('#nav');
     if (!menu || !nav || menu.dataset.mobileFixed === '1') return;
@@ -129,19 +40,34 @@
     });
   }
 
-  function boot() {
-    normalizeDemoData();
-    bindSafeNavigation();
-    fixForms();
-    fixSupportTemplates();
-    polishMobile();
-    handleStartHash();
+  function addResetDealsToProfile() {
+    const profileActions = $('#profileActions');
+    if (!profileActions || $('#resetDealsBtn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-soft';
+    btn.id = 'resetDealsBtn';
+    btn.type = 'button';
+    btn.textContent = 'Сбросить сделки';
+    btn.onclick = () => {
+      localStorage.removeItem('rm_deals_v1');
+      sessionStorage.removeItem('rm_active_deal');
+      alert('Demo-сделки сброшены');
+    };
+    profileActions.appendChild(btn);
+  }
 
+  async function boot() {
+    try { await import('./deals.js'); } catch (error) { console.warn('Deals module failed', error); }
+    bindSafeNavigation();
+    fixMobileMenu();
+    setTimeout(() => {
+      const id = startHash.replace('#', '') || 'home';
+      document.querySelector(`[data-page="${id}"]`)?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      if ($(`#page-${id}`)) showPage(id);
+    }, 120);
     setInterval(() => {
       bindSafeNavigation();
-      fixForms();
-      fixSupportTemplates();
-      addRecoveryActions();
+      addResetDealsToProfile();
     }, 1000);
   }
 
