@@ -22,6 +22,10 @@
             <a asp-controller="Creators" asp-action="Index">Исполнители</a>
             <a asp-controller="Inbox" asp-action="Index">Сообщения</a>
             <a asp-controller="Profile" asp-action="Index">Профиль</a>
+            @if (User.IsInRole(UserRoles.Admin))
+            {
+                <a asp-controller="Admin" asp-action="Index">Админка</a>
+            }
         </nav>
         <div class="auth">
             @if (SignInManager.IsSignedIn(User))
