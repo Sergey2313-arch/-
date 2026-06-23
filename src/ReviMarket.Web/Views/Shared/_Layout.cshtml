@@ -26,6 +26,7 @@
             @if (User.IsInRole(UserRoles.Admin))
             {
                 <a asp-controller="Admin" asp-action="Index">Админка</a>
+                <a asp-controller="AdminQueue" asp-action="Index">Проверка</a>
             }
         </nav>
         <div class="auth">
