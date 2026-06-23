@@ -1,0 +1,28 @@
+@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "Команда";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">team</p>
+        <h1>Команда</h1>
+        <p>Список пользователей платформы.</p>
+    </div>
+    <a class="btn btn-soft" href="/Panel">← В панель</a>
+</section>
+
+<div class="review-list">
+@foreach (var user in Model)
+{
+    <article class="review-row neon-card">
+        <div>
+            <div class="review-title">
+                <b>@user.DisplayName</b>
+                <span class="tag">@user.AccountType</span>
+            </div>
+            <p>@user.Email</p>
+        </div>
+    </article>
+}
+</div>
