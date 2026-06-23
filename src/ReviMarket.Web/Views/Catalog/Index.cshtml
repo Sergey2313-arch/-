@@ -47,13 +47,25 @@
 @foreach (var item in Model)
 {
     <article class="card product-card">
-        <div class="product-cover">
-            <div class="product-cover-icon">@CategoryIcon(item.Category)</div>
-            <div class="product-cover-title">
-                <b>@item.Title</b>
-                <span>@item.Category</span>
+        @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+        {
+            <div class="product-cover product-cover-photo" style="background-image: linear-gradient(rgba(7,3,15,.12), rgba(7,3,15,.72)), url('@item.ImagePath')">
+                <div class="product-cover-title">
+                    <b>@item.Title</b>
+                    <span>@item.Category</span>
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="product-cover">
+                <div class="product-cover-icon">@CategoryIcon(item.Category)</div>
+                <div class="product-cover-title">
+                    <b>@item.Title</b>
+                    <span>@item.Category</span>
+                </div>
+            </div>
+        }
         <div class="product-body">
             <div class="card-top"><span class="tag">@item.Category</span><span class="price">@item.Price.ToString("N0") ₽</span></div>
             <h3>@item.Title</h3>
