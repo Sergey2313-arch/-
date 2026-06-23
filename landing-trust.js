@@ -2,22 +2,29 @@
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
 
+  const allowedItems = [
+    ['shop', 'Товары'],
+    ['freelance', 'Работа'],
+    ['profile', 'Профиль']
+  ];
+  const allowedPages = new Set(allowedItems.map(([page]) => page));
+
+  function routeTo(page) {
+    if (typeof route === 'function') route(page);
+    else location.hash = page;
+  }
+
   function cleanHeaderNav() {
     const nav = $('#nav');
     if (!nav) return;
 
-    const items = [
-      ['shop', 'Товары'],
-      ['freelance', 'Работа'],
-      ['profile', 'Профиль']
-    ];
-    const allowed = new Set(items.map(([page]) => page));
-
     nav.querySelectorAll('a[data-page]').forEach((link) => {
-      if (!allowed.has(link.dataset.page)) link.remove();
+      if (!allowedPages.has(link.dataset.page)) {
+        link.remove();
+      }
     });
 
-    items.forEach(([page, title]) => {
+    allowedItems.forEach(([page, title]) => {
       let link = nav.querySelector(`a[data-page="${page}"]`);
       if (!link) {
         link = document.createElement('a');
@@ -26,13 +33,22 @@
         nav.appendChild(link);
       }
       link.textContent = title;
+      link.style.display = '';
       link.classList.remove('hidden', 'auth-only');
       link.onclick = (event) => {
         event.preventDefault();
-        if (typeof route === 'function') route(page);
-        else location.hash = page;
+        routeTo(page);
       };
     });
+  }
+
+  function lockHeaderNav() {
+    const nav = $('#nav');
+    if (!nav || nav.dataset.trustLocked === '1') return;
+    nav.dataset.trustLocked = '1';
+
+    const observer = new MutationObserver(() => cleanHeaderNav());
+    observer.observe(nav, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
   }
 
   function updateLandingText() {
@@ -88,15 +104,13 @@
 
   function boot() {
     cleanHeaderNav();
+    lockHeaderNav();
     updateLandingText();
 
-    let count = 0;
-    const timer = setInterval(() => {
+    setInterval(() => {
       cleanHeaderNav();
       updateLandingText();
-      count += 1;
-      if (count > 20) clearInterval(timer);
-    }, 250);
+    }, 1000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
