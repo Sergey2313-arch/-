@@ -7,9 +7,9 @@
 <section class="auth-card neon-card">
     <p class="eyebrow">new product</p>
     <h1>Добавить товар / услугу</h1>
-    <p>Добавь ссылку на изображение товара или путь к картинке из папки wwwroot.</p>
+    <p>Загрузи обложку товара, чтобы карточка выглядела как нормальная витрина.</p>
 
-    <form asp-action="Create" method="post" class="form">
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="form">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="validation"></div>
 
@@ -30,9 +30,9 @@
             }
         </select>
 
-        <label>Картинка товара</label>
-        <input asp-for="ImagePath" placeholder="Например /uploads/products/card.png или https://..." />
-        <small class="form-hint">Пока можно вставить ссылку. Позже заменим на полноценную загрузку файла.</small>
+        <label>Фото товара</label>
+        <input name="imageFile" type="file" accept="image/png,image/jpeg,image/webp" />
+        <small class="form-hint">JPG, PNG или WEBP до 5 МБ.</small>
 
         <button class="btn btn-primary" type="submit">Опубликовать</button>
     </form>
