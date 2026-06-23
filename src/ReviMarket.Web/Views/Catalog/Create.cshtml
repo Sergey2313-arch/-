@@ -7,6 +7,7 @@
 <section class="auth-card neon-card">
     <p class="eyebrow">new product</p>
     <h1>Добавить товар / услугу</h1>
+    <p>Добавь ссылку на изображение товара или путь к картинке из папки wwwroot.</p>
 
     <form asp-action="Create" method="post" class="form">
         @Html.AntiForgeryToken()
@@ -28,6 +29,10 @@
                 <option value="@category">@category</option>
             }
         </select>
+
+        <label>Картинка товара</label>
+        <input asp-for="ImagePath" placeholder="Например /uploads/products/card.png или https://..." />
+        <small class="form-hint">Пока можно вставить ссылку. Позже заменим на полноценную загрузку файла.</small>
 
         <button class="btn btn-primary" type="submit">Опубликовать</button>
     </form>
