@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Админ-панель";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">admin panel</p>
+        <h1>Админ-панель ReviMarket</h1>
+        <p>Доступна только пользователям с ролью Admin.</p>
+    </div>
+</section>
+
+<section class="admin-grid">
+    <article class="card">
+        <span class="tag">Users</span>
+        <h3>@ViewBag.UsersCount</h3>
+        <p>зарегистрированных пользователей</p>
+    </article>
+    <article class="card">
+        <span class="tag">Orders</span>
+        <h3>@ViewBag.OrdersCount</h3>
+        <p>заказов на бирже</p>
+    </article>
+    <article class="card">
+        <span class="tag">Catalog</span>
+        <h3>@ViewBag.ProductsCount</h3>
+        <p>товаров и услуг</p>
+    </article>
+    <article class="card">
+        <span class="tag">Messages</span>
+        <h3>@ViewBag.MessagesCount</h3>
+        <p>сообщений в системе</p>
+    </article>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Что дальше добавить в админку</h2>
+    <p>Модерация заказов, жалобы, тикеты поддержки, споры, блокировки пользователей и audit log.</p>
+</section>
