@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReviMarket Admin — moderation & support</title>
+  <meta name="description" content="Demo admin panel for ReviMarket moderation, support agents and audit logs." />
+  <link rel="icon" href="assets/revimarket-icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="admin-bg"></div>
+
+  <aside class="sidebar">
+    <a class="brand" href="index.html">
+      <img src="assets/revimarket-icon.svg" alt="RM" />
+      <span><b>ReviMarket</b><small>admin beta</small></span>
+    </a>
+
+    <nav>
+      <button class="nav-link active" data-tab="dashboard">Dashboard</button>
+      <button class="nav-link" data-tab="moderation">Модерация</button>
+      <button class="nav-link" data-tab="tickets">Поддержка</button>
+      <button class="nav-link" data-tab="disputes">Споры</button>
+      <button class="nav-link" data-tab="finance">Платежи</button>
+      <button class="nav-link" data-tab="audit">Audit log</button>
+      <button class="nav-link" data-tab="roles">Роли</button>
+    </nav>
+
+    <div class="sidebar-note">
+      <b>Frontend demo</b>
+      <span>Настоящие права доступа появятся в ASP.NET backend.</span>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">moderation / support / security</p>
+        <h1>Система администрации</h1>
+      </div>
+      <div class="admin-user">
+        <span class="status-dot"></span>
+        <div>
+          <b>Revive Admin</b>
+          <small>Owner demo mode</small>
+        </div>
+      </div>
+    </header>
+
+    <section class="tab active" id="tab-dashboard">
+      <div class="cards">
+        <article class="card"><span>Пользователи</span><b id="metricUsers">128</b><small>+12 за неделю</small></article>
+        <article class="card"><span>Заказы на проверке</span><b id="metricModeration">6</b><small>нужно решение</small></article>
+        <article class="card"><span>Тикеты поддержки</span><b id="metricTickets">4</b><small>2 high priority</small></article>
+        <article class="card"><span>Споры</span><b id="metricDisputes">2</b><small>деньги заморожены</small></article>
+      </div>
+
+      <div class="panel two-cols">
+        <div>
+          <h2>Что делает админка</h2>
+          <p>Модераторы проверяют заказы, агенты поддержки отвечают пользователям, админы решают споры и следят за платежами.</p>
+          <ul class="check-list">
+            <li>Проверка жалоб и подозрительных заказов</li>
+            <li>Тикеты поддержки с приоритетами</li>
+            <li>Споры по сделкам и возвратам</li>
+            <li>Audit log всех важных действий</li>
+          </ul>
+        </div>
+        <div class="quick-actions">
+          <button class="btn primary" data-tab-jump="moderation">Открыть модерацию</button>
+          <button class="btn" data-tab-jump="tickets">Открыть поддержку</button>
+          <button class="btn" data-tab-jump="audit">Смотреть логи</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-moderation">
+      <div class="section-head">
+        <div><p class="eyebrow">queue</p><h2>Очередь модерации</h2></div>
+        <input class="search" id="moderationSearch" placeholder="Поиск по заказам, товарам, пользователям..." />
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Тип</th><th>Объект</th><th>Причина</th><th>Статус</th><th>Действия</th></tr></thead>
+          <tbody id="moderationTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-tickets">
+      <div class="section-head">
+        <div><p class="eyebrow">support agents</p><h2>Тикеты поддержки</h2></div>
+        <button class="btn primary" id="newTicketBtn">+ Demo ticket</button>
+      </div>
+      <div class="ticket-grid" id="ticketsGrid"></div>
+    </section>
+
+    <section class="tab" id="tab-disputes">
+      <div class="section-head">
+        <div><p class="eyebrow">safe deal</p><h2>Споры по сделкам</h2></div>
+      </div>
+      <div class="ticket-grid" id="disputesGrid"></div>
+    </section>
+
+    <section class="tab" id="tab-finance">
+      <div class="section-head">
+        <div><p class="eyebrow">payments review</p><h2>Платежи и комиссии</h2></div>
+      </div>
+      <div class="cards">
+        <article class="card"><span>Оборот demo</span><b>86 400 ₽</b><small>тестовые данные</small></article>
+        <article class="card"><span>Комиссия платформы</span><b>9 720 ₽</b><small>10–12%</small></article>
+        <article class="card"><span>Заморожено</span><b>18 500 ₽</b><small>по активным сделкам</small></article>
+        <article class="card"><span>Возвраты</span><b>2</b><small>на проверке</small></article>
+      </div>
+      <div class="panel">
+        <h2>Правило безопасности</h2>
+        <p>Админка не должна показывать номер карты, CVC и лишние банковские данные. Храним только ProviderPaymentId, сумму, комиссию и статус платежа.</p>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-audit">
+      <div class="section-head">
+        <div><p class="eyebrow">security logs</p><h2>Audit log</h2></div>
+        <button class="btn" id="clearAuditBtn">Очистить demo logs</button>
+      </div>
+      <div class="log-list" id="auditList"></div>
+    </section>
+
+    <section class="tab" id="tab-roles">
+      <div class="section-head">
+        <div><p class="eyebrow">access control</p><h2>Роли и права</h2></div>
+      </div>
+      <div class="role-grid" id="rolesGrid"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="admin.js"></script>
+</body>
+</html>
