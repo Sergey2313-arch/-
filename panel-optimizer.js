@@ -35,8 +35,10 @@
     if (!nav) return;
 
     const desired = [
-      ['shop', 'Товары'],
-      ['freelance', 'Работа'],
+      ['shop', 'Каталог'],
+      ['freelance', 'Заказы'],
+      ['creators', 'Исполнители'],
+      ['chat', 'Сообщения'],
       ['profile', 'Профиль']
     ];
     const allowed = desired.map(([page]) => page);
@@ -68,28 +70,28 @@
     const shopSearch = $('#productsSearch');
     const shopButton = $('#page-shop [data-create="product"]');
 
-    if (shopTitle) shopTitle.textContent = 'Товары';
-    if (shopText) shopText.textContent = 'Список информационных товаров: шаблоны, аудиты, цифровые материалы и готовые услуги.';
-    if (shopSearch) shopSearch.placeholder = 'Поиск: шаблон, аудит, инфотовар...';
-    if (shopButton) shopButton.textContent = '+ Товар';
+    if (shopTitle) shopTitle.textContent = 'Каталог услуг и товаров';
+    if (shopText) shopText.textContent = 'Услуги, цифровые товары, шаблоны, аудиты, макеты и готовые предложения.';
+    if (shopSearch) shopSearch.placeholder = 'Поиск по каталогу: шаблон, аудит, услуга...';
+    if (shopButton) shopButton.textContent = '+ Товар / услуга';
 
     const workTitle = $('#page-freelance .section-head h2');
     const workText = $('#page-freelance .section-head p:last-child');
     const workSearch = $('#freelanceSearch');
     const workButton = $('#page-freelance [data-create="freelance"]');
 
-    if (workTitle) workTitle.textContent = 'Работа / фриланс';
-    if (workText) workText.textContent = 'Список заказов, которые нужно выполнить: сайты, дизайн, карточки, тексты, монтаж и простые IT-задачи.';
+    if (workTitle) workTitle.textContent = 'Биржа заказов';
+    if (workText) workText.textContent = 'Заказы, которые нужно выполнить: дизайн, сайты, карточки, тексты, монтаж и простые IT-задачи.';
     if (workSearch) workSearch.placeholder = 'Поиск заказа: сайт, карточки, текст, монтаж...';
     if (workButton) workButton.textContent = '+ Заказ';
 
     const heroActions = $$('#page-home .hero-actions .btn');
     if (heroActions[0]) {
-      heroActions[0].textContent = 'Открыть работу';
+      heroActions[0].textContent = 'Открыть заказы';
       heroActions[0].dataset.go = 'freelance';
     }
     if (heroActions[1]) {
-      heroActions[1].textContent = 'Открыть товары';
+      heroActions[1].textContent = 'Открыть каталог';
       heroActions[1].dataset.go = 'shop';
     }
   }
@@ -185,8 +187,8 @@
 
         <section class="profile-tab-content ${activeTab === 'products' ? 'active' : ''}" data-profile-pane="products">
           <div class="profile-actions-row">
-            <button class="btn btn-primary" data-create="product">Добавить информационный товар</button>
-            <button class="btn btn-soft" data-go="shop">Открыть витрину товаров</button>
+            <button class="btn btn-primary" data-create="product">Добавить товар / услугу</button>
+            <button class="btn btn-soft" data-go="shop">Открыть каталог</button>
           </div>
           ${listHtml(myProducts, 'product', user ? 'Ты пока не добавлял товары. Можно добавить шаблон, аудит или цифровую услугу.' : 'Войди, чтобы видеть свои товары.')}
         </section>
