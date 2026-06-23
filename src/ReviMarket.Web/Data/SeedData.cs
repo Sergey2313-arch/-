@@ -8,6 +8,8 @@ public static class SeedData
     public static async Task InitializeAsync(IServiceProvider services)
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var configuration = services.GetRequiredService<IConfiguration>();
         var db = services.GetRequiredService<ApplicationDbContext>();
 
         foreach (var role in new[] { UserRoles.Customer, UserRoles.Creator, UserRoles.Admin })
@@ -15,6 +17,18 @@ public static class SeedData
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        var adminEmail = configuration["Admin:BootstrapEmail"];
+        if (!string.IsNullOrWhiteSpace(adminEmail))
+        {
+            var adminUser = await userManager.FindByEmailAsync(adminEmail.Trim());
+            if (adminUser is not null && !await userManager.IsInRoleAsync(adminUser, UserRoles.Admin))
+            {
+                adminUser.AccountType = UserRoles.Admin;
+                await userManager.UpdateAsync(adminUser);
+                await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
             }
         }
 
