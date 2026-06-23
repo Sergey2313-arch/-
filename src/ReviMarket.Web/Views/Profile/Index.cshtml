@@ -6,38 +6,52 @@
 
 <section class="profile-page neon-card">
     <p class="eyebrow">personal cabinet</p>
-    <h1>@currentUser?.DisplayName</h1>
-    <p>@currentUser?.AccountType • @currentUser?.Email</p>
-
-    <div class="profile-tabs">
-        <a class="btn btn-soft" href="#my-orders">Мои заказы</a>
-        <a class="btn btn-soft" href="#my-products">Мои товары</a>
-        <a class="btn btn-soft" asp-controller="Inbox" asp-action="Index">Сообщения</a>
-        <a class="btn btn-soft" href="#status">Статус профиля</a>
-    </div>
-</section>
-
-<section id="my-orders" class="section-block">
-    <h2>Мои заказы</h2>
-    <div class="grid">
-    @foreach (var item in Model.Where(x => x.Type == MarketItemTypes.Order))
+    @if (currentUser is null)
     {
-        <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span></article>
+        <h1>Профиль</h1>
+        <p>Чтобы видеть свои заказы, товары и сообщения, нужно войти или зарегистрироваться.</p>
+        <div class="profile-tabs">
+            <a class="btn btn-primary" href="/Account/Login">Войти</a>
+            <a class="btn btn-soft" href="/Account/Register">Регистрация</a>
+        </div>
     }
-    </div>
-</section>
-
-<section id="my-products" class="section-block">
-    <h2>Мои товары</h2>
-    <div class="grid">
-    @foreach (var item in Model.Where(x => x.Type == MarketItemTypes.Product))
+    else
     {
-        <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span></article>
+        <h1>@currentUser.DisplayName</h1>
+        <p>@currentUser.AccountType • @currentUser.Email</p>
+        <div class="profile-tabs">
+            <a class="btn btn-soft" href="#my-orders">Мои заказы</a>
+            <a class="btn btn-soft" href="#my-products">Мои товары</a>
+            <a class="btn btn-soft" href="/Inbox">Сообщения</a>
+            <a class="btn btn-soft" href="#status">Статус профиля</a>
+        </div>
     }
-    </div>
 </section>
 
-<section id="status" class="section-block neon-card">
-    <h2>Статус профиля</h2>
-    <p>Профиль активен. Backend-версия уже использует ASP.NET Identity и роли.</p>
-</section>
+@if (currentUser is not null)
+{
+    <section id="my-orders" class="section-block">
+        <h2>Мои заказы</h2>
+        <div class="grid">
+        @foreach (var item in Model.Where(x => x.Type == MarketItemTypes.Order))
+        {
+            <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span></article>
+        }
+        </div>
+    </section>
+
+    <section id="my-products" class="section-block">
+        <h2>Мои товары</h2>
+        <div class="grid">
+        @foreach (var item in Model.Where(x => x.Type == MarketItemTypes.Product))
+        {
+            <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span></article>
+        }
+        </div>
+    </section>
+
+    <section id="status" class="section-block neon-card">
+        <h2>Статус профиля</h2>
+        <p>Профиль активен. Backend-версия уже использует ASP.NET Identity и роли.</p>
+    </section>
+}
