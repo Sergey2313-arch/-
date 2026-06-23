@@ -1,0 +1,242 @@
+.admin-shell {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 28px;
+    min-height: calc(100vh - 120px);
+}
+
+.admin-sidebar {
+    position: sticky;
+    top: 24px;
+    height: fit-content;
+    padding: 22px;
+    border-radius: 28px;
+}
+
+.admin-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.admin-logo-mark {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #7c2cff, #ff2bd6);
+    box-shadow: 0 0 28px rgba(168, 85, 247, .55);
+    color: white;
+    font-weight: 900;
+    font-size: 22px;
+}
+
+.admin-logo b {
+    display: block;
+    font-size: 20px;
+}
+
+.admin-logo small {
+    color: var(--muted);
+}
+
+.admin-menu {
+    display: grid;
+    gap: 10px;
+}
+
+.admin-menu a {
+    padding: 13px 15px;
+    border-radius: 16px;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: rgba(255,255,255,.03);
+    font-weight: 800;
+}
+
+.admin-menu a:hover,
+.admin-menu a.active {
+    border-color: rgba(168,85,247,.35);
+    background: rgba(168,85,247,.16);
+}
+
+.admin-note {
+    margin-top: 26px;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(168,85,247,.22);
+    background: rgba(255,255,255,.04);
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.admin-main {
+    display: grid;
+    gap: 22px;
+}
+
+.admin-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+}
+
+.admin-badge {
+    padding: 13px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(168,85,247,.28);
+    background: rgba(255,255,255,.05);
+    white-space: nowrap;
+}
+
+.admin-badge b {
+    color: var(--text);
+}
+
+.admin-badge span {
+    color: var(--muted);
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-stat {
+    padding: 22px;
+    border-radius: 24px;
+}
+
+.admin-stat span {
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.admin-stat h3 {
+    margin: 12px 0 8px;
+    font-size: 38px;
+}
+
+.admin-stat p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.admin-section {
+    padding: 24px;
+    border-radius: 28px;
+}
+
+.admin-section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 18px;
+}
+
+.admin-section-head h2 {
+    margin: 4px 0 8px;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-card {
+    padding: 20px;
+    border-radius: 22px;
+    border: 1px solid rgba(168,85,247,.18);
+    background: rgba(255,255,255,.04);
+    display: grid;
+    gap: 12px;
+}
+
+.admin-card h3 {
+    margin: 0;
+}
+
+.admin-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.admin-list {
+    display: grid;
+    gap: 12px;
+}
+
+.admin-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(168,85,247,.16);
+    background: rgba(255,255,255,.035);
+}
+
+.admin-row h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.admin-row p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.admin-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.admin-tag {
+    padding: 6px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(168,85,247,.18);
+    background: rgba(255,255,255,.045);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+    .admin-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+        position: static;
+    }
+
+    .admin-stats,
+    .admin-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .admin-top,
+    .admin-section-head,
+    .admin-row {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .admin-stats,
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+}
