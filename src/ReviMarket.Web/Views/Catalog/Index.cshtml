@@ -1,0 +1,33 @@
+@model List<MarketItem>
+@{
+    ViewData["Title"] = "Каталог";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">service catalog</p>
+        <h1>Каталог услуг и товаров</h1>
+        <p>Услуги, шаблоны, цифровые товары, аудиты и готовые предложения.</p>
+    </div>
+    @if (User.IsInRole(UserRoles.Creator) || User.IsInRole(UserRoles.Admin))
+    {
+        <a class="btn btn-primary" asp-action="Create">+ Товар / услуга</a>
+    }
+</section>
+
+<form method="get" class="toolbar neon-card">
+    <input name="search" value="@ViewBag.Search" placeholder="Поиск по каталогу..." />
+    <button class="btn btn-soft" type="submit">Найти</button>
+</form>
+
+<div class="grid">
+@foreach (var item in Model)
+{
+    <article class="card">
+        <div class="card-top"><span class="tag">@item.Category</span><span class="price">@item.Price.ToString("N0") ₽</span></div>
+        <h3>@item.Title</h3>
+        <p>@item.Description</p>
+        <div class="card-bottom"><span>@(item.Owner?.DisplayName ?? "ReviMarket")</span><a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Подробнее</a></div>
+    </article>
+}
+</div>
