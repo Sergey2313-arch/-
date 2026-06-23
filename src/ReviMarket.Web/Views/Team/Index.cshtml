@@ -1,15 +1,16 @@
 @model List<ApplicationUser>
 @{
     ViewData["Title"] = "Команда";
+    var roles = ViewBag.Roles as string[] ?? UserRoles.All;
 }
 
 <section class="section-head">
     <div>
-        <p class="eyebrow">team</p>
-        <h1>Команда</h1>
-        <p>Список пользователей платформы.</p>
+        <p class="eyebrow">team roles</p>
+        <h1>Команда и роли</h1>
+        <p>Назначение ролей для владельцев, админов, модераторов, юристов, поддержки и пользователей.</p>
     </div>
-    <a class="btn btn-soft" href="/Panel">← В панель</a>
+    <a class="btn btn-soft" href="/admin.html">← В панель</a>
 </section>
 
 <div class="review-list">
@@ -22,6 +23,30 @@
                 <span class="tag">@user.AccountType</span>
             </div>
             <p>@user.Email</p>
+            <div class="review-meta">
+                <span>@user.Id</span>
+                <span>@user.CreatedAt.ToString("dd.MM.yyyy")</span>
+            </div>
+        </div>
+        <div class="review-actions">
+            <form asp-action="SetRole" method="post" class="role-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@user.Id" />
+                <select name="role">
+                    @foreach (var role in roles)
+                    {
+                        if (user.AccountType == role)
+                        {
+                            <option value="@role" selected>@role</option>
+                        }
+                        else
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    }
+                </select>
+                <button class="btn btn-primary" type="submit">Назначить</button>
+            </form>
         </div>
     </article>
 }
