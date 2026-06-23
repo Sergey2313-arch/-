@@ -13,34 +13,34 @@
 <body>
     <div class="bg-grid"></div>
     <header class="topbar">
-        <a class="brand" asp-controller="Home" asp-action="Index">
+        <a class="brand" href="/">
             <span class="brand-icon">R</span>
             <span><b>ReviMarket</b><small>работа • товары • сделки</small></span>
         </a>
         <nav class="nav">
-            <a asp-controller="Catalog" asp-action="Index">Товары</a>
-            <a asp-controller="Orders" asp-action="Index">Работа</a>
-            <a asp-controller="Creators" asp-action="Index">Исполнители</a>
-            <a asp-controller="Inbox" asp-action="Index">Сообщения</a>
-            <a asp-controller="Profile" asp-action="Index">Профиль</a>
+            <a href="/Catalog">Товары</a>
+            <a href="/Orders">Работа</a>
+            <a href="/Creators">Исполнители</a>
+            <a href="/Inbox">Сообщения</a>
+            <a href="/Profile">Профиль</a>
             @if (User.IsInRole(UserRoles.Admin))
             {
-                <a asp-controller="Admin" asp-action="Index">Админка</a>
-                <a asp-controller="AdminQueue" asp-action="Index">Проверка</a>
+                <a href="/Admin">Админка</a>
+                <a href="/AdminQueue">Проверка</a>
             }
         </nav>
         <div class="auth">
             @if (SignInManager.IsSignedIn(User))
             {
-                <form asp-controller="Account" asp-action="Logout" method="post">
+                <form action="/Account/Logout" method="post">
                     @Html.AntiForgeryToken()
                     <button class="btn btn-soft" type="submit">Выйти</button>
                 </form>
             }
             else
             {
-                <a class="btn btn-soft" asp-controller="Account" asp-action="Login">Войти</a>
-                <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Регистрация</a>
+                <a class="btn btn-soft" href="/Account/Login">Войти</a>
+                <a class="btn btn-primary" href="/Account/Register">Регистрация</a>
             }
         </div>
     </header>
