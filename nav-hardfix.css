@@ -1,4 +1,4 @@
-/* Hard navigation cleanup: top header must stay simple. */
+/* Kwork-like navigation: compact marketplace header. */
 
 .header .nav {
   margin-left: auto !important;
@@ -14,16 +14,19 @@
 
 .header .nav a[data-page="shop"],
 .header .nav a[data-page="freelance"],
+.header .nav a[data-page="creators"],
+.header .nav a[data-page="chat"],
 .header .nav a[data-page="profile"] {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  min-width: 112px;
+  min-width: auto;
   text-align: center;
+  padding: 10px 14px;
 }
 
-.header .nav a[data-page="shop"]::before {
-  content: "";
+.header .nav a[data-page="shop"] {
+  font-weight: 900;
 }
 
 @media (max-width: 920px) {
@@ -33,6 +36,8 @@
 
   .header .nav a[data-page="shop"],
   .header .nav a[data-page="freelance"],
+  .header .nav a[data-page="creators"],
+  .header .nav a[data-page="chat"],
   .header .nav a[data-page="profile"] {
     width: 100%;
     min-width: 0;
