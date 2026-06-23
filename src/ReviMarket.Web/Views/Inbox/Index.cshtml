@@ -1,0 +1,33 @@
+@model List<ChatMessage>
+@{
+    ViewData["Title"] = "Сообщения";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">inbox</p>
+        <h1>Сообщения</h1>
+        <p>Пока это backend-заготовка для чатов по сделкам.</p>
+    </div>
+</section>
+
+@if (!Model.Any())
+{
+    <section class="neon-card empty">
+        <h2>Сообщений пока нет</h2>
+        <p>После отклика на заказ или покупки товара здесь появится переписка.</p>
+    </section>
+}
+else
+{
+    <div class="grid">
+    @foreach (var message in Model)
+    {
+        <article class="card">
+            <h3>@message.Sender?.DisplayName → @message.Receiver?.DisplayName</h3>
+            <p>@message.Text</p>
+            <span>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+        </article>
+    }
+    </div>
+}
