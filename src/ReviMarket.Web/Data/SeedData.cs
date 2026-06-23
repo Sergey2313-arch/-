@@ -12,7 +12,7 @@ public static class SeedData
         var configuration = services.GetRequiredService<IConfiguration>();
         var db = services.GetRequiredService<ApplicationDbContext>();
 
-        foreach (var role in new[] { UserRoles.Customer, UserRoles.Creator, UserRoles.Admin })
+        foreach (var role in new[] { UserRoles.Customer, UserRoles.Creator, UserRoles.Admin, UserRoles.Manager })
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
