@@ -96,6 +96,34 @@ input, textarea, select {
 textarea { min-height: 130px; resize: vertical; }
 select option { color: #111; }
 
+.category-blocks {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 18px;
+}
+.category-block {
+    display: grid;
+    gap: 7px;
+    min-height: 118px;
+    padding: 15px;
+    border: 1px solid rgba(168,85,247,.18);
+    border-radius: 20px;
+    background: rgba(255,255,255,.035);
+    transition: .18s ease;
+}
+.category-block:hover,
+.category-block.active {
+    transform: translateY(-2px);
+    border-color: rgba(216,180,254,.55);
+    background: linear-gradient(135deg, rgba(124,44,255,.28), rgba(255,43,214,.10));
+    box-shadow: 0 0 28px rgba(139,44,255,.18);
+}
+.category-block span { font-size: 24px; }
+.category-block b { font-size: 17px; }
+.category-block small { color: var(--muted); line-height: 1.35; }
+
 .grid, .admin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .admin-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 20px; }
 .card { padding: 20px; display: grid; gap: 12px; }
@@ -144,7 +172,7 @@ select option { color: #111; }
 .admin-note code { color: #fff; background: rgba(0,0,0,.22); padding: 2px 5px; border-radius: 6px; }
 
 .profile-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-.empty { padding: 28px; }
+.empty { padding: 28px; margin-top: 18px; }
 
 .detail-page { display: grid; gap: 16px; }
 .detail-back { width: max-content; }
@@ -224,13 +252,22 @@ select option { color: #111; }
 .detail-info-list b { color: #fff; }
 .detail-action { width: 100%; }
 
+@media (max-width: 1100px) {
+    .category-blocks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 @media (max-width: 900px) {
     .topbar { flex-wrap: wrap; }
     .nav { order: 3; width: 100%; overflow-x: auto; }
     .hero { grid-template-columns: 1fr; }
     .grid, .admin-grid, .role-choice { grid-template-columns: 1fr; }
+    .category-blocks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .section-head, .toolbar { flex-direction: column; align-items: stretch; }
     .detail-layout { grid-template-columns: 1fr; padding: 18px; }
     .detail-main h1 { font-size: clamp(32px, 10vw, 44px); }
     .detail-sidebar { padding: 14px; }
+}
+
+@media (max-width: 560px) {
+    .category-blocks { grid-template-columns: 1fr; }
 }
