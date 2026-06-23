@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.log
+*.db
+src/ReviMarket.Web/wwwroot/uploads/
+publish/
+artifacts/
