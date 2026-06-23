@@ -17,36 +17,49 @@
     }
 </section>
 
-<nav class="category-blocks neon-card">
-    <a class="category-block @(string.IsNullOrWhiteSpace(activeCategory) ? "active" : "")" asp-action="Index" asp-route-search="@ViewBag.Search">
-        <span>🧩</span>
-        <b>Все</b>
-        <small>Все товары и услуги</small>
-    </a>
-    @foreach (var category in categories)
-    {
-        <a class="category-block @(activeCategory == category ? "active" : "")" asp-action="Index" asp-route-category="@category" asp-route-search="@ViewBag.Search">
-            <span>@CategoryIcon(category)</span>
-            <b>@category</b>
-            <small>@CategoryDescription(category)</small>
-        </a>
-    }
-</nav>
-
-<form method="get" class="toolbar neon-card">
-    <input type="hidden" name="category" value="@activeCategory" />
+<form method="get" class="toolbar neon-card product-filter">
     <input name="search" value="@ViewBag.Search" placeholder="Поиск товара или услуги..." />
+    <select name="category">
+        @if (string.IsNullOrWhiteSpace(activeCategory))
+        {
+            <option value="" selected>Все категории</option>
+        }
+        else
+        {
+            <option value="">Все категории</option>
+        }
+        @foreach (var category in categories)
+        {
+            if (activeCategory == category)
+            {
+                <option value="@category" selected>@category</option>
+            }
+            else
+            {
+                <option value="@category">@category</option>
+            }
+        }
+    </select>
     <button class="btn btn-soft" type="submit">Найти</button>
 </form>
 
-<div class="grid">
+<div class="grid product-grid">
 @foreach (var item in Model)
 {
-    <article class="card">
-        <div class="card-top"><span class="tag">@item.Category</span><span class="price">@item.Price.ToString("N0") ₽</span></div>
-        <h3>@item.Title</h3>
-        <p>@item.Description</p>
-        <div class="card-bottom"><span>@(item.Owner?.DisplayName ?? "ReviMarket")</span><a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Подробнее</a></div>
+    <article class="card product-card">
+        <div class="product-cover">
+            <div class="product-cover-icon">@CategoryIcon(item.Category)</div>
+            <div class="product-cover-title">
+                <b>@item.Title</b>
+                <span>@item.Category</span>
+            </div>
+        </div>
+        <div class="product-body">
+            <div class="card-top"><span class="tag">@item.Category</span><span class="price">@item.Price.ToString("N0") ₽</span></div>
+            <h3>@item.Title</h3>
+            <p>@item.Description</p>
+            <div class="card-bottom"><span>@(item.Owner?.DisplayName ?? "ReviMarket")</span><a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Подробнее</a></div>
+        </div>
     </article>
 }
 </div>
@@ -55,7 +68,7 @@
 {
     <section class="empty neon-card">
         <h2>Пока ничего нет</h2>
-        <p>Попробуй выбрать другой блок или убрать поиск.</p>
+        <p>Попробуй выбрать другую категорию или убрать поиск.</p>
     </section>
 }
 
@@ -69,16 +82,5 @@
         MarketCategories.Seo => "📈",
         MarketCategories.Marketplaces => "🛒",
         _ => "🧩"
-    };
-
-    string CategoryDescription(string category) => category switch
-    {
-        MarketCategories.Design => "карточки, баннеры, визуал",
-        MarketCategories.It => "сайты, боты, backend",
-        MarketCategories.Ai => "промпты, генерация, AI",
-        MarketCategories.Content => "тексты, описания, посты",
-        MarketCategories.Seo => "аудит, ключи, трафик",
-        MarketCategories.Marketplaces => "WB, Ozon, инфографика",
-        _ => "категория"
     };
 }
