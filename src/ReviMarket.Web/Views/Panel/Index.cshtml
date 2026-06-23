@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Панель";
+    var currentUser = ViewBag.User as ApplicationUser;
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">dashboard</p>
+        <h1>Панель ReviMarket</h1>
+        <p>Быстрый доступ к товарам, работе, сообщениям, профилю и админ-разделам.</p>
+    </div>
+</section>
+
+<section class="profile-page neon-card">
+    <p class="eyebrow">account</p>
+    <h2>@currentUser?.DisplayName</h2>
+    <p>@currentUser?.AccountType • @currentUser?.Email</p>
+</section>
+
+<section class="admin-grid panel-stats">
+    <article class="card">
+        <span class="tag">Мои заказы</span>
+        <h3>@ViewBag.MyOrdersCount</h3>
+        <p>созданных задач</p>
+    </article>
+    <article class="card">
+        <span class="tag">Мои товары</span>
+        <h3>@ViewBag.MyProductsCount</h3>
+        <p>товаров и услуг</p>
+    </article>
+    <article class="card">
+        <span class="tag">Сообщения</span>
+        <h3>@ViewBag.MessagesCount</h3>
+        <p>диалогов и сообщений</p>
+    </article>
+    <article class="card">
+        <span class="tag">Площадка</span>
+        <h3>@ViewBag.AllOrdersCount</h3>
+        <p>работы на бирже</p>
+    </article>
+</section>
+
+<section class="panel-grid">
+    <article class="panel-card neon-card">
+        <p class="eyebrow">products</p>
+        <h2>Товары</h2>
+        <p>Открыть витрину товаров и услуг.</p>
+        <a class="btn btn-primary" href="/Catalog">Открыть товары</a>
+    </article>
+
+    <article class="panel-card neon-card">
+        <p class="eyebrow">work</p>
+        <h2>Работа</h2>
+        <p>Посмотреть заказы и задачи.</p>
+        <a class="btn btn-primary" href="/Orders">Открыть работу</a>
+    </article>
+
+    @if (User.IsInRole(UserRoles.Customer) || User.IsInRole(UserRoles.Admin))
+    {
+        <article class="panel-card neon-card">
+            <p class="eyebrow">new order</p>
+            <h2>Создать заказ</h2>
+            <p>Добавить задачу для исполнителей.</p>
+            <a class="btn btn-soft" href="/Orders/Create">Создать заказ</a>
+        </article>
+    }
+
+    @if (User.IsInRole(UserRoles.Creator) || User.IsInRole(UserRoles.Admin))
+    {
+        <article class="panel-card neon-card">
+            <p class="eyebrow">new product</p>
+            <h2>Добавить товар</h2>
+            <p>Добавить услугу или цифровой товар.</p>
+            <a class="btn btn-soft" href="/Catalog/Create">Добавить товар</a>
+        </article>
+    }
+
+    <article class="panel-card neon-card">
+        <p class="eyebrow">messages</p>
+        <h2>Сообщения</h2>
+        <p>Открыть переписки по сделкам.</p>
+        <a class="btn btn-soft" href="/Inbox">Открыть сообщения</a>
+    </article>
+
+    <article class="panel-card neon-card">
+        <p class="eyebrow">profile</p>
+        <h2>Профиль</h2>
+        <p>Открыть личный кабинет.</p>
+        <a class="btn btn-soft" href="/Profile">Открыть профиль</a>
+    </article>
+
+    @if (User.IsInRole(UserRoles.Admin))
+    {
+        <article class="panel-card neon-card">
+            <p class="eyebrow">admin</p>
+            <h2>Админка</h2>
+            <p>Статистика, пользователи и управление площадкой.</p>
+            <a class="btn btn-primary" href="/Admin">Открыть админку</a>
+        </article>
+
+        <article class="panel-card neon-card">
+            <p class="eyebrow">review</p>
+            <h2>Проверка</h2>
+            <p>Просмотр товаров и заказов перед публикацией.</p>
+            <a class="btn btn-soft" href="/AdminQueue">Открыть проверку</a>
+        </article>
+    }
+</section>
