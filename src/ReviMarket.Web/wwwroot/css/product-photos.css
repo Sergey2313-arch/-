@@ -1,0 +1,117 @@
+/* Product page: no category cards, only product cards with image-like covers */
+
+.product-grid {
+    align-items: stretch;
+}
+
+.product-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.product-cover {
+    position: relative;
+    min-height: 185px;
+    display: grid;
+    align-content: end;
+    padding: 18px;
+    border-bottom: 1px solid rgba(168, 85, 247, .18);
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.24), transparent 18%),
+        radial-gradient(circle at 80% 10%, rgba(255,43,214,.24), transparent 24%),
+        linear-gradient(135deg, rgba(124,44,255,.42), rgba(255,43,214,.16));
+}
+
+.product-cover::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 26px 26px;
+    opacity: .34;
+}
+
+.product-cover-icon {
+    position: relative;
+    z-index: 1;
+    width: 62px;
+    height: 62px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255,255,255,.20);
+    border-radius: 20px;
+    background: rgba(7, 3, 15, .46);
+    backdrop-filter: blur(12px);
+    font-size: 31px;
+}
+
+.product-cover-title {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: end;
+}
+
+.product-cover-title b {
+    max-width: 72%;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.product-cover-title span {
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(7, 3, 15, .58);
+    border: 1px solid rgba(255,255,255,.14);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.product-body {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+}
+
+.product-body h3 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.product-body p {
+    margin: 0;
+}
+
+.product-filter {
+    display: grid;
+    grid-template-columns: 1fr 240px auto;
+    align-items: center;
+}
+
+.product-detail-cover {
+    margin-bottom: 20px;
+    min-height: 260px;
+    border: 1px solid rgba(168,85,247,.20);
+    border-radius: 26px;
+    overflow: hidden;
+}
+
+.product-detail-cover .product-cover {
+    min-height: 260px;
+    border-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .product-filter {
+        grid-template-columns: 1fr;
+    }
+
+    .product-cover {
+        min-height: 165px;
+    }
+}
