@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,6 @@ using ReviMarket.Web.Models;
 
 namespace ReviMarket.Web.Controllers;
 
-[Authorize]
 public class InboxController : Controller
 {
     private readonly ApplicationDbContext _db;
@@ -21,6 +19,11 @@ public class InboxController : Controller
 
     public async Task<IActionResult> Index()
     {
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            return View(new List<ChatMessage>());
+        }
+
         var userId = _userManager.GetUserId(User);
         var list = await _db.ChatMessages
             .Include(x => x.Sender)
