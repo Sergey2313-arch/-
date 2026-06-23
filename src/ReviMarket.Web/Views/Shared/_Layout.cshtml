@@ -1,0 +1,48 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ReviMarket</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <header class="topbar">
+        <a class="brand" asp-controller="Home" asp-action="Index">
+            <span class="brand-icon">R</span>
+            <span><b>ReviMarket</b><small>работа • товары • сделки</small></span>
+        </a>
+        <nav class="nav">
+            <a asp-controller="Catalog" asp-action="Index">Каталог</a>
+            <a asp-controller="Orders" asp-action="Index">Заказы</a>
+            <a asp-controller="Creators" asp-action="Index">Исполнители</a>
+            <a asp-controller="Inbox" asp-action="Index">Сообщения</a>
+            <a asp-controller="Profile" asp-action="Index">Профиль</a>
+        </nav>
+        <div class="auth">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-soft" type="submit">Выйти</button>
+                </form>
+            }
+            else
+            {
+                <a class="btn btn-soft" asp-controller="Account" asp-action="Login">Войти</a>
+                <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Регистрация</a>
+            }
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
