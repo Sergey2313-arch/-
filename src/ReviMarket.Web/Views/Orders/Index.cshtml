@@ -1,6 +1,8 @@
 @model List<MarketItem>
 @{
     ViewData["Title"] = "Работа";
+    var categories = ViewBag.Categories as string[] ?? Array.Empty<string>();
+    var activeCategory = ViewBag.Category as string;
 }
 
 <section class="section-head">
@@ -15,7 +17,24 @@
     }
 </section>
 
+<nav class="category-blocks neon-card">
+    <a class="category-block @(string.IsNullOrWhiteSpace(activeCategory) ? "active" : "")" asp-action="Index" asp-route-search="@ViewBag.Search">
+        <span>🧩</span>
+        <b>Все</b>
+        <small>Все заказы</small>
+    </a>
+    @foreach (var category in categories)
+    {
+        <a class="category-block @(activeCategory == category ? "active" : "")" asp-action="Index" asp-route-category="@category" asp-route-search="@ViewBag.Search">
+            <span>@CategoryIcon(category)</span>
+            <b>@category</b>
+            <small>@CategoryDescription(category)</small>
+        </a>
+    }
+</nav>
+
 <form method="get" class="toolbar neon-card">
+    <input type="hidden" name="category" value="@activeCategory" />
     <input name="search" value="@ViewBag.Search" placeholder="Поиск работы или заказа..." />
     <button class="btn btn-soft" type="submit">Найти</button>
 </form>
@@ -31,3 +50,35 @@
     </article>
 }
 </div>
+
+@if (!Model.Any())
+{
+    <section class="empty neon-card">
+        <h2>Пока ничего нет</h2>
+        <p>Попробуй выбрать другой блок или убрать поиск.</p>
+    </section>
+}
+
+@functions {
+    string CategoryIcon(string category) => category switch
+    {
+        MarketCategories.Design => "🎨",
+        MarketCategories.It => "💻",
+        MarketCategories.Ai => "🤖",
+        MarketCategories.Content => "✍️",
+        MarketCategories.Seo => "📈",
+        MarketCategories.Marketplaces => "🛒",
+        _ => "🧩"
+    };
+
+    string CategoryDescription(string category) => category switch
+    {
+        MarketCategories.Design => "карточки, баннеры, визуал",
+        MarketCategories.It => "сайты, боты, backend",
+        MarketCategories.Ai => "промпты, генерация, AI",
+        MarketCategories.Content => "тексты, описания, посты",
+        MarketCategories.Seo => "аудит, ключи, трафик",
+        MarketCategories.Marketplaces => "WB, Ozon, инфографика",
+        _ => "категория"
+    };
+}
