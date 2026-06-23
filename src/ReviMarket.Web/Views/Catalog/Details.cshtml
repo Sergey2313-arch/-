@@ -1,0 +1,17 @@
+@model MarketItem
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="detail neon-card">
+    <a class="btn btn-soft" asp-action="Index">← Назад в каталог</a>
+    <p class="eyebrow">product detail</p>
+    <h1>@Model.Title</h1>
+    <p>@Model.Description</p>
+    <div class="detail-meta">
+        <span>@Model.Category</span>
+        <span>@Model.Price.ToString("N0") ₽</span>
+        <span>@(Model.Owner?.DisplayName ?? "ReviMarket")</span>
+    </div>
+    <a class="btn btn-primary" asp-controller="Inbox" asp-action="Index">Написать продавцу</a>
+</section>
