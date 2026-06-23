@@ -1,0 +1,24 @@
+@model List<ApplicationUser>
+@{
+    ViewData["Title"] = "Исполнители";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">creators</p>
+        <h1>Исполнители</h1>
+        <p>Зарегистрированные исполнители ReviMarket.</p>
+    </div>
+</section>
+
+<div class="grid">
+@foreach (var user in Model)
+{
+    <article class="card">
+        <div class="card-top"><span class="tag">@user.AccountType</span><span class="price">Beta</span></div>
+        <h3>@user.DisplayName</h3>
+        <p>@user.Email</p>
+        <div class="card-bottom"><span>На платформе с @user.CreatedAt.ToString("dd.MM.yyyy")</span><a class="btn btn-soft" asp-controller="Inbox" asp-action="Index">Написать</a></div>
+    </article>
+}
+</div>
