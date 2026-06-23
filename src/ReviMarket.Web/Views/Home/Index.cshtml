@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<section class="hero">
+    <div>
+        <p class="eyebrow">российская beta-биржа</p>
+        <h1>ReviMarket — площадка для заказчиков, исполнителей и продавцов</h1>
+        <p class="hero-text">
+            ASP.NET-версия проекта: регистрация, вход, роли, каталог, заказы и профиль уже перенесены на backend.
+        </p>
+        <div class="actions">
+            <a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Открыть заказы</a>
+            <a class="btn btn-soft" asp-controller="Catalog" asp-action="Index">Открыть каталог</a>
+        </div>
+    </div>
+    <div class="neon-card hero-card">
+        <b>@ViewBag.OrdersCount</b><span>заказов</span>
+        <b>@ViewBag.ProductsCount</b><span>товаров</span>
+        <b>ASP.NET</b><span>backend</span>
+    </div>
+</section>
