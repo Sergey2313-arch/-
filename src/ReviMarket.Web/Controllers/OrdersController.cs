@@ -22,7 +22,7 @@ public class OrdersController : Controller
     {
         var query = _db.MarketItems
             .Include(x => x.Owner)
-            .Where(x => x.Type == MarketItemTypes.Order);
+            .Where(x => x.Type == MarketItemTypes.Order && x.ReviewStatus == ReviewStatuses.Approved);
 
         if (!string.IsNullOrWhiteSpace(category))
         {
@@ -69,6 +69,7 @@ public class OrdersController : Controller
         item.Type = MarketItemTypes.Order;
         item.OwnerId = _userManager.GetUserId(User);
         item.CreatedAt = DateTime.UtcNow;
+        item.ReviewStatus = User.IsInRole(UserRoles.Admin) ? ReviewStatuses.Approved : ReviewStatuses.Pending;
         _db.MarketItems.Add(item);
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
