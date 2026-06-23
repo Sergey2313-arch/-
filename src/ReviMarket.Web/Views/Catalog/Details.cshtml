@@ -3,15 +3,39 @@
     ViewData["Title"] = Model.Title;
 }
 
-<section class="detail neon-card">
-    <a class="btn btn-soft" asp-action="Index">← Назад в каталог</a>
-    <p class="eyebrow">product detail</p>
-    <h1>@Model.Title</h1>
-    <p>@Model.Description</p>
-    <div class="detail-meta">
-        <span>@Model.Category</span>
-        <span>@Model.Price.ToString("N0") ₽</span>
-        <span>@(Model.Owner?.DisplayName ?? "ReviMarket")</span>
+<section class="detail-page">
+    <a class="btn btn-soft detail-back" asp-action="Index">← Назад в каталог</a>
+
+    <div class="detail-layout neon-card">
+        <article class="detail-main">
+            <p class="eyebrow">product detail</p>
+            <h1>@Model.Title</h1>
+            <p class="detail-lead">@Model.Description</p>
+
+            <div class="detail-block">
+                <h2>Что входит</h2>
+                <p>
+                    Это карточка товара или услуги в каталоге ReviMarket. В полной версии здесь будут изображения,
+                    файлы, условия покупки, отзывы и безопасная сделка.
+                </p>
+            </div>
+        </article>
+
+        <aside class="detail-sidebar">
+            <div class="detail-price-box">
+                <span>Стоимость</span>
+                <b>@Model.Price.ToString("N0") ₽</b>
+            </div>
+
+            <div class="detail-info-list">
+                <div><span>Категория</span><b>@Model.Category</b></div>
+                <div><span>Продавец</span><b>@(Model.Owner?.DisplayName ?? "ReviMarket")</b></div>
+                <div><span>Статус</span><b>Опубликовано</b></div>
+                <div><span>Тип</span><b>Товар / услуга</b></div>
+            </div>
+
+            <a class="btn btn-primary detail-action" asp-controller="Inbox" asp-action="Index">Написать продавцу</a>
+            <a class="btn btn-soft detail-action" asp-controller="Catalog" asp-action="Index">Открыть каталог</a>
+        </aside>
     </div>
-    <a class="btn btn-primary" asp-controller="Inbox" asp-action="Index">Написать продавцу</a>
 </section>
