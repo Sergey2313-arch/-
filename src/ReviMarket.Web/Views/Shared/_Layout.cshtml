@@ -21,17 +21,9 @@
             <a href="/Catalog">Товары</a>
             <a href="/Orders">Работа</a>
             <a href="/Creators">Исполнители</a>
-            <a href="/Inbox">Сообщения</a>
             @if (SignInManager.IsSignedIn(User))
             {
                 <a href="/Panel">Панель</a>
-            }
-            <a href="/Profile">Профиль</a>
-            @if (User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager))
-            {
-                <a href="/Admin">Админка</a>
-                <a href="/AdminQueue">Проверка</a>
-                <a href="/Team">Команда</a>
             }
         </nav>
         <div class="auth">
