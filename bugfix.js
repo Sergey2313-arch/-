@@ -56,8 +56,38 @@
     profileActions.appendChild(btn);
   }
 
+  function loadStyle(href) {
+    if ([...document.styleSheets].some((sheet) => sheet.href && sheet.href.includes(href.split('?')[0]))) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src^="${src.split('?')[0]}"]`)) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadOptimizers() {
+    loadStyle('panel-optimizer.css?v=1');
+    loadStyle('detail-pages.css?v=1');
+    await loadScript('panel-optimizer.js?v=1');
+    await loadScript('detail-pages.js?v=1');
+  }
+
   async function boot() {
     try { await import('./deals.js'); } catch (error) { console.warn('Deals module failed', error); }
+    try { await loadOptimizers(); } catch (error) { console.warn('Optimizer modules failed', error); }
     bindSafeNavigation();
     fixMobileMenu();
     setTimeout(() => {
