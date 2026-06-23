@@ -1,10 +1,11 @@
 @model MarketItem
 @{
     ViewData["Title"] = "Создать заказ";
+    var categories = ViewBag.Categories as string[] ?? MarketCategories.All;
 }
 
 <section class="auth-card neon-card">
-    <p class="eyebrow">new order</p>
+    <p class="eyebrow">new work order</p>
     <h1>Создать заказ</h1>
 
     <form asp-action="Create" method="post" class="form">
@@ -20,8 +21,13 @@
         <label>Бюджет</label>
         <input asp-for="Price" type="number" min="0" step="100" />
 
-        <label>Категория</label>
-        <input asp-for="Category" placeholder="Карточки, сайты, дизайн..." />
+        <label>Блок / категория</label>
+        <select asp-for="Category">
+            @foreach (var category in categories)
+            {
+                <option value="@category">@category</option>
+            }
+        </select>
 
         <button class="btn btn-primary" type="submit">Опубликовать заказ</button>
     </form>
