@@ -21,15 +21,21 @@ Backend-версия ReviMarket.
 ```bash
 cd src/ReviMarket.Web
 dotnet restore
-dotnet ef migrations add InitialCreate
-dotnet ef database update
 dotnet run
 ```
+
+База `revimarket.db` создаётся автоматически при первом запуске через `EnsureCreatedAsync()`.
 
 После запуска открыть адрес из консоли, обычно:
 
 ```text
 https://localhost:5001
+```
+
+или
+
+```text
+http://localhost:5000
 ```
 
 ## Регистрация
@@ -49,7 +55,7 @@ https://localhost:5001
 
 Сейчас это первая backend-основа. Дальше нужно добавить:
 
-- миграцию в репозиторий или автогенерацию базы;
+- нормальные EF migrations;
 - настоящие отклики на заказы;
 - полноценные чаты;
 - админ-панель;
