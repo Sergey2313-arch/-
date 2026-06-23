@@ -1,12 +1,12 @@
 @model List<MarketItem>
 @{
-    ViewData["Title"] = "Заказы";
+    ViewData["Title"] = "Работа";
 }
 
 <section class="section-head">
     <div>
-        <p class="eyebrow">order board</p>
-        <h1>Биржа заказов</h1>
+        <p class="eyebrow">work board</p>
+        <h1>Работа</h1>
         <p>Задачи, которые нужно выполнить: дизайн, сайты, карточки, тексты и IT.</p>
     </div>
     @if (User.IsInRole(UserRoles.Customer) || User.IsInRole(UserRoles.Admin))
@@ -16,7 +16,7 @@
 </section>
 
 <form method="get" class="toolbar neon-card">
-    <input name="search" value="@ViewBag.Search" placeholder="Поиск заказа..." />
+    <input name="search" value="@ViewBag.Search" placeholder="Поиск работы или заказа..." />
     <button class="btn btn-soft" type="submit">Найти</button>
 </form>
 
