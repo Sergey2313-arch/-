@@ -37,6 +37,7 @@ public static class MarketItemTypes
 {
     public const string Product = "Product";
     public const string Order = "Order";
+    public const string Vacancy = "Vacancy";
 }
 
 public static class ReviewStatuses
