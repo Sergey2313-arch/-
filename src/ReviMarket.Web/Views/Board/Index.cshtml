@@ -1,0 +1,69 @@
+@model List<MarketItem>
+@{
+    ViewData["Title"] = "Вакансии";
+    var categories = ViewBag.Categories as string[] ?? Array.Empty<string>();
+    var activeCategory = ViewBag.Category as string;
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">open roles</p>
+        <h1>Вакансии</h1>
+        <p>Раздел для постоянной и частичной работы внутри биржи: IT, дизайн, поддержка, контент и модерация.</p>
+    </div>
+</section>
+
+<form method="get" class="toolbar neon-card product-filter">
+    <input name="search" value="@ViewBag.Search" placeholder="Поиск: дизайнер, разработчик, поддержка..." />
+    <select name="category">
+        @if (string.IsNullOrWhiteSpace(activeCategory))
+        {
+            <option value="" selected>Все направления</option>
+        }
+        else
+        {
+            <option value="">Все направления</option>
+        }
+        @foreach (var category in categories)
+        {
+            if (activeCategory == category)
+            {
+                <option value="@category" selected>@category</option>
+            }
+            else
+            {
+                <option value="@category">@category</option>
+            }
+        }
+    </select>
+    <button class="btn btn-soft" type="submit">Найти</button>
+</form>
+
+<div class="grid product-grid">
+@foreach (var item in Model)
+{
+    <article class="card product-card">
+        <div class="product-cover">
+            <div class="product-cover-icon">💼</div>
+            <div class="product-cover-title">
+                <b>@item.Title</b>
+                <span>@item.Category</span>
+            </div>
+        </div>
+        <div class="product-body">
+            <div class="card-top"><span class="tag">@item.Category</span><span class="price">@item.Price.ToString("N0") ₽</span></div>
+            <h3>@item.Title</h3>
+            <p>@item.Description</p>
+            <div class="card-bottom"><span>@(item.Owner?.DisplayName ?? "ReviMarket")</span><a class="btn btn-soft" href="/Inbox">Откликнуться</a></div>
+        </div>
+    </article>
+}
+</div>
+
+@if (!Model.Any())
+{
+    <section class="empty neon-card">
+        <h2>Пока вакансий нет</h2>
+        <p>Позже здесь будут роли для команды, поддержки, модерации, дизайна и разработки.</p>
+    </section>
+}
