@@ -6,7 +6,7 @@ using ReviMarket.Web.Models;
 
 namespace ReviMarket.Web.Controllers;
 
-[Authorize(Roles = UserRoles.Admin)]
+[Authorize(Roles = UserRoles.Admin + "," + UserRoles.Manager + "," + UserRoles.Moderator)]
 public class AdminQueueController : Controller
 {
     private readonly ApplicationDbContext _db;
@@ -20,9 +20,46 @@ public class AdminQueueController : Controller
     {
         var items = await _db.MarketItems
             .Include(x => x.Owner)
-            .OrderByDescending(x => x.CreatedAt)
+            .OrderBy(x => x.ReviewStatus == ReviewStatuses.Pending ? 0 : 1)
+            .ThenByDescending(x => x.CreatedAt)
             .ToListAsync();
 
         return View(items);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Approve(int id)
+    {
+        var item = await _db.MarketItems.FindAsync(id);
+        if (item is null) return NotFound();
+
+        item.ReviewStatus = ReviewStatuses.Approved;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReturnToQueue(int id)
+    {
+        var item = await _db.MarketItems.FindAsync(id);
+        if (item is null) return NotFound();
+
+        item.ReviewStatus = ReviewStatuses.Pending;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Block(int id)
+    {
+        var item = await _db.MarketItems.FindAsync(id);
+        if (item is null) return NotFound();
+
+        item.ReviewStatus = ReviewStatuses.Blocked;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
     }
 }
