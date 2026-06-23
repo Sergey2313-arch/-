@@ -1,108 +1,221 @@
 @{
     ViewData["Title"] = "Панель";
     var currentUser = ViewBag.User as ApplicationUser;
+    var isStaff = User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager);
 }
 
-<section class="section-head">
-    <div>
-        <p class="eyebrow">dashboard</p>
-        <h1>Панель ReviMarket</h1>
-        <p>Быстрый доступ к товарам, работе, сообщениям, профилю и админ-разделам.</p>
-    </div>
-</section>
+<div class="admin-shell">
+    <aside class="admin-sidebar neon-card">
+        <div class="admin-logo">
+            <div class="admin-logo-mark">R</div>
+            <div>
+                <b>ReviMarket</b>
+                <small>admin beta</small>
+            </div>
+        </div>
 
-<section class="profile-page neon-card">
-    <p class="eyebrow">account</p>
-    <h2>@currentUser?.DisplayName</h2>
-    <p>@currentUser?.AccountType • @currentUser?.Email</p>
-</section>
+        <nav class="admin-menu">
+            <a class="active" href="#dashboard">Dashboard</a>
+            <a href="#support">Чат поддержки</a>
+            <a href="#orders-review">Проверка заказов</a>
+            <a href="#user-reports">Обращения пользователей</a>
+            <a href="#order-reports">Обращения по заказам</a>
+            <a href="#team">Команда и роли</a>
+            <a href="/Catalog">Товары</a>
+            <a href="/Orders">Работа</a>
+        </nav>
 
-<section class="admin-grid panel-stats">
-    <article class="card">
-        <span class="tag">Мои заказы</span>
-        <h3>@ViewBag.MyOrdersCount</h3>
-        <p>созданных задач</p>
-    </article>
-    <article class="card">
-        <span class="tag">Мои товары</span>
-        <h3>@ViewBag.MyProductsCount</h3>
-        <p>товаров и услуг</p>
-    </article>
-    <article class="card">
-        <span class="tag">Сообщения</span>
-        <h3>@ViewBag.MessagesCount</h3>
-        <p>диалогов и сообщений</p>
-    </article>
-    <article class="card">
-        <span class="tag">Площадка</span>
-        <h3>@ViewBag.AllOrdersCount</h3>
-        <p>работы на бирже</p>
-    </article>
-</section>
+        <div class="admin-note">
+            <b>Backend panel</b><br />
+            Панель подключена к ASP.NET. Следующий шаг — реальные таблицы обращений и поддержки.
+        </div>
+    </aside>
 
-<section class="panel-grid">
-    <article class="panel-card neon-card">
-        <p class="eyebrow">products</p>
-        <h2>Товары</h2>
-        <p>Открыть витрину товаров и услуг.</p>
-        <a class="btn btn-primary" href="/Catalog">Открыть товары</a>
-    </article>
+    <main class="admin-main">
+        <section id="dashboard" class="admin-top">
+            <div>
+                <p class="eyebrow">moderation / support / security</p>
+                <h1>Система администрации</h1>
+                <p>Единая панель для поддержки, обращений, проверки заказов и управления площадкой.</p>
+            </div>
 
-    <article class="panel-card neon-card">
-        <p class="eyebrow">work</p>
-        <h2>Работа</h2>
-        <p>Посмотреть заказы и задачи.</p>
-        <a class="btn btn-primary" href="/Orders">Открыть работу</a>
-    </article>
+            <div class="admin-badge">
+                <b>@currentUser?.DisplayName</b>
+                <span>@currentUser?.AccountType</span>
+            </div>
+        </section>
 
-    @if (User.IsInRole(UserRoles.Customer) || User.IsInRole(UserRoles.Admin))
-    {
-        <article class="panel-card neon-card">
-            <p class="eyebrow">new order</p>
-            <h2>Создать заказ</h2>
-            <p>Добавить задачу для исполнителей.</p>
-            <a class="btn btn-soft" href="/Orders/Create">Создать заказ</a>
-        </article>
-    }
+        <section class="admin-stats">
+            <article class="admin-stat neon-card">
+                <span>Пользователи</span>
+                <h3>@ViewBag.AllProductsCount</h3>
+                <p>активность площадки</p>
+            </article>
 
-    @if (User.IsInRole(UserRoles.Creator) || User.IsInRole(UserRoles.Admin))
-    {
-        <article class="panel-card neon-card">
-            <p class="eyebrow">new product</p>
-            <h2>Добавить товар</h2>
-            <p>Добавить услугу или цифровой товар.</p>
-            <a class="btn btn-soft" href="/Catalog/Create">Добавить товар</a>
-        </article>
-    }
+            <article class="admin-stat neon-card">
+                <span>Заказы</span>
+                <h3>@ViewBag.AllOrdersCount</h3>
+                <p>на проверке и в работе</p>
+            </article>
 
-    <article class="panel-card neon-card">
-        <p class="eyebrow">messages</p>
-        <h2>Сообщения</h2>
-        <p>Открыть переписки по сделкам.</p>
-        <a class="btn btn-soft" href="/Inbox">Открыть сообщения</a>
-    </article>
+            <article class="admin-stat neon-card">
+                <span>Поддержка</span>
+                <h3>@ViewBag.MessagesCount</h3>
+                <p>сообщений</p>
+            </article>
 
-    <article class="panel-card neon-card">
-        <p class="eyebrow">profile</p>
-        <h2>Профиль</h2>
-        <p>Открыть личный кабинет.</p>
-        <a class="btn btn-soft" href="/Profile">Открыть профиль</a>
-    </article>
+            <article class="admin-stat neon-card">
+                <span>Обращения</span>
+                <h3>0</h3>
+                <p>пока демо-блок</p>
+            </article>
+        </section>
 
-    @if (User.IsInRole(UserRoles.Admin))
-    {
-        <article class="panel-card neon-card">
-            <p class="eyebrow">admin</p>
-            <h2>Админка</h2>
-            <p>Статистика, пользователи и управление площадкой.</p>
-            <a class="btn btn-primary" href="/Admin">Открыть админку</a>
-        </article>
+        <section id="support" class="admin-section neon-card">
+            <div class="admin-section-head">
+                <div>
+                    <p class="eyebrow">support chat</p>
+                    <h2>Чат с пользователями</h2>
+                    <p>Агенты поддержки общаются с пользователями и помогают по заказам.</p>
+                </div>
+                <a class="btn btn-primary" href="/Inbox">Открыть чат</a>
+            </div>
 
-        <article class="panel-card neon-card">
-            <p class="eyebrow">review</p>
-            <h2>Проверка</h2>
-            <p>Просмотр товаров и заказов перед публикацией.</p>
-            <a class="btn btn-soft" href="/AdminQueue">Открыть проверку</a>
-        </article>
-    }
-</section>
+            <div class="admin-list">
+                <article class="admin-row">
+                    <div>
+                        <h3>Демо-диалог поддержки</h3>
+                        <p>Пользователь спрашивает про заказ или проблему с исполнителем.</p>
+                        <div class="admin-tags">
+                            <span class="admin-tag">support</span>
+                            <span class="admin-tag">new</span>
+                            <span class="admin-tag">agent</span>
+                        </div>
+                    </div>
+                    <a class="btn btn-soft" href="/Inbox">Ответить</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="orders-review" class="admin-section neon-card">
+            <div class="admin-section-head">
+                <div>
+                    <p class="eyebrow">orders check</p>
+                    <h2>Проверка заказов от заказчиков</h2>
+                    <p>Перед публикацией заказ проверяется: описание, бюджет, категория и корректность.</p>
+                </div>
+                <a class="btn btn-primary" href="/AdminQueue">Открыть проверку</a>
+            </div>
+
+            <div class="admin-list">
+                <article class="admin-row">
+                    <div>
+                        <h3>Заказ ожидает проверки</h3>
+                        <p>Админ или модератор открывает заказ и принимает решение по публикации.</p>
+                        <div class="admin-tags">
+                            <span class="admin-tag">order</span>
+                            <span class="admin-tag">pending</span>
+                            <span class="admin-tag">customer</span>
+                        </div>
+                    </div>
+                    <a class="btn btn-soft" href="/AdminQueue">Проверить</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="user-reports" class="admin-section neon-card">
+            <div class="admin-section-head">
+                <div>
+                    <p class="eyebrow">user reports</p>
+                    <h2>Обращения на пользователей</h2>
+                    <p>Проверка профилей, переписок и действий участников биржи.</p>
+                </div>
+                <a class="btn btn-soft" href="#team">Назначить агента</a>
+            </div>
+
+            <div class="admin-list">
+                <article class="admin-row">
+                    <div>
+                        <h3>Демо-обращение на пользователя</h3>
+                        <p>Здесь будет: кто отправил обращение, на кого, причина и решение агента.</p>
+                        <div class="admin-tags">
+                            <span class="admin-tag">user</span>
+                            <span class="admin-tag">report</span>
+                            <span class="admin-tag">review</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-soft" type="button">Открыть</button>
+                </article>
+            </div>
+        </section>
+
+        <section id="order-reports" class="admin-section neon-card">
+            <div class="admin-section-head">
+                <div>
+                    <p class="eyebrow">order reports</p>
+                    <h2>Обращения по заказам</h2>
+                    <p>Проблемные заказы: сроки, результат работы и решение администрации.</p>
+                </div>
+                <a class="btn btn-soft" href="/AdminQueue">Проверить заказ</a>
+            </div>
+
+            <div class="admin-list">
+                <article class="admin-row">
+                    <div>
+                        <h3>Демо-обращение по заказу</h3>
+                        <p>Агент поддержки проверяет заказ, переписку и материалы по работе.</p>
+                        <div class="admin-tags">
+                            <span class="admin-tag">deal</span>
+                            <span class="admin-tag">work</span>
+                            <span class="admin-tag">decision</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-soft" type="button">Разобрать</button>
+                </article>
+            </div>
+        </section>
+
+        <section id="team" class="admin-section neon-card">
+            <div class="admin-section-head">
+                <div>
+                    <p class="eyebrow">team roles</p>
+                    <h2>Команда и роли</h2>
+                    <p>Владельцы и совладельцы назначают агентов поддержки, модераторов и админов.</p>
+                </div>
+                <a class="btn btn-primary" href="/Team">Открыть команду</a>
+            </div>
+
+            <div class="admin-grid">
+                <article class="admin-card">
+                    <h3>Owner / владелец</h3>
+                    <p>Главный доступ к управлению биржей.</p>
+                </article>
+
+                <article class="admin-card">
+                    <h3>CoOwner / совладелец</h3>
+                    <p>Помогает управлять командой и процессами.</p>
+                </article>
+
+                <article class="admin-card">
+                    <h3>Support agent</h3>
+                    <p>Отвечает пользователям и разбирает обращения.</p>
+                </article>
+
+                <article class="admin-card">
+                    <h3>Moderator</h3>
+                    <p>Проверяет заказы, товары и обращения.</p>
+                </article>
+
+                <article class="admin-card">
+                    <h3>Admin</h3>
+                    <p>Следит за площадкой и системными разделами.</p>
+                </article>
+
+                <article class="admin-card">
+                    <h3>User</h3>
+                    <p>Обычный заказчик или исполнитель.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+</div>
