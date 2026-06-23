@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <nav class="admin-menu">
+        <nav class="admin-menu" id="adminMenu">
             <a class="active" href="#dashboard">Dashboard</a>
 
             @if (canSeeFinance)
@@ -303,3 +303,51 @@
         }
     </main>
 </div>
+
+<script>
+    (() => {
+        const menu = document.getElementById('adminMenu');
+        if (!menu) return;
+
+        const links = [...menu.querySelectorAll('a[href^="#"]')];
+        const sections = links
+            .map(link => document.querySelector(link.getAttribute('href')))
+            .filter(Boolean);
+
+        const setActive = (id) => {
+            links.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+            });
+        };
+
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                const id = link.getAttribute('href').replace('#', '');
+                setActive(id);
+            });
+        });
+
+        window.addEventListener('hashchange', () => {
+            const id = location.hash.replace('#', '') || 'dashboard';
+            setActive(id);
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            const visible = entries
+                .filter(entry => entry.isIntersecting)
+                .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+            if (visible?.target?.id) {
+                setActive(visible.target.id);
+            }
+        }, {
+            rootMargin: '-25% 0px -55% 0px',
+            threshold: [0.15, 0.35, 0.6]
+        });
+
+        sections.forEach(section => observer.observe(section));
+
+        const firstId = location.hash.replace('#', '') || 'dashboard';
+        setActive(firstId);
+    })();
+</script>
