@@ -21,6 +21,12 @@ public class MarketItem
     [Required, MaxLength(20)]
     public string Type { get; set; } = MarketItemTypes.Product;
 
+    [MaxLength(300)]
+    public string? ImagePath { get; set; }
+
+    [Required, MaxLength(20)]
+    public string ReviewStatus { get; set; } = ReviewStatuses.Pending;
+
     public string? OwnerId { get; set; }
     public ApplicationUser? Owner { get; set; }
 
@@ -31,4 +37,11 @@ public static class MarketItemTypes
 {
     public const string Product = "Product";
     public const string Order = "Order";
+}
+
+public static class ReviewStatuses
+{
+    public const string Pending = "Pending";
+    public const string Approved = "Approved";
+    public const string Blocked = "Blocked";
 }
