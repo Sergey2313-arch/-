@@ -1,0 +1,52 @@
+@model List<MarketItem>
+@{
+    ViewData["Title"] = "Проверка публикаций";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">admin queue</p>
+        <h1>Проверка публикаций</h1>
+        <p>Товары и заказы, которые админ может просмотреть перед публикацией.</p>
+    </div>
+    <a class="btn btn-soft" asp-controller="Admin" asp-action="Index">← Админ-панель</a>
+</section>
+
+<div class="review-list">
+@foreach (var item in Model)
+{
+    <article class="review-row neon-card">
+        <div>
+            <div class="review-title">
+                <b>@item.Title</b>
+                <span class="tag">@item.ReviewStatus</span>
+                <span class="tag">@(item.Type == MarketItemTypes.Product ? "Товар" : "Работа")</span>
+            </div>
+            <p>@item.Description</p>
+            <div class="review-meta">
+                <span>@item.Category</span>
+                <span>@item.Price.ToString("N0") ₽</span>
+                <span>@(item.Owner?.DisplayName ?? "ReviMarket")</span>
+            </div>
+        </div>
+        <div class="review-actions">
+            @if (item.Type == MarketItemTypes.Product)
+            {
+                <a class="btn btn-soft" asp-controller="Catalog" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+            }
+            else
+            {
+                <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+            }
+        </div>
+    </article>
+}
+</div>
+
+@if (!Model.Any())
+{
+    <section class="empty neon-card">
+        <h2>Публикаций пока нет</h2>
+        <p>Когда пользователи начнут добавлять товары и заказы, они появятся здесь.</p>
+    </section>
+}
