@@ -18,11 +18,16 @@ public class CatalogController : Controller
         _userManager = userManager;
     }
 
-    public async Task<IActionResult> Index(string? search)
+    public async Task<IActionResult> Index(string? search, string? category)
     {
         var query = _db.MarketItems
             .Include(x => x.Owner)
             .Where(x => x.Type == MarketItemTypes.Product);
+
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            query = query.Where(x => x.Category == category);
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -30,6 +35,8 @@ public class CatalogController : Controller
         }
 
         ViewBag.Search = search;
+        ViewBag.Category = category;
+        ViewBag.Categories = MarketCategories.All;
         return View(await query.OrderByDescending(x => x.CreatedAt).ToListAsync());
     }
 
@@ -42,14 +49,22 @@ public class CatalogController : Controller
 
     [Authorize(Roles = UserRoles.Creator + "," + UserRoles.Admin)]
     [HttpGet]
-    public IActionResult Create() => View(new MarketItem { Type = MarketItemTypes.Product });
+    public IActionResult Create()
+    {
+        ViewBag.Categories = MarketCategories.All;
+        return View(new MarketItem { Type = MarketItemTypes.Product, Category = MarketCategories.Design });
+    }
 
     [Authorize(Roles = UserRoles.Creator + "," + UserRoles.Admin)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MarketItem item)
     {
-        if (!ModelState.IsValid) return View(item);
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Categories = MarketCategories.All;
+            return View(item);
+        }
 
         item.Type = MarketItemTypes.Product;
         item.OwnerId = _userManager.GetUserId(User);
