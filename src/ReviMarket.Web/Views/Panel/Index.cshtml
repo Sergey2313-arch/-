@@ -1,7 +1,17 @@
 @{
     ViewData["Title"] = "Панель";
     var currentUser = ViewBag.User as ApplicationUser;
-    var isStaff = User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager);
+    var accountType = currentUser?.AccountType ?? "User";
+
+    var isAdmin = User.IsInRole(UserRoles.Admin) || accountType == UserRoles.Admin;
+    var isManager = User.IsInRole(UserRoles.Manager) || accountType == UserRoles.Manager;
+    var isOwner = accountType == "Owner" || accountType == "CoOwner" || isManager;
+
+    var canSeeFinance = isOwner || isAdmin;
+    var canSeeModeration = isOwner || isAdmin || accountType == "Moderator";
+    var canSeeSupport = isOwner || isAdmin || accountType == "SupportAgent";
+    var canSeeLegal = isOwner || isAdmin || accountType == "Lawyer";
+    var canSeeTeam = isOwner || isAdmin;
 }
 
 <div class="admin-shell">
@@ -10,24 +20,51 @@
             <div class="admin-logo-mark">R</div>
             <div>
                 <b>ReviMarket</b>
-                <small>admin beta</small>
+                <small>@accountType</small>
             </div>
         </div>
 
         <nav class="admin-menu">
             <a class="active" href="#dashboard">Dashboard</a>
-            <a href="#support">Чат поддержки</a>
-            <a href="#orders-review">Проверка заказов</a>
-            <a href="#user-reports">Обращения пользователей</a>
-            <a href="#order-reports">Обращения по заказам</a>
-            <a href="#team">Команда и роли</a>
+
+            @if (canSeeFinance)
+            {
+                <a href="#finance">Финансы</a>
+                <a href="#business-stats">Статистика биржи</a>
+            }
+
+            @if (canSeeModeration)
+            {
+                <a href="#orders-review">Проверка заказов</a>
+                <a href="#content-review">Проверка товаров</a>
+                <a href="#user-reports">Обращения пользователей</a>
+            }
+
+            @if (canSeeSupport)
+            {
+                <a href="#support">Чат поддержки</a>
+                <a href="#support-tickets">Тикеты поддержки</a>
+            }
+
+            @if (canSeeLegal)
+            {
+                <a href="#order-reports">Спорные заказы</a>
+                <a href="#refunds">Возвраты</a>
+            }
+
+            @if (canSeeTeam)
+            {
+                <a href="#team">Команда и роли</a>
+            }
+
             <a href="/Catalog">Товары</a>
             <a href="/Orders">Работа</a>
+            <a href="/Profile">Профиль</a>
         </nav>
 
         <div class="admin-note">
-            <b>Backend panel</b><br />
-            Панель подключена к ASP.NET. Следующий шаг — реальные таблицы обращений и поддержки.
+            <b>Role based panel</b><br />
+            Разделы показываются по роли аккаунта: владелец, админ, модератор, юрист или агент поддержки.
         </div>
     </aside>
 
@@ -36,186 +73,233 @@
             <div>
                 <p class="eyebrow">moderation / support / security</p>
                 <h1>Система администрации</h1>
-                <p>Единая панель для поддержки, обращений, проверки заказов и управления площадкой.</p>
+                <p>Единая панель: финансы, поддержка, проверка заказов, обращения и роли.</p>
             </div>
 
             <div class="admin-badge">
                 <b>@currentUser?.DisplayName</b>
-                <span>@currentUser?.AccountType</span>
+                <span>@accountType</span>
             </div>
         </section>
 
         <section class="admin-stats">
             <article class="admin-stat neon-card">
-                <span>Пользователи</span>
-                <h3>@ViewBag.AllProductsCount</h3>
-                <p>активность площадки</p>
-            </article>
-
-            <article class="admin-stat neon-card">
                 <span>Заказы</span>
                 <h3>@ViewBag.AllOrdersCount</h3>
-                <p>на проверке и в работе</p>
+                <p>всего на бирже</p>
             </article>
 
             <article class="admin-stat neon-card">
-                <span>Поддержка</span>
+                <span>Каталог</span>
+                <h3>@ViewBag.AllProductsCount</h3>
+                <p>товаров и услуг</p>
+            </article>
+
+            <article class="admin-stat neon-card">
+                <span>Сообщения</span>
                 <h3>@ViewBag.MessagesCount</h3>
-                <p>сообщений</p>
+                <p>в системе</p>
             </article>
 
             <article class="admin-stat neon-card">
-                <span>Обращения</span>
-                <h3>0</h3>
-                <p>пока демо-блок</p>
+                <span>Мои публикации</span>
+                <h3>@ViewBag.MyProductsCount</h3>
+                <p>товаров пользователя</p>
             </article>
         </section>
 
-        <section id="support" class="admin-section neon-card">
-            <div class="admin-section-head">
-                <div>
-                    <p class="eyebrow">support chat</p>
-                    <h2>Чат с пользователями</h2>
-                    <p>Агенты поддержки общаются с пользователями и помогают по заказам.</p>
-                </div>
-                <a class="btn btn-primary" href="/Inbox">Открыть чат</a>
-            </div>
-
-            <div class="admin-list">
-                <article class="admin-row">
+        @if (canSeeFinance)
+        {
+            <section id="finance" class="admin-section neon-card">
+                <div class="admin-section-head">
                     <div>
-                        <h3>Демо-диалог поддержки</h3>
-                        <p>Пользователь спрашивает про заказ или проблему с исполнителем.</p>
-                        <div class="admin-tags">
-                            <span class="admin-tag">support</span>
-                            <span class="admin-tag">new</span>
-                            <span class="admin-tag">agent</span>
-                        </div>
+                        <p class="eyebrow">finance</p>
+                        <h2>Деньги и оборот площадки</h2>
+                        <p>Раздел для владельца, совладельца и админа: оборот, комиссия, замороженные суммы и возвраты.</p>
                     </div>
-                    <a class="btn btn-soft" href="/Inbox">Ответить</a>
-                </article>
-            </div>
-        </section>
-
-        <section id="orders-review" class="admin-section neon-card">
-            <div class="admin-section-head">
-                <div>
-                    <p class="eyebrow">orders check</p>
-                    <h2>Проверка заказов от заказчиков</h2>
-                    <p>Перед публикацией заказ проверяется: описание, бюджет, категория и корректность.</p>
                 </div>
-                <a class="btn btn-primary" href="/AdminQueue">Открыть проверку</a>
-            </div>
 
-            <div class="admin-list">
-                <article class="admin-row">
+                <section class="admin-stats">
+                    <article class="admin-stat neon-card">
+                        <span>Оборот demo</span>
+                        <h3>86 400 ₽</h3>
+                        <p>тестовые данные</p>
+                    </article>
+
+                    <article class="admin-stat neon-card">
+                        <span>Комиссия платформы</span>
+                        <h3>9 720 ₽</h3>
+                        <p>10–12%</p>
+                    </article>
+
+                    <article class="admin-stat neon-card">
+                        <span>В удержании</span>
+                        <h3>18 500 ₽</h3>
+                        <p>по активным сделкам</p>
+                    </article>
+
+                    <article class="admin-stat neon-card">
+                        <span>Возвраты</span>
+                        <h3>2</h3>
+                        <p>на проверке</p>
+                    </article>
+                </section>
+            </section>
+
+            <section id="business-stats" class="admin-section neon-card">
+                <div class="admin-section-head">
                     <div>
-                        <h3>Заказ ожидает проверки</h3>
-                        <p>Админ или модератор открывает заказ и принимает решение по публикации.</p>
-                        <div class="admin-tags">
-                            <span class="admin-tag">order</span>
-                            <span class="admin-tag">pending</span>
-                            <span class="admin-tag">customer</span>
-                        </div>
+                        <p class="eyebrow">business stats</p>
+                        <h2>Статистика биржи</h2>
+                        <p>Рост заказов, активность исполнителей, конверсия публикаций и состояние площадки.</p>
                     </div>
-                    <a class="btn btn-soft" href="/AdminQueue">Проверить</a>
-                </article>
-            </div>
-        </section>
-
-        <section id="user-reports" class="admin-section neon-card">
-            <div class="admin-section-head">
-                <div>
-                    <p class="eyebrow">user reports</p>
-                    <h2>Обращения на пользователей</h2>
-                    <p>Проверка профилей, переписок и действий участников биржи.</p>
                 </div>
-                <a class="btn btn-soft" href="#team">Назначить агента</a>
-            </div>
 
-            <div class="admin-list">
-                <article class="admin-row">
+                <div class="admin-grid">
+                    <article class="admin-card"><h3>Новые заказы</h3><p>Сколько заказов создали заказчики за период.</p></article>
+                    <article class="admin-card"><h3>Новые товары</h3><p>Сколько услуг и цифровых товаров добавили исполнители.</p></article>
+                    <article class="admin-card"><h3>Активность</h3><p>Сообщения, отклики, просмотры и действия пользователей.</p></article>
+                </div>
+            </section>
+        }
+
+        @if (canSeeSupport)
+        {
+            <section id="support" class="admin-section neon-card">
+                <div class="admin-section-head">
                     <div>
-                        <h3>Демо-обращение на пользователя</h3>
-                        <p>Здесь будет: кто отправил обращение, на кого, причина и решение агента.</p>
-                        <div class="admin-tags">
-                            <span class="admin-tag">user</span>
-                            <span class="admin-tag">report</span>
-                            <span class="admin-tag">review</span>
-                        </div>
+                        <p class="eyebrow">support chat</p>
+                        <h2>Чат с пользователями</h2>
+                        <p>Агенты поддержки общаются с пользователями и помогают по заказам.</p>
                     </div>
-                    <button class="btn btn-soft" type="button">Открыть</button>
-                </article>
-            </div>
-        </section>
-
-        <section id="order-reports" class="admin-section neon-card">
-            <div class="admin-section-head">
-                <div>
-                    <p class="eyebrow">order reports</p>
-                    <h2>Обращения по заказам</h2>
-                    <p>Проблемные заказы: сроки, результат работы и решение администрации.</p>
+                    <a class="btn btn-primary" href="/Inbox">Открыть чат</a>
                 </div>
-                <a class="btn btn-soft" href="/AdminQueue">Проверить заказ</a>
-            </div>
+            </section>
 
-            <div class="admin-list">
-                <article class="admin-row">
+            <section id="support-tickets" class="admin-section neon-card">
+                <div class="admin-section-head">
                     <div>
-                        <h3>Демо-обращение по заказу</h3>
-                        <p>Агент поддержки проверяет заказ, переписку и материалы по работе.</p>
-                        <div class="admin-tags">
-                            <span class="admin-tag">deal</span>
-                            <span class="admin-tag">work</span>
-                            <span class="admin-tag">decision</span>
-                        </div>
+                        <p class="eyebrow">support tickets</p>
+                        <h2>Тикеты поддержки</h2>
+                        <p>Очередь вопросов от пользователей: доступ, публикации, сделки и технические проблемы.</p>
                     </div>
-                    <button class="btn btn-soft" type="button">Разобрать</button>
-                </article>
-            </div>
-        </section>
-
-        <section id="team" class="admin-section neon-card">
-            <div class="admin-section-head">
-                <div>
-                    <p class="eyebrow">team roles</p>
-                    <h2>Команда и роли</h2>
-                    <p>Владельцы и совладельцы назначают агентов поддержки, модераторов и админов.</p>
                 </div>
-                <a class="btn btn-primary" href="/Team">Открыть команду</a>
-            </div>
 
-            <div class="admin-grid">
-                <article class="admin-card">
-                    <h3>Owner / владелец</h3>
-                    <p>Главный доступ к управлению биржей.</p>
-                </article>
+                <div class="admin-list">
+                    <article class="admin-row">
+                        <div>
+                            <h3>Демо-тикет поддержки</h3>
+                            <p>Пользователь просит помочь с заказом или публикацией.</p>
+                            <div class="admin-tags"><span class="admin-tag">support</span><span class="admin-tag">new</span></div>
+                        </div>
+                        <a class="btn btn-soft" href="/Inbox">Ответить</a>
+                    </article>
+                </div>
+            </section>
+        }
 
-                <article class="admin-card">
-                    <h3>CoOwner / совладелец</h3>
-                    <p>Помогает управлять командой и процессами.</p>
-                </article>
+        @if (canSeeModeration)
+        {
+            <section id="orders-review" class="admin-section neon-card">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="eyebrow">orders check</p>
+                        <h2>Проверка заказов от заказчиков</h2>
+                        <p>Модераторы проверяют описание, бюджет, категорию и корректность заявки.</p>
+                    </div>
+                    <a class="btn btn-primary" href="/AdminQueue">Открыть проверку</a>
+                </div>
+            </section>
 
-                <article class="admin-card">
-                    <h3>Support agent</h3>
-                    <p>Отвечает пользователям и разбирает обращения.</p>
-                </article>
+            <section id="content-review" class="admin-section neon-card">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="eyebrow">content review</p>
+                        <h2>Проверка товаров и услуг</h2>
+                        <p>Проверка карточек товаров, изображений, описаний и категорий перед публикацией.</p>
+                    </div>
+                    <a class="btn btn-soft" href="/AdminQueue">Открыть очередь</a>
+                </div>
+            </section>
 
-                <article class="admin-card">
-                    <h3>Moderator</h3>
-                    <p>Проверяет заказы, товары и обращения.</p>
-                </article>
+            <section id="user-reports" class="admin-section neon-card">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="eyebrow">user reports</p>
+                        <h2>Обращения на пользователей</h2>
+                        <p>Проверка профилей, переписок и действий участников биржи.</p>
+                    </div>
+                </div>
 
-                <article class="admin-card">
-                    <h3>Admin</h3>
-                    <p>Следит за площадкой и системными разделами.</p>
-                </article>
+                <div class="admin-list">
+                    <article class="admin-row">
+                        <div>
+                            <h3>Демо-обращение на пользователя</h3>
+                            <p>Здесь будет причина, автор обращения, пользователь и статус решения.</p>
+                            <div class="admin-tags"><span class="admin-tag">user</span><span class="admin-tag">review</span></div>
+                        </div>
+                        <button class="btn btn-soft" type="button">Открыть</button>
+                    </article>
+                </div>
+            </section>
+        }
 
-                <article class="admin-card">
-                    <h3>User</h3>
-                    <p>Обычный заказчик или исполнитель.</p>
-                </article>
-            </div>
-        </section>
+        @if (canSeeLegal)
+        {
+            <section id="order-reports" class="admin-section neon-card">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="eyebrow">legal cases</p>
+                        <h2>Спорные заказы</h2>
+                        <p>Раздел для юриста и администрации: конфликтные сделки, сроки, результат и решение.</p>
+                    </div>
+                    <a class="btn btn-soft" href="/AdminQueue">Проверить заказ</a>
+                </div>
+            </section>
+
+            <section id="refunds" class="admin-section neon-card">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="eyebrow">refunds</p>
+                        <h2>Возвраты и решения</h2>
+                        <p>Проверка возвратов, удержаний, материалов сделки и итогового решения.</p>
+                    </div>
+                </div>
+
+                <div class="admin-list">
+                    <article class="admin-row">
+                        <div>
+                            <h3>Демо-возврат</h3>
+                            <p>Юрист проверяет материалы и готовит решение по сделке.</p>
+                            <div class="admin-tags"><span class="admin-tag">refund</span><span class="admin-tag">legal</span></div>
+                        </div>
+                        <button class="btn btn-soft" type="button">Разобрать</button>
+                    </article>
+                </div>
+            </section>
+        }
+
+        @if (canSeeTeam)
+        {
+            <section id="team" class="admin-section neon-card">
+                <div class="admin-section-head">
+                    <div>
+                        <p class="eyebrow">team roles</p>
+                        <h2>Команда и роли</h2>
+                        <p>Владельцы и совладельцы назначают агентов поддержки, модераторов, юристов и админов.</p>
+                    </div>
+                    <a class="btn btn-primary" href="/Team">Открыть команду</a>
+                </div>
+
+                <div class="admin-grid">
+                    <article class="admin-card"><h3>Owner</h3><p>Видит финансы, роли, команду и все разделы.</p></article>
+                    <article class="admin-card"><h3>CoOwner</h3><p>Помогает управлять командой и процессами.</p></article>
+                    <article class="admin-card"><h3>Admin</h3><p>Видит всю операционную панель.</p></article>
+                    <article class="admin-card"><h3>Moderator</h3><p>Проверяет заказы, товары и обращения.</p></article>
+                    <article class="admin-card"><h3>Lawyer</h3><p>Разбирает спорные сделки и возвраты.</p></article>
+                    <article class="admin-card"><h3>SupportAgent</h3><p>Отвечает пользователям и ведёт тикеты.</p></article>
+                </div>
+            </section>
+        }
     </main>
 </div>
