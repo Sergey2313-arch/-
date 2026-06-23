@@ -19,6 +19,8 @@ public class PanelController : Controller
         _userManager = userManager;
     }
 
+    [HttpGet("/Panel")]
+    [HttpGet("/admin.html")]
     public async Task<IActionResult> Index()
     {
         var userId = _userManager.GetUserId(User);
