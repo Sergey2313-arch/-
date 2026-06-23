@@ -1,0 +1,35 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">create account</p>
+    <h1>Регистрация ReviMarket</h1>
+    <p>Создай аккаунт заказчика или исполнителя. Пароль хранится через ASP.NET Identity, не обычным текстом.</p>
+
+    <form asp-action="Register" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <label>Имя / ник</label>
+        <input asp-for="DisplayName" placeholder="Например ReviveCode" />
+        <span asp-validation-for="DisplayName" class="validation"></span>
+
+        <label>Email</label>
+        <input asp-for="Email" placeholder="mail@example.com" />
+        <span asp-validation-for="Email" class="validation"></span>
+
+        <label>Пароль</label>
+        <input asp-for="Password" placeholder="Минимум 6 символов" />
+        <span asp-validation-for="Password" class="validation"></span>
+
+        <label>Тип аккаунта</label>
+        <select asp-for="AccountType">
+            <option value="Customer">Заказчик</option>
+            <option value="Creator">Исполнитель</option>
+        </select>
+
+        <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
+    </form>
+</section>
