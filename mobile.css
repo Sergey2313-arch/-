@@ -1,0 +1,501 @@
+/* ReviMarket mobile-first polish */
+@media (max-width: 760px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    overflow-x: hidden;
+    padding-bottom: 88px;
+  }
+
+  .orb {
+    opacity: .42;
+    filter: blur(36px);
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    width: calc(100% - 18px);
+    margin: 8px auto 0;
+    padding: 10px;
+    border-radius: 22px;
+    backdrop-filter: blur(18px);
+    background: rgba(9, 7, 18, .82);
+    border: 1px solid rgba(168, 85, 247, .22);
+    box-shadow: 0 14px 40px rgba(0,0,0,.35);
+  }
+
+  .brand {
+    gap: 9px;
+    min-width: 0;
+  }
+
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+  }
+
+  .brand b {
+    font-size: 15px;
+  }
+
+  .brand small {
+    display: block;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10px;
+  }
+
+  .menu-btn {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 15px;
+    border: 1px solid rgba(168, 85, 247, .28);
+    background: rgba(168, 85, 247, .12);
+    color: #fff;
+    font-size: 22px;
+  }
+
+  .header > .btn {
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 13px;
+    border-radius: 15px;
+  }
+
+  .nav {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: 76px;
+    z-index: 120;
+    display: none;
+    max-height: calc(100vh - 100px);
+    overflow: auto;
+    padding: 12px;
+    border-radius: 24px;
+    border: 1px solid rgba(168, 85, 247, .30);
+    background: linear-gradient(180deg, rgba(15, 9, 28, .98), rgba(7, 6, 14, .98));
+    box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 45px rgba(147, 51, 234, .14);
+  }
+
+  .nav.open {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .nav a {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(168, 85, 247, .16);
+    font-size: 13px;
+  }
+
+  .nav a.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, .42), rgba(99, 102, 241, .22));
+    border-color: rgba(216, 180, 254, .42);
+    box-shadow: inset 0 0 18px rgba(168, 85, 247, .16);
+  }
+
+  main {
+    width: min(100% - 18px, 1180px);
+    margin: 14px auto 0;
+  }
+
+  .page {
+    padding: 16px 0;
+  }
+
+  .hero {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding-top: 8px;
+  }
+
+  .hero-info {
+    padding: 22px 16px;
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(18, 10, 32, .68), rgba(8, 7, 15, .42));
+    border: 1px solid rgba(168, 85, 247, .20);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: .12em;
+  }
+
+  .hero h1,
+  h1 {
+    font-size: clamp(31px, 10vw, 46px);
+    line-height: .98;
+    margin-bottom: 12px;
+  }
+
+  .hero-text,
+  .section-head p,
+  .card p,
+  .rm-cat-card p,
+  .rm-proposal-card p,
+  .rm-account-card p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .btn,
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 15px;
+  }
+
+  .btn {
+    min-height: 46px;
+    justify-content: center;
+    border-radius: 16px;
+  }
+
+  .btn-big {
+    min-height: 52px;
+    font-size: 15px;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .metrics div {
+    min-width: 0;
+    padding: 13px 8px;
+    border-radius: 18px;
+  }
+
+  .metrics b {
+    font-size: 18px;
+  }
+
+  .metrics span {
+    font-size: 10px;
+  }
+
+  .hero-logo {
+    display: none;
+  }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .section-head h2 {
+    font-size: 28px;
+    line-height: 1.05;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 22px;
+    margin-bottom: 14px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    border-radius: 16px;
+  }
+
+  textarea {
+    min-height: 105px;
+  }
+
+  .grid,
+  .creator-list,
+  .rm-category-grid,
+  .rm-proposals-grid,
+  .rm-account-grid,
+  .rm-dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .card,
+  .creator,
+  .neon-card,
+  .rm-cat-card,
+  .rm-proposal-card,
+  .rm-account-card,
+  .rm-dashboard-card,
+  .rm-mini-category {
+    border-radius: 22px;
+  }
+
+  .card,
+  .rm-cat-card,
+  .rm-proposal-card,
+  .rm-account-card {
+    padding: 15px;
+  }
+
+  .card-top,
+  .card-bottom {
+    gap: 10px;
+  }
+
+  .card-bottom {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .chips,
+  .rm-cat-meta,
+  .rm-proposal-meta,
+  .rm-account-meta {
+    gap: 7px;
+  }
+
+  .chips span,
+  .rm-cat-meta span,
+  .rm-proposal-meta span,
+  .rm-account-meta span {
+    font-size: 11px;
+    padding: 6px 9px;
+  }
+
+  .rm-home-cats {
+    display: flex !important;
+    overflow-x: auto;
+    gap: 10px;
+    margin: 18px -16px 0;
+    padding: 2px 16px 8px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .rm-home-cats::-webkit-scrollbar,
+  .chat-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rm-mini-category {
+    min-width: 235px;
+    scroll-snap-align: start;
+    padding: 14px;
+  }
+
+  .rm-mini-category .btn {
+    width: 100%;
+  }
+
+  .chat-layout,
+  .support-layout {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .chat-sidebar {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 22px;
+  }
+
+  .chat-thread {
+    min-width: 220px;
+    flex: 0 0 220px;
+    border-radius: 18px;
+  }
+
+  .chat-window,
+  .support-window {
+    min-height: 64vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .chat-messages {
+    max-height: 58vh;
+    min-height: 280px;
+    padding: 12px;
+  }
+
+  .message {
+    max-width: 88%;
+    border-radius: 18px;
+  }
+
+  .chat-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .support-panel {
+    padding: 15px;
+  }
+
+  .support-tags {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .profile {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 24px;
+  }
+
+  #profileActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px;
+  }
+
+  .stat-card,
+  .rm-dashboard-card {
+    padding: 13px;
+    border-radius: 18px;
+  }
+
+  .rm-account-upgrade {
+    margin-top: 12px;
+    padding: 14px;
+  }
+
+  .rm-account-head {
+    display: grid;
+    gap: 12px;
+  }
+
+  .rm-account-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .rm-upgrade-form {
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .modal,
+  .privacy-modal {
+    align-items: flex-end;
+  }
+
+  .modal-box,
+  .privacy-box {
+    width: 100%;
+    max-width: none;
+    max-height: 92vh;
+    overflow-y: auto;
+    border-radius: 26px 26px 0 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    animation: rmMobileSheet .18s ease-out;
+  }
+
+  .close {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  .privacy-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .toast {
+    left: 10px;
+    right: 10px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: auto;
+    border-radius: 18px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .header {
+    grid-template-columns: auto 42px auto;
+    gap: 8px;
+  }
+
+  .brand small {
+    max-width: 105px;
+  }
+
+  .header > .btn {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .nav.open {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1,
+  h1 {
+    font-size: 34px;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@keyframes rmMobileSheet {
+  from { transform: translateY(24px); opacity: .6; }
+  to { transform: translateY(0); opacity: 1; }
+}
