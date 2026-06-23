@@ -96,9 +96,11 @@ input, textarea, select {
 textarea { min-height: 130px; resize: vertical; }
 select option { color: #111; }
 
-.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid, .admin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.admin-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 20px; }
 .card { padding: 20px; display: grid; gap: 12px; }
 .card h3 { margin: 0; font-size: 22px; }
+.admin-grid .card h3 { font-size: 42px; }
 .card-top, .card-bottom, .detail-meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
 .tag, .price, .detail-meta span {
     padding: 7px 10px; border-radius: 999px; background: rgba(168,85,247,.12);
@@ -110,6 +112,36 @@ select option { color: #111; }
 .validation { color: #ff8ab3; font-size: 13px; }
 .checkbox { display: flex; gap: 8px; align-items: center; color: var(--muted); }
 .checkbox input { width: auto; }
+
+.role-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 10px 0; }
+.role-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: rgba(255,255,255,.04);
+    cursor: pointer;
+}
+.role-card:has(input:checked) {
+    border-color: rgba(216,180,254,.65);
+    background: linear-gradient(135deg, rgba(124,44,255,.30), rgba(255,43,214,.10));
+}
+.role-card input { width: auto; margin-top: 4px; }
+.role-card b { display: block; margin-bottom: 5px; font-size: 18px; }
+.role-card small { color: var(--muted); line-height: 1.45; }
+.admin-note {
+    padding: 15px;
+    border: 1px solid rgba(168,85,247,.20);
+    border-radius: 18px;
+    background: rgba(255,255,255,.035);
+    color: var(--muted);
+    line-height: 1.55;
+}
+.admin-note b { display: block; color: #fff; margin-bottom: 5px; }
+.admin-note code { color: #fff; background: rgba(0,0,0,.22); padding: 2px 5px; border-radius: 6px; }
 
 .profile-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .empty { padding: 28px; }
@@ -196,7 +228,7 @@ select option { color: #111; }
     .topbar { flex-wrap: wrap; }
     .nav { order: 3; width: 100%; overflow-x: auto; }
     .hero { grid-template-columns: 1fr; }
-    .grid { grid-template-columns: 1fr; }
+    .grid, .admin-grid, .role-choice { grid-template-columns: 1fr; }
     .section-head, .toolbar { flex-direction: column; align-items: stretch; }
     .detail-layout { grid-template-columns: 1fr; padding: 18px; }
     .detail-main h1 { font-size: clamp(32px, 10vw, 44px); }
