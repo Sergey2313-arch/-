@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Пополнить баланс";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">top up</p>
+    <h1>Пополнить баланс</h1>
+    <p>Сейчас это тестовое пополнение для разработки. Позже здесь будет переход на ЮKassa или Т-Банк.</p>
+
+    <form asp-action="TopUp" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <label>Сумма</label>
+        <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
+
+        <button class="btn btn-primary" type="submit">Пополнить тестово</button>
+    </form>
+</section>
+
+<section class="section-block neon-card">
+    <p class="eyebrow">real payments</p>
+    <h2>Как будет с реальными деньгами</h2>
+    <p>
+        Пользователь нажимает пополнить, сайт создаёт платёж, платёжный сервис возвращает ссылку на оплату,
+        пользователь платит картой или СБП, а после webhook мы пополняем баланс.
+    </p>
+</section>
