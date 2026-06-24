@@ -1,0 +1,59 @@
+@model Wallet
+@{
+    ViewData["Title"] = "Кошелёк";
+    var transactions = ViewBag.Transactions as List<PaymentTransaction> ?? new();
+    var available = Model.Balance;
+    var total = Model.Balance + Model.HoldBalance;
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">wallet</p>
+        <h1>Кошелёк ReviMarket</h1>
+        <p>Баланс, деньги в сделках и история операций пользователя.</p>
+    </div>
+    <a class="btn btn-primary" asp-controller="Wallet" asp-action="TopUp">Пополнить</a>
+</section>
+
+<section class="admin-stats">
+    <div class="stat-card neon-card">
+        <span>Доступно</span>
+        <b>@available.ToString("N0") ₽</b>
+    </div>
+    <div class="stat-card neon-card">
+        <span>В сделках</span>
+        <b>@Model.HoldBalance.ToString("N0") ₽</b>
+    </div>
+    <div class="stat-card neon-card">
+        <span>Всего</span>
+        <b>@total.ToString("N0") ₽</b>
+    </div>
+</section>
+
+<section class="admin-section neon-card">
+    <div class="section-head mini">
+        <div>
+            <p class="eyebrow">transactions</p>
+            <h2>История операций</h2>
+        </div>
+    </div>
+
+    <div class="admin-list">
+        @foreach (var transaction in transactions)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>@transaction.Type</b>
+                    <p>@(transaction.Comment ?? "Операция")</p>
+                </div>
+                <span>@transaction.Amount.ToString("N0") ₽</span>
+                <span class="tag">@transaction.Status</span>
+            </div>
+        }
+    </div>
+
+    @if (!transactions.Any())
+    {
+        <p>Операций пока нет. Пополни баланс в тестовом режиме, чтобы проверить механику.</p>
+    }
+</section>
