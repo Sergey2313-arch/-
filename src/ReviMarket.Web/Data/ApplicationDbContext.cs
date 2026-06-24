@@ -15,6 +15,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
     public DbSet<UserCase> UserCases => Set<UserCase>();
     public DbSet<OrderCase> OrderCases => Set<OrderCase>();
+    public DbSet<Wallet> Wallets => Set<Wallet>();
+    public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+    public DbSet<PaymentInvoice> PaymentInvoices => Set<PaymentInvoice>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -85,5 +88,23 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(x => x.AgentId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<Wallet>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<PaymentTransaction>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<PaymentInvoice>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
