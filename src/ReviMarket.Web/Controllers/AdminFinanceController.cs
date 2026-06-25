@@ -18,12 +18,17 @@ public class AdminFinanceController : Controller
 
     public async Task<IActionResult> Index()
     {
-        ViewBag.TotalDeals = await _db.Deals.Select(x => (decimal?)x.Amount).SumAsync() ?? 0m;
-        ViewBag.TotalCommission = await _db.PlatformTransactions.Select(x => (decimal?)x.Amount).SumAsync() ?? 0m;
-        ViewBag.TotalHold = await _db.Wallets.Select(x => (decimal?)x.HoldBalance).SumAsync() ?? 0m;
-        ViewBag.TotalBalance = await _db.Wallets.Select(x => (decimal?)x.Balance).SumAsync() ?? 0m;
-        ViewBag.Withdrawals = await _db.WithdrawalRequests.Include(x => x.User).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
-        ViewBag.Deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
+        var deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
+        var withdrawals = await _db.WithdrawalRequests.Include(x => x.User).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
+        var wallets = await _db.Wallets.ToListAsync();
+        var platformTransactions = await _db.PlatformTransactions.ToListAsync();
+
+        ViewBag.TotalDeals = deals.Sum(x => x.Amount);
+        ViewBag.TotalCommission = platformTransactions.Sum(x => x.Amount);
+        ViewBag.TotalHold = wallets.Sum(x => x.HoldBalance);
+        ViewBag.TotalBalance = wallets.Sum(x => x.Balance);
+        ViewBag.Withdrawals = withdrawals;
+        ViewBag.Deals = deals;
         return View();
     }
 
