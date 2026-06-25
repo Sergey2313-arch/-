@@ -12,7 +12,7 @@ public static class SeedData
         var configuration = services.GetRequiredService<IConfiguration>();
         var db = services.GetRequiredService<ApplicationDbContext>();
 
-        foreach (var role in new[] { UserRoles.Customer, UserRoles.Creator, UserRoles.Admin, UserRoles.Manager })
+        foreach (var role in UserRoles.All)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
@@ -32,15 +32,12 @@ public static class SeedData
             }
         }
 
-        if (!db.MarketItems.Any())
+        if (!db.MarketItems.Any(x => x.Type == MarketItemTypes.Order))
         {
             db.MarketItems.AddRange(
-                new MarketItem { Type = MarketItemTypes.Product, Title = "Figma-шаблоны карточек", Description = "Готовые шаблоны карточек WB/Ozon для быстрого старта.", Price = 1990, Category = MarketCategories.Design, ReviewStatus = ReviewStatuses.Approved },
-                new MarketItem { Type = MarketItemTypes.Product, Title = "Аудит карточки товара", Description = "Разбор визуала, оффера и ошибок карточки товара.", Price = 2500, Category = MarketCategories.Marketplaces, ReviewStatus = ReviewStatuses.Approved },
-                new MarketItem { Type = MarketItemTypes.Product, Title = "Пакет AI-промптов для карточек", Description = "Промпты для генерации описаний, преимуществ и идей визуала.", Price = 1490, Category = MarketCategories.Ai, ReviewStatus = ReviewStatuses.Approved },
-                new MarketItem { Type = MarketItemTypes.Order, Title = "Карточки товара для WB/Ozon", Description = "Нужно 8 карточек в черно-фиолетовом стиле: преимущества, инфографика, чистая подача.", Price = 7500, Category = MarketCategories.Design, ReviewStatus = ReviewStatuses.Approved },
-                new MarketItem { Type = MarketItemTypes.Order, Title = "Сделать лендинг услуги", Description = "Главный экран, преимущества, цены, отзывы и форма заявки.", Price = 15000, Category = MarketCategories.It, ReviewStatus = ReviewStatuses.Approved },
-                new MarketItem { Type = MarketItemTypes.Order, Title = "SEO-тексты для сайта", Description = "Нужны тексты под ключевые запросы, структура страниц и meta-описания.", Price = 6000, Category = MarketCategories.Seo, ReviewStatus = ReviewStatuses.Approved }
+                new MarketItem { Type = MarketItemTypes.Order, Title = "Карточки товара для WB/Ozon", Description = "Нужно 8 карточек в черно-фиолетовом стиле: преимущества, инфографика, чистая подача.", Price = 7500, Category = MarketCategories.Design, ReviewStatus = ReviewStatuses.Approved, OrderStatus = OrderStatuses.Open },
+                new MarketItem { Type = MarketItemTypes.Order, Title = "Сделать лендинг услуги", Description = "Главный экран, преимущества, цены, отзывы и форма заявки.", Price = 15000, Category = MarketCategories.It, ReviewStatus = ReviewStatuses.Approved, OrderStatus = OrderStatuses.Open },
+                new MarketItem { Type = MarketItemTypes.Order, Title = "SEO-тексты для сайта", Description = "Нужны тексты под ключевые запросы, структура страниц и meta-описания.", Price = 6000, Category = MarketCategories.Seo, ReviewStatus = ReviewStatuses.Approved, OrderStatus = OrderStatuses.Open }
             );
             await db.SaveChangesAsync();
         }
