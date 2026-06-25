@@ -22,47 +22,34 @@ public class DealsController : Controller
     public async Task<IActionResult> Index()
     {
         var uid = _users.GetUserId(User)!;
-        var deals = await _db.Deals
-            .Include(x => x.Customer)
-            .Include(x => x.Executor)
-            .Include(x => x.MarketItem)
-            .Where(x => x.CustomerId == uid || x.ExecutorId == uid)
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
-
+        var deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).Include(x => x.MarketItem).Where(x => x.CustomerId == uid || x.ExecutorId == uid).OrderByDescending(x => x.CreatedAt).ToListAsync();
         return View(deals);
     }
 
     [HttpGet]
-    public IActionResult Create()
-    {
-        return RedirectToAction("Index", "Orders");
-    }
+    public IActionResult Create() => RedirectToAction("Index", "Orders");
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(string executorEmail, decimal amount, int? marketItemId)
-    {
-        return RedirectToAction("Index", "Orders");
-    }
+    public IActionResult Create(string executorEmail, decimal amount, int? marketItemId) => RedirectToAction("Index", "Orders");
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Complete(int id)
     {
         var uid = _users.GetUserId(User)!;
-        var deal = await _db.Deals.FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == uid);
+        var deal = await _db.Deals.Include(x => x.MarketItem).FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == uid);
         if (deal is null || deal.Status != DealStatuses.Funded) return NotFound();
 
         var customerWallet = await GetWallet(deal.CustomerId);
         var executorWallet = await GetWallet(deal.ExecutorId);
 
         await using var tx = await _db.Database.BeginTransactionAsync();
-
         customerWallet.HoldBalance -= deal.Amount;
         executorWallet.Balance += deal.ExecutorAmount;
         deal.Status = DealStatuses.Completed;
         deal.CompletedAt = DateTime.UtcNow;
+        if (deal.MarketItem is not null) deal.MarketItem.OrderStatus = OrderStatuses.Done;
 
         _db.PaymentTransactions.Add(new PaymentTransaction { UserId = deal.ExecutorId, Amount = deal.ExecutorAmount, Type = PaymentTypes.Release, Status = PaymentStatuses.Success });
         _db.PaymentTransactions.Add(new PaymentTransaction { UserId = deal.CustomerId, Amount = deal.CommissionAmount, Type = PaymentTypes.Commission, Status = PaymentStatuses.Success });
