@@ -5,18 +5,18 @@
 <section class="hero">
     <div>
         <p class="eyebrow">российская beta-биржа</p>
-        <h1>ReviMarket — площадка для заказчиков и исполнителей</h1>
+        <h1>ReviMarket — заказы, исполнители и безопасный холд</h1>
         <p class="hero-text">
-            ASP.NET-версия проекта: регистрация, вход, роли, работа, сделки, кошелёк и профиль уже перенесены на backend.
+            Заказчик создаёт заказ, исполнитель берёт его в работу, деньги уходят в холд и выплачиваются после завершения.
         </p>
         <div class="actions">
             <a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Открыть работу</a>
-            <a class="btn btn-soft" asp-controller="Deals" asp-action="Index">Мои сделки</a>
+            <a class="btn btn-soft" asp-controller="Orders" asp-action="Create">Создать заказ</a>
         </div>
     </div>
     <div class="neon-card hero-card">
         <b>@ViewBag.OrdersCount</b><span>заказов</span>
-        <b>@ViewBag.ProductsCount</b><span>товаров позже</span>
-        <b>ASP.NET</b><span>backend</span>
+        <b>@ViewBag.ActiveDealsCount</b><span>активных сделок</span>
+        <b>HOLD</b><span>безопасная оплата</span>
     </div>
 </section>
