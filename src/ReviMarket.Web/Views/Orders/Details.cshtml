@@ -39,10 +39,14 @@
                 <div><span>Категория</span><b>@Model.Category</b></div>
                 <div><span>Заказчик</span><b><a asp-controller="Profile" asp-action="Public" asp-route-id="@Model.OwnerId">@(Model.Owner?.DisplayName ?? "Заказчик")</a></b></div>
                 <div><span>Рейтинг заказчика</span><b>★ @((Model.Owner?.Rating ?? 0).ToString("0.00")) • @(ownerOnline ? "в сети" : "не в сети")</b></div>
-                <div><span>Исполнитель</span><b>@if (Model.AssignedExecutor is not null) { <a asp-controller="Profile" asp-action="Public" asp-route-id="@Model.AssignedExecutorId">@Model.AssignedExecutor.DisplayName</a> } else { <span>не назначен</span> }</b></div>
                 @if (Model.AssignedExecutor is not null)
                 {
+                    <div><span>Исполнитель</span><b><a asp-controller="Profile" asp-action="Public" asp-route-id="@Model.AssignedExecutorId">@Model.AssignedExecutor.DisplayName</a></b></div>
                     <div><span>Рейтинг исполнителя</span><b>★ @Model.AssignedExecutor.Rating.ToString("0.00") • @(executorOnline ? "в сети" : "не в сети")</b></div>
+                }
+                else
+                {
+                    <div><span>Исполнитель</span><b>не назначен</b></div>
                 }
                 <div><span>Статус</span><b>@DisplayStatus(Model, deal)</b></div>
             </div>
