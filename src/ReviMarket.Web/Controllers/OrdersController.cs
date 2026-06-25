@@ -54,6 +54,10 @@ public class OrdersController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MarketItem item)
     {
+        if (item.Price < 100) ModelState.AddModelError(nameof(item.Price), "Минимальный бюджет — 100 ₽");
+        if (string.IsNullOrWhiteSpace(item.Title)) ModelState.AddModelError(nameof(item.Title), "Укажи название заказа");
+        if (string.IsNullOrWhiteSpace(item.Description)) ModelState.AddModelError(nameof(item.Description), "Опиши задачу");
+
         if (!ModelState.IsValid)
         {
             ViewBag.Categories = MarketCategories.All;
@@ -95,7 +99,7 @@ public class OrdersController : Controller
         var uid = _userManager.GetUserId(User)!;
         var order = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (order is null) return NotFound();
-        if (order.ReviewStatus != ReviewStatuses.Approved || order.OwnerId != uid || string.IsNullOrWhiteSpace(order.AssignedExecutorId)) return BadRequest();
+        if (order.Price < 100 || order.ReviewStatus != ReviewStatuses.Approved || order.OwnerId != uid || string.IsNullOrWhiteSpace(order.AssignedExecutorId)) return BadRequest();
         if (await _db.Deals.AnyAsync(x => x.MarketItemId == id)) return RedirectToAction(nameof(Details), new { id });
 
         var wallet = await GetWallet(uid);
