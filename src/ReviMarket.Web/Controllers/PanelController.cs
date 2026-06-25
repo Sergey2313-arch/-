@@ -28,9 +28,10 @@ public class PanelController : Controller
 
         ViewBag.User = user;
         ViewBag.MyOrdersCount = await _db.MarketItems.CountAsync(x => x.OwnerId == userId && x.Type == MarketItemTypes.Order);
-        ViewBag.MyProductsCount = await _db.MarketItems.CountAsync(x => x.OwnerId == userId && x.Type == MarketItemTypes.Product);
+        ViewBag.TakenOrdersCount = await _db.MarketItems.CountAsync(x => x.AssignedExecutorId == userId && x.Type == MarketItemTypes.Order);
         ViewBag.AllOrdersCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Order);
-        ViewBag.AllProductsCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Product);
+        ViewBag.InWorkOrdersCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Order && x.OrderStatus == OrderStatuses.InWork);
+        ViewBag.ActiveDealsCount = await _db.Deals.CountAsync(x => x.Status == DealStatuses.Funded || x.Status == DealStatuses.InProgress);
         ViewBag.MessagesCount = await _db.ChatMessages.CountAsync(x => x.SenderId == userId || x.ReceiverId == userId);
 
         return View();
