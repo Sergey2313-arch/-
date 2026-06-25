@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Финансы";
+    var withdrawals = ViewBag.Withdrawals as List<WithdrawalRequest> ?? new();
+    var deals = ViewBag.Deals as List<Deal> ?? new();
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">finance</p>
+        <h1>Финансы ReviMarket</h1>
+        <p>Оборот, комиссия, холд, балансы, выводы и сделки.</p>
+    </div>
+</section>
+
+<section class="admin-stats">
+    <div class="stat-card neon-card"><span>Оборот</span><b>@(((decimal)ViewBag.TotalDeals).ToString("N0")) ₽</b></div>
+    <div class="stat-card neon-card"><span>Комиссия</span><b>@(((decimal)ViewBag.TotalCommission).ToString("N0")) ₽</b></div>
+    <div class="stat-card neon-card"><span>Холд</span><b>@(((decimal)ViewBag.TotalHold).ToString("N0")) ₽</b></div>
+    <div class="stat-card neon-card"><span>Балансы</span><b>@(((decimal)ViewBag.TotalBalance).ToString("N0")) ₽</b></div>
+</section>
+
+<section class="admin-section neon-card">
+    <h2>Выводы</h2>
+    <div class="admin-list">
+        @foreach (var item in withdrawals)
+        {
+            <div class="admin-row"><div><b>@(item.User?.DisplayName ?? "user")</b><p>@item.PaymentInfo</p></div><span>@item.Amount.ToString("N0") ₽</span><span class="tag">@item.Status</span></div>
+        }
+    </div>
+</section>
+
+<section class="admin-section neon-card">
+    <h2>Сделки</h2>
+    <div class="admin-list">
+        @foreach (var deal in deals)
+        {
+            <div class="admin-row"><div><b>#@deal.Id</b><p>@(deal.Customer?.DisplayName ?? "-") → @(deal.Executor?.DisplayName ?? "-")</p></div><span>@deal.Amount.ToString("N0") ₽</span><span class="tag">@deal.Status</span></div>
+        }
+    </div>
+</section>
