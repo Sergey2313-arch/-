@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ReviMarket.Web.Models;
 
 namespace ReviMarket.Web.ViewModels;
 
@@ -18,7 +19,22 @@ public class RegisterViewModel
     public string Password { get; set; } = string.Empty;
 
     [Required]
-    public string AccountType { get; set; } = "Customer";
+    public string AccountType { get; set; } = UserRoles.Customer;
+
+    [Required]
+    public string LegalType { get; set; } = AccountLegalTypes.Individual;
+
+    [MaxLength(160)]
+    public string? OrganizationName { get; set; }
+
+    [MaxLength(20)]
+    public string? Inn { get; set; }
+
+    [MaxLength(30)]
+    public string? OgrnOrOgrnip { get; set; }
+
+    [MaxLength(250)]
+    public string? LegalAddress { get; set; }
 }
 
 public class LoginViewModel
