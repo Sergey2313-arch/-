@@ -1,6 +1,9 @@
 @model MarketItem
 @{
     ViewData["Title"] = Model.Title;
+    var deal = ViewBag.Deal as Deal;
+    var isOwner = User.Identity?.Name == Model.Owner?.Email;
+    var isExecutor = User.Identity?.Name == Model.AssignedExecutor?.Email;
 }
 
 <section class="detail-page">
@@ -13,11 +16,13 @@
             <p class="detail-lead">@Model.Description</p>
 
             <div class="detail-block">
-                <h2>Что нужно сделать</h2>
-                <p>
-                    Исполнителю нужно выполнить задачу по описанию заказчика. В полной версии здесь будут файлы ТЗ,
-                    этапы работы, отклики исполнителей и статус безопасной сделки.
-                </p>
+                <h2>Как работает заказ</h2>
+                <p>Заказчик публикует заказ, исполнитель берёт его в работу, затем заказчик оплачивает заказ через холд ReviMarket.</p>
+            </div>
+
+            <div class="detail-block">
+                <h2>Правило биржи</h2>
+                <p>Контакты вне ReviMarket запрещены. Все договорённости, оплата, спор и переписка должны идти внутри платформы.</p>
             </div>
         </article>
 
@@ -30,12 +35,52 @@
             <div class="detail-info-list">
                 <div><span>Категория</span><b>@Model.Category</b></div>
                 <div><span>Заказчик</span><b>@(Model.Owner?.DisplayName ?? "Заказчик")</b></div>
-                <div><span>Статус</span><b>Открыт</b></div>
-                <div><span>Тип</span><b>Заказ</b></div>
+                <div><span>Исполнитель</span><b>@(Model.AssignedExecutor?.DisplayName ?? "не назначен")</b></div>
+                <div><span>Статус</span><b>@DisplayStatus(Model, deal)</b></div>
             </div>
 
-            <a class="btn btn-primary detail-action" asp-controller="Inbox" asp-action="Index">Откликнуться</a>
-            <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Index">Написать заказчику</a>
+            @if (Model.OrderStatus == OrderStatuses.Open && User.IsInRole(UserRoles.Creator) && !isOwner)
+            {
+                <form asp-action="Take" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button class="btn btn-primary detail-action" type="submit">Взять в работу</button>
+                </form>
+            }
+
+            @if (Model.OrderStatus == OrderStatuses.InWork && isOwner && deal is null)
+            {
+                <form asp-action="Fund" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button class="btn btn-primary detail-action" type="submit">Оплатить в холд</button>
+                </form>
+            }
+
+            @if (deal is not null)
+            {
+                <a class="btn btn-soft detail-action" asp-controller="Deals" asp-action="Index">Открыть сделку</a>
+            }
+
+            @if (Model.OrderStatus == OrderStatuses.InWork && (isOwner || isExecutor))
+            {
+                <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Index">Чат ReviMarket</a>
+            }
         </aside>
     </div>
 </section>
+
+@functions {
+    string DisplayStatus(MarketItem item, Deal? deal)
+    {
+        if (deal is not null) return $"Оплачен: {deal.Status}";
+        return item.OrderStatus switch
+        {
+            OrderStatuses.Open => "Открыт",
+            OrderStatuses.InWork => "В работе",
+            OrderStatuses.Done => "Завершён",
+            OrderStatuses.Cancelled => "Отменён",
+            _ => item.OrderStatus
+        };
+    }
+}
