@@ -1,0 +1,39 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = Model.DisplayName;
+    var reviews = ViewBag.Reviews as List<UserReview> ?? new();
+    var isOnline = ViewBag.IsOnline as bool? ?? false;
+}
+
+<section class="profile-page neon-card">
+    <p class="eyebrow">public profile</p>
+    <h1>@Model.DisplayName</h1>
+    <p>@Model.AccountType • @Model.LegalType</p>
+    <div class="profile-tabs">
+        <span class="tag">@(isOnline ? "В сети" : "Не в сети")</span>
+        <span class="tag">★ @Model.Rating.ToString("0.00")</span>
+        <span class="tag">@Model.ReviewsCount отзывов</span>
+    </div>
+</section>
+
+<section class="admin-stats">
+    <div class="stat-card neon-card"><span>Рейтинг</span><b>★ @Model.Rating.ToString("0.00")</b></div>
+    <div class="stat-card neon-card"><span>Отзывы</span><b>@Model.ReviewsCount</b></div>
+    <div class="stat-card neon-card"><span>Статус</span><b>@(isOnline ? "Online" : "Offline")</b></div>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Отзывы</h2>
+    <div class="admin-list">
+        @foreach (var review in reviews)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>★ @review.Rating — @(review.Author?.DisplayName ?? "Пользователь")</b>
+                    <p>@review.Text</p>
+                    <small>@(review.Deal?.MarketItem?.Title ?? "Сделка") • @review.CreatedAt.ToString("dd.MM.yyyy")</small>
+                </div>
+            </div>
+        }
+    </div>
+</section>
