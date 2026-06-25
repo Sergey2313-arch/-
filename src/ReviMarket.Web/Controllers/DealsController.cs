@@ -23,6 +23,7 @@ public class DealsController : Controller
     {
         var uid = _users.GetUserId(User)!;
         var deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).Include(x => x.MarketItem).Where(x => x.CustomerId == uid || x.ExecutorId == uid).OrderByDescending(x => x.CreatedAt).ToListAsync();
+        ViewBag.MyReviews = await _db.UserReviews.Where(x => x.AuthorId == uid).ToListAsync();
         return View(deals);
     }
 
