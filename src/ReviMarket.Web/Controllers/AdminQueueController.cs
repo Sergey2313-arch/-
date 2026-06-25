@@ -20,6 +20,7 @@ public class AdminQueueController : Controller
     {
         var items = await _db.MarketItems
             .Include(x => x.Owner)
+            .Where(x => x.Type == MarketItemTypes.Order)
             .OrderBy(x => x.ReviewStatus == ReviewStatuses.Pending ? 0 : 1)
             .ThenByDescending(x => x.CreatedAt)
             .ToListAsync();
@@ -31,9 +32,8 @@ public class AdminQueueController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Approve(int id)
     {
-        var item = await _db.MarketItems.FindAsync(id);
+        var item = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (item is null) return NotFound();
-
         item.ReviewStatus = ReviewStatuses.Approved;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
@@ -43,9 +43,8 @@ public class AdminQueueController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ReturnToQueue(int id)
     {
-        var item = await _db.MarketItems.FindAsync(id);
+        var item = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (item is null) return NotFound();
-
         item.ReviewStatus = ReviewStatuses.Pending;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
@@ -55,9 +54,8 @@ public class AdminQueueController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Block(int id)
     {
-        var item = await _db.MarketItems.FindAsync(id);
+        var item = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (item is null) return NotFound();
-
         item.ReviewStatus = ReviewStatuses.Blocked;
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
