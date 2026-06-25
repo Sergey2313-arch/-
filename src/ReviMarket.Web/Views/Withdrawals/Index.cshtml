@@ -17,11 +17,20 @@
     <p>Доступно: <b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></p>
     <form asp-action="Create" method="post" class="form">
         @Html.AntiForgeryToken()
+
         <label>Сумма</label>
         <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
 
+        <label>Способ вывода</label>
+        <div class="withdraw-methods">
+            <button class="btn btn-soft withdraw-method" type="button" data-method="Карта" data-placeholder="Номер карты или последние 4 цифры">Карта</button>
+            <button class="btn btn-soft withdraw-method" type="button" data-method="СБП" data-placeholder="Телефон для СБП и банк">СБП</button>
+            <button class="btn btn-soft withdraw-method" type="button" data-method="Банк" data-placeholder="Название банка и реквизиты">Банк</button>
+            <button class="btn btn-soft withdraw-method" type="button" data-method="Реквизиты" data-placeholder="Полные реквизиты для выплаты">Реквизиты</button>
+        </div>
+
         <label>Куда вывести</label>
-        <input name="paymentInfo" placeholder="Карта, СБП, банк или реквизиты" />
+        <input id="paymentInfo" name="paymentInfo" placeholder="Выбери способ вывода выше" />
 
         <button class="btn btn-primary" type="submit">Запросить вывод</button>
     </form>
@@ -42,3 +51,19 @@
     </article>
 }
 </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.withdraw-method').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.withdraw-method').forEach(x => x.classList.remove('active'));
+                button.classList.add('active');
+
+                const input = document.getElementById('paymentInfo');
+                input.placeholder = button.dataset.placeholder;
+                input.value = button.dataset.method + ': ';
+                input.focus();
+            });
+        });
+    </script>
+}
