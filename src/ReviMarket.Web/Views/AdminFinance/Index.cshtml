@@ -24,7 +24,24 @@
     <div class="admin-list">
         @foreach (var item in withdrawals)
         {
-            <div class="admin-row"><div><b>@(item.User?.DisplayName ?? "user")</b><p>@item.PaymentInfo</p></div><span>@item.Amount.ToString("N0") ₽</span><span class="tag">@item.Status</span></div>
+            <div class="admin-row">
+                <div><b>@(item.User?.DisplayName ?? "user")</b><p>@item.PaymentInfo</p></div>
+                <span>@item.Amount.ToString("N0") ₽</span>
+                <span class="tag">@item.Status</span>
+                @if (item.Status == WithdrawalStatuses.Pending)
+                {
+                    <form asp-action="MarkWithdrawalPaid" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button class="btn btn-primary" type="submit">Выплачено</button>
+                    </form>
+                    <form asp-action="RejectWithdrawal" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button class="btn btn-soft" type="submit">Отклонить</button>
+                    </form>
+                }
+            </div>
         }
     </div>
 </section>
