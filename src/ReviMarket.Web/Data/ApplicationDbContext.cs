@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Deal> Deals => Set<Deal>();
     public DbSet<WithdrawalRequest> WithdrawalRequests => Set<WithdrawalRequest>();
     public DbSet<PlatformTransaction> PlatformTransactions => Set<PlatformTransaction>();
+    public DbSet<UserReview> UserReviews => Set<UserReview>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -46,5 +47,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Deal>().HasOne(x => x.MarketItem).WithMany().HasForeignKey(x => x.MarketItemId).OnDelete(DeleteBehavior.SetNull);
         builder.Entity<WithdrawalRequest>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Entity<PlatformTransaction>().HasOne(x => x.Deal).WithMany().HasForeignKey(x => x.DealId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<UserReview>().HasOne(x => x.Author).WithMany().HasForeignKey(x => x.AuthorId).OnDelete(DeleteBehavior.Restrict);
+        builder.Entity<UserReview>().HasOne(x => x.TargetUser).WithMany().HasForeignKey(x => x.TargetUserId).OnDelete(DeleteBehavior.Restrict);
+        builder.Entity<UserReview>().HasOne(x => x.Deal).WithMany().HasForeignKey(x => x.DealId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<UserReview>().HasIndex(x => new { x.AuthorId, x.TargetUserId, x.DealId }).IsUnique();
     }
 }
