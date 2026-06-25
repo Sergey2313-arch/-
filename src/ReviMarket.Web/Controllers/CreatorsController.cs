@@ -17,10 +17,13 @@ public class CreatorsController : Controller
     public async Task<IActionResult> Index()
     {
         var creators = await _db.Users
-            .Where(x => x.AccountType == UserRoles.Creator || x.AccountType == UserRoles.Admin)
-            .OrderByDescending(x => x.CreatedAt)
+            .Where(x => x.AccountType == UserRoles.Creator)
+            .OrderByDescending(x => x.Rating)
+            .ThenByDescending(x => x.ReviewsCount)
+            .ThenByDescending(x => x.LastSeenAt)
             .ToListAsync();
 
+        ViewBag.OnlineLimit = DateTime.UtcNow.AddMinutes(-5);
         return View(creators);
     }
 }
