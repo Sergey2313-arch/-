@@ -62,12 +62,21 @@ app.Use(async (context, next) =>
         using var scope = context.RequestServices.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await userManager.GetUserAsync(context.User);
-        if (user is not null && (user.LastSeenAt is null || user.LastSeenAt < DateTime.UtcNow.AddMinutes(-1)))
+
+        if (user is null)
+        {
+            context.Response.Cookies.Delete(".AspNetCore.Identity.Application");
+            context.Response.Redirect("/Account/Login");
+            return;
+        }
+
+        if (user.LastSeenAt is null || user.LastSeenAt < DateTime.UtcNow.AddMinutes(-1))
         {
             user.LastSeenAt = DateTime.UtcNow;
             await userManager.UpdateAsync(user);
         }
     }
+
     await next();
 });
 
