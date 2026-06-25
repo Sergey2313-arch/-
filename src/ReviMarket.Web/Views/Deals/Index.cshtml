@@ -1,0 +1,55 @@
+@model List<Deal>
+@{
+    ViewData["Title"] = "Мои сделки";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">deals</p>
+        <h1>Мои сделки</h1>
+        <p>Здесь отображаются сделки, деньги в холде, комиссия и статусы выполнения.</p>
+    </div>
+    <a class="btn btn-primary" asp-controller="Deals" asp-action="Create">Создать сделку</a>
+</section>
+
+<div class="review-list">
+@foreach (var deal in Model)
+{
+    <article class="review-row neon-card">
+        <div>
+            <div class="review-title">
+                <b>Сделка #@deal.Id</b>
+                <span class="tag">@deal.Status</span>
+            </div>
+            <p>@(deal.MarketItem?.Title ?? "Ручная сделка")</p>
+            <div class="review-meta">
+                <span>Сумма: @deal.Amount.ToString("N0") ₽</span>
+                <span>Комиссия: @deal.CommissionAmount.ToString("N0") ₽</span>
+                <span>Исполнителю: @deal.ExecutorAmount.ToString("N0") ₽</span>
+            </div>
+            <div class="review-meta">
+                <span>Заказчик: @(deal.Customer?.DisplayName ?? "-")</span>
+                <span>Исполнитель: @(deal.Executor?.DisplayName ?? "-")</span>
+            </div>
+        </div>
+        <div class="review-actions">
+            @if (deal.Status == DealStatuses.Funded && User.Identity?.Name == deal.Customer?.Email)
+            {
+                <form asp-action="Complete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@deal.Id" />
+                    <button class="btn btn-primary" type="submit">Завершить</button>
+                </form>
+            }
+        </div>
+    </article>
+}
+</div>
+
+@if (!Model.Any())
+{
+    <section class="empty neon-card">
+        <h2>Сделок пока нет</h2>
+        <p>Создай первую сделку, чтобы проверить холд, комиссию и выплату исполнителю.</p>
+    </section>
+}
