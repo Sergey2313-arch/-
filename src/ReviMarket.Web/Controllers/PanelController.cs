@@ -25,6 +25,7 @@ public class PanelController : Controller
     {
         var userId = _userManager.GetUserId(User);
         var user = await _userManager.GetUserAsync(User);
+        if (!CanOpenPanel(user)) return RedirectToAction("Index", "Profile");
 
         ViewBag.User = user;
         ViewBag.MyOrdersCount = await _db.MarketItems.CountAsync(x => x.OwnerId == userId && x.Type == MarketItemTypes.Order);
@@ -35,5 +36,24 @@ public class PanelController : Controller
         ViewBag.MessagesCount = await _db.ChatMessages.CountAsync(x => x.SenderId == userId || x.ReceiverId == userId);
 
         return View();
+    }
+
+    private bool CanOpenPanel(ApplicationUser? user)
+    {
+        var role = user?.AccountType;
+        return User.IsInRole(UserRoles.Admin)
+            || User.IsInRole(UserRoles.Manager)
+            || User.IsInRole(UserRoles.Owner)
+            || User.IsInRole(UserRoles.CoOwner)
+            || User.IsInRole(UserRoles.Moderator)
+            || User.IsInRole(UserRoles.Lawyer)
+            || User.IsInRole(UserRoles.SupportAgent)
+            || role == UserRoles.Admin
+            || role == UserRoles.Manager
+            || role == UserRoles.Owner
+            || role == UserRoles.CoOwner
+            || role == UserRoles.Moderator
+            || role == UserRoles.Lawyer
+            || role == UserRoles.SupportAgent;
     }
 }
