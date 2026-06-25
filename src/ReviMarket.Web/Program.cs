@@ -54,6 +54,23 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        using var scope = context.RequestServices.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.GetUserAsync(context.User);
+        if (user is not null && (user.LastSeenAt is null || user.LastSeenAt < DateTime.UtcNow.AddMinutes(-1)))
+        {
+            user.LastSeenAt = DateTime.UtcNow;
+            await userManager.UpdateAsync(user);
+        }
+    }
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
