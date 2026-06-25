@@ -4,6 +4,9 @@
     var deal = ViewBag.Deal as Deal;
     var isOwner = User.Identity?.Name == Model.Owner?.Email;
     var isExecutor = User.Identity?.Name == Model.AssignedExecutor?.Email;
+    var onlineLimit = DateTime.UtcNow.AddMinutes(-5);
+    var ownerOnline = Model.Owner?.LastSeenAt is not null && Model.Owner.LastSeenAt > onlineLimit;
+    var executorOnline = Model.AssignedExecutor?.LastSeenAt is not null && Model.AssignedExecutor.LastSeenAt > onlineLimit;
 }
 
 <section class="detail-page">
@@ -34,8 +37,13 @@
 
             <div class="detail-info-list">
                 <div><span>Категория</span><b>@Model.Category</b></div>
-                <div><span>Заказчик</span><b>@(Model.Owner?.DisplayName ?? "Заказчик")</b></div>
-                <div><span>Исполнитель</span><b>@(Model.AssignedExecutor?.DisplayName ?? "не назначен")</b></div>
+                <div><span>Заказчик</span><b><a asp-controller="Profile" asp-action="Public" asp-route-id="@Model.OwnerId">@(Model.Owner?.DisplayName ?? "Заказчик")</a></b></div>
+                <div><span>Рейтинг заказчика</span><b>★ @((Model.Owner?.Rating ?? 0).ToString("0.00")) • @(ownerOnline ? "в сети" : "не в сети")</b></div>
+                <div><span>Исполнитель</span><b>@if (Model.AssignedExecutor is not null) { <a asp-controller="Profile" asp-action="Public" asp-route-id="@Model.AssignedExecutorId">@Model.AssignedExecutor.DisplayName</a> } else { <span>не назначен</span> }</b></div>
+                @if (Model.AssignedExecutor is not null)
+                {
+                    <div><span>Рейтинг исполнителя</span><b>★ @Model.AssignedExecutor.Rating.ToString("0.00") • @(executorOnline ? "в сети" : "не в сети")</b></div>
+                }
                 <div><span>Статус</span><b>@DisplayStatus(Model, deal)</b></div>
             </div>
 
