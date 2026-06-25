@@ -32,13 +32,13 @@ public class WithdrawalsController : Controller
     {
         var uid = _users.GetUserId(User)!;
         var wallet = await GetWallet(uid);
-        if (amount <= 0 || wallet.Balance < amount) return RedirectToAction(nameof(Index));
+        if (amount < 100 || amount > wallet.Balance || string.IsNullOrWhiteSpace(paymentInfo)) return RedirectToAction(nameof(Index));
 
         wallet.Balance -= amount;
         wallet.HoldBalance += amount;
 
-        _db.WithdrawalRequests.Add(new WithdrawalRequest { UserId = uid, Amount = amount, PaymentInfo = paymentInfo });
-        _db.PaymentTransactions.Add(new PaymentTransaction { UserId = uid, Amount = amount, Type = PaymentTypes.Withdraw, Status = PaymentStatuses.Pending });
+        _db.WithdrawalRequests.Add(new WithdrawalRequest { UserId = uid, Amount = amount, PaymentInfo = paymentInfo.Trim() });
+        _db.PaymentTransactions.Add(new PaymentTransaction { UserId = uid, Amount = amount, Type = PaymentTypes.Withdraw, Status = PaymentStatuses.Pending, Comment = "Заявка на вывод средств" });
 
         await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
