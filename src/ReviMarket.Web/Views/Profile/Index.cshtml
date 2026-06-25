@@ -6,6 +6,12 @@
     var createdOrders = ViewBag.CreatedOrders as List<MarketItem> ?? new();
     var takenOrders = ViewBag.TakenOrders as List<MarketItem> ?? new();
     var deals = ViewBag.Deals as List<Deal> ?? new();
+    var withdrawals = ViewBag.Withdrawals as List<WithdrawalRequest> ?? new();
+    var earnedTotal = ViewBag.EarnedTotal as decimal? ?? 0m;
+    var spentTotal = ViewBag.SpentTotal as decimal? ?? 0m;
+    var isCreator = currentUser?.AccountType == UserRoles.Creator || User.IsInRole(UserRoles.Creator);
+    var isCustomer = currentUser?.AccountType == UserRoles.Customer || User.IsInRole(UserRoles.Customer);
+    var isStaff = User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager) || User.IsInRole(UserRoles.Moderator) || User.IsInRole(UserRoles.Lawyer) || User.IsInRole(UserRoles.SupportAgent);
 }
 
 <section class="profile-page neon-card">
@@ -16,32 +22,52 @@
         <p>Войди, чтобы видеть заказы, сделки и баланс.</p>
         <div class="profile-tabs"><a class="btn btn-primary" href="/Account/Login">Войти</a><a class="btn btn-soft" href="/Account/Register">Регистрация</a></div>
     }
+    else if (isCreator)
+    {
+        <h1>Кабинет исполнителя</h1>
+        <p>@currentUser.DisplayName • исполнитель • @currentUser.Email</p>
+        <div class="profile-tabs"><a class="btn btn-primary" href="/Orders">Найти работу</a><a class="btn btn-soft" href="/Wallet">Кошелёк</a><a class="btn btn-soft" href="/Withdrawals">Вывод</a><a class="btn btn-soft" href="/Deals">Сделки</a><a class="btn btn-soft" href="/Inbox">Чат</a></div>
+    }
     else
     {
-        <h1>@currentUser.DisplayName</h1>
-        <p>@currentUser.AccountType • @currentUser.LegalType • @currentUser.Email</p>
-        <div class="profile-tabs">
-            <a class="btn btn-soft" href="/Wallet">Кошелёк</a>
-            <a class="btn btn-soft" href="/Withdrawals">Вывод</a>
-            <a class="btn btn-soft" href="/Deals">Сделки</a>
-            <a class="btn btn-soft" href="/Inbox">Чат</a>
-            <a class="btn btn-primary" href="/Orders/Create">Создать заказ</a>
-        </div>
+        <h1>Кабинет заказчика</h1>
+        <p>@currentUser.DisplayName • заказчик • @currentUser.LegalType • @currentUser.Email</p>
+        <div class="profile-tabs"><a class="btn btn-primary" href="/Orders/Create">Создать заказ</a><a class="btn btn-soft" href="/Wallet">Кошелёк</a><a class="btn btn-soft" href="/Deals">Сделки</a><a class="btn btn-soft" href="/Inbox">Чат</a>@if (isStaff) { <a class="btn btn-soft" href="/admin.html">Панель</a> }</div>
     }
 </section>
 
-@if (currentUser is not null)
+@if (currentUser is not null && isCreator)
 {
     <section class="admin-stats">
         <div class="stat-card neon-card"><span>Доступно</span><b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></div>
         <div class="stat-card neon-card"><span>В холде</span><b>@((wallet?.HoldBalance ?? 0).ToString("N0")) ₽</b></div>
-        <div class="stat-card neon-card"><span>Создано заказов</span><b>@createdOrders.Count</b></div>
-        <div class="stat-card neon-card"><span>Взято в работу</span><b>@takenOrders.Count</b></div>
+        <div class="stat-card neon-card"><span>Заработано</span><b>@earnedTotal.ToString("N0") ₽</b></div>
+        <div class="stat-card neon-card"><span>Взято заказов</span><b>@takenOrders.Count</b></div>
     </section>
+    <section class="section-block neon-card"><h2>Моя работа</h2><div class="grid">@foreach (var item in takenOrders) { <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span><span class="tag">Заказчик: @(item.Owner?.DisplayName ?? "-")</span><a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a></article> }</div></section>
+    <section class="section-block neon-card"><h2>Последние сделки</h2><div class="grid">@foreach (var deal in deals) { <article class="card"><h3>Сделка #@deal.Id</h3><p>@(deal.MarketItem?.Title ?? "Заказ")</p><span class="price">@deal.ExecutorAmount.ToString("N0") ₽</span><span class="tag">@deal.Status</span></article> }</div></section>
+    <section class="section-block neon-card"><h2>Заявки на вывод</h2><div class="admin-list">@foreach (var item in withdrawals) { <div class="admin-row"><div><b>@item.Amount.ToString("N0") ₽</b><p>@item.PaymentInfo</p></div><span class="tag">@item.Status</span></div> }</div></section>
+}
 
-    <section class="section-block neon-card"><h2>Мои заказы</h2><div class="grid">@foreach (var item in createdOrders) { <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span><a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a></article> }</div></section>
-
-    <section class="section-block neon-card"><h2>Взятые заказы</h2><div class="grid">@foreach (var item in takenOrders) { <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span><a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a></article> }</div></section>
-
+@if (currentUser is not null && !isCreator)
+{
+    <section class="admin-stats">
+        <div class="stat-card neon-card"><span>Доступно</span><b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></div>
+        <div class="stat-card neon-card"><span>В холде</span><b>@((wallet?.HoldBalance ?? 0).ToString("N0")) ₽</b></div>
+        <div class="stat-card neon-card"><span>Потрачено</span><b>@spentTotal.ToString("N0") ₽</b></div>
+        <div class="stat-card neon-card"><span>Мои заказы</span><b>@createdOrders.Count</b></div>
+    </section>
+    <section class="section-block neon-card"><h2>Мои заказы</h2><div class="grid">@foreach (var item in createdOrders) { <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span><span class="tag">@DisplayOrderStatus(item)</span><a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a></article> }</div></section>
     <section class="section-block neon-card"><h2>Последние сделки</h2><div class="grid">@foreach (var deal in deals) { <article class="card"><h3>Сделка #@deal.Id</h3><p>@(deal.MarketItem?.Title ?? "Заказ")</p><span class="price">@deal.Amount.ToString("N0") ₽</span><span class="tag">@deal.Status</span></article> }</div></section>
+}
+
+@functions {
+    string DisplayOrderStatus(MarketItem item) => item.OrderStatus switch
+    {
+        OrderStatuses.Open => item.ReviewStatus == ReviewStatuses.Pending ? "На проверке" : "Открыт",
+        OrderStatuses.InWork => $"В работе: {item.AssignedExecutor?.DisplayName ?? "исполнитель"}",
+        OrderStatuses.Done => "Завершён",
+        OrderStatuses.Cancelled => "Отменён",
+        _ => item.OrderStatus
+    };
 }
