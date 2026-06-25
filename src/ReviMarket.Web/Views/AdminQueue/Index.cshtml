@@ -1,13 +1,13 @@
 @model List<MarketItem>
 @{
-    ViewData["Title"] = "Проверка публикаций";
+    ViewData["Title"] = "Проверка заказов";
 }
 
 <section class="section-head">
     <div>
         <p class="eyebrow">admin queue</p>
-        <h1>Проверка публикаций</h1>
-        <p>Товары, вакансии и заказы, которые нужно проверить перед публикацией.</p>
+        <h1>Проверка заказов</h1>
+        <p>Заказы заказчиков проходят проверку перед публикацией в общей ленте работы.</p>
     </div>
     <a class="btn btn-soft" href="/admin.html">← В панель</a>
 </section>
@@ -20,33 +20,22 @@
             <div class="review-title">
                 <b>@item.Title</b>
                 <span class="tag">@item.ReviewStatus</span>
-                <span class="tag">@DisplayType(item.Type)</span>
+                <span class="tag">Заказ</span>
             </div>
             <p>@item.Description</p>
             <div class="review-meta">
                 <span>@item.Category</span>
                 <span>@item.Price.ToString("N0") ₽</span>
-                <span>@(item.Owner?.DisplayName ?? "ReviMarket")</span>
+                <span>@(item.Owner?.DisplayName ?? "Заказчик")</span>
             </div>
         </div>
         <div class="review-actions">
-            @if (item.Type == MarketItemTypes.Product)
-            {
-                <a class="btn btn-soft" asp-controller="Catalog" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
-            }
-            else if (item.Type == MarketItemTypes.Order)
-            {
-                <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
-            }
-            else
-            {
-                <a class="btn btn-soft" href="/Board">Открыть</a>
-            }
+            <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
 
             <form asp-action="Approve" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@item.Id" />
-                <button class="btn btn-primary" type="submit">Одобрить</button>
+                <button class="btn btn-primary" type="submit">Опубликовать</button>
             </form>
 
             <form asp-action="ReturnToQueue" method="post">
@@ -68,17 +57,7 @@
 @if (!Model.Any())
 {
     <section class="empty neon-card">
-        <h2>Публикаций пока нет</h2>
-        <p>Когда пользователи начнут добавлять товары, вакансии и заказы, они появятся здесь.</p>
+        <h2>Заказов на проверке нет</h2>
+        <p>Когда заказчики создадут новые заказы, они появятся здесь.</p>
     </section>
-}
-
-@functions {
-    string DisplayType(string type) => type switch
-    {
-        MarketItemTypes.Product => "Товар",
-        MarketItemTypes.Order => "Работа",
-        MarketItemTypes.Vacancy => "Вакансия",
-        _ => "Публикация"
-    };
 }
