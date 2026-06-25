@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Кошелёк";
     var transactions = ViewBag.Transactions as List<PaymentTransaction> ?? new();
+    var invoices = ViewBag.Invoices as List<PaymentInvoice> ?? new();
     var available = Model.Balance;
     var total = Model.Balance + Model.HoldBalance;
 }
@@ -10,50 +11,45 @@
     <div>
         <p class="eyebrow">wallet</p>
         <h1>Кошелёк ReviMarket</h1>
-        <p>Баланс, деньги в сделках и история операций пользователя.</p>
+        <p>Beta-кошелёк: баланс, холд, счета на оплату и история операций.</p>
     </div>
-    <a class="btn btn-primary" asp-controller="Wallet" asp-action="TopUp">Пополнить</a>
+    <a class="btn btn-primary" asp-controller="Wallet" asp-action="TopUp">Создать счёт</a>
 </section>
 
 <section class="admin-stats">
-    <div class="stat-card neon-card">
-        <span>Доступно</span>
-        <b>@available.ToString("N0") ₽</b>
-    </div>
-    <div class="stat-card neon-card">
-        <span>В сделках</span>
-        <b>@Model.HoldBalance.ToString("N0") ₽</b>
-    </div>
-    <div class="stat-card neon-card">
-        <span>Всего</span>
-        <b>@total.ToString("N0") ₽</b>
+    <div class="stat-card neon-card"><span>Доступно</span><b>@available.ToString("N0") ₽</b></div>
+    <div class="stat-card neon-card"><span>В холде</span><b>@Model.HoldBalance.ToString("N0") ₽</b></div>
+    <div class="stat-card neon-card"><span>Всего</span><b>@total.ToString("N0") ₽</b></div>
+</section>
+
+<section class="admin-section neon-card">
+    <div class="section-head mini"><div><p class="eyebrow">invoices</p><h2>Счета на оплату</h2></div></div>
+    <div class="admin-list">
+        @foreach (var invoice in invoices)
+        {
+            <div class="admin-row">
+                <div><b>Счёт #@invoice.Id</b><p>@invoice.Provider • @invoice.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p></div>
+                <span>@invoice.Amount.ToString("N0") ₽</span>
+                <span class="tag">@invoice.Status</span>
+                @if (invoice.Status == PaymentStatuses.Pending)
+                {
+                    <a class="btn btn-soft" href="/Payments/Checkout/@invoice.Id">Оплатить</a>
+                }
+            </div>
+        }
     </div>
 </section>
 
 <section class="admin-section neon-card">
-    <div class="section-head mini">
-        <div>
-            <p class="eyebrow">transactions</p>
-            <h2>История операций</h2>
-        </div>
-    </div>
-
+    <div class="section-head mini"><div><p class="eyebrow">transactions</p><h2>История операций</h2></div></div>
     <div class="admin-list">
         @foreach (var transaction in transactions)
         {
             <div class="admin-row">
-                <div>
-                    <b>@transaction.Type</b>
-                    <p>@(transaction.Comment ?? "Операция")</p>
-                </div>
+                <div><b>@transaction.Type</b><p>@(transaction.Comment ?? "Операция")</p></div>
                 <span>@transaction.Amount.ToString("N0") ₽</span>
                 <span class="tag">@transaction.Status</span>
             </div>
         }
     </div>
-
-    @if (!transactions.Any())
-    {
-        <p>Операций пока нет. Пополни баланс в тестовом режиме, чтобы проверить механику.</p>
-    }
 </section>
