@@ -9,7 +9,7 @@
     @if (currentUser is null)
     {
         <h1>Профиль</h1>
-        <p>Чтобы видеть свои заказы, товары и сообщения, нужно войти или зарегистрироваться.</p>
+        <p>Чтобы видеть свои заказы, сделки и сообщения, нужно войти или зарегистрироваться.</p>
         <div class="profile-tabs">
             <a class="btn btn-primary" href="/Account/Login">Войти</a>
             <a class="btn btn-soft" href="/Account/Register">Регистрация</a>
@@ -20,9 +20,11 @@
         <h1>@currentUser.DisplayName</h1>
         <p>@currentUser.AccountType • @currentUser.Email</p>
         <div class="profile-tabs">
-            <a class="btn btn-soft" href="#my-orders">Мои заказы</a>
-            <a class="btn btn-soft" href="#my-products">Мои товары</a>
+            <a class="btn btn-soft" href="/Wallet">Кошелёк</a>
+            <a class="btn btn-soft" href="/Withdrawals">Вывод средств</a>
+            <a class="btn btn-soft" href="/Deals">Мои сделки</a>
             <a class="btn btn-soft" href="/Inbox">Сообщения</a>
+            <a class="btn btn-soft" href="#my-orders">Мои заказы</a>
             <a class="btn btn-soft" href="#status">Статус профиля</a>
         </div>
     }
@@ -40,18 +42,8 @@
         </div>
     </section>
 
-    <section id="my-products" class="section-block">
-        <h2>Мои товары</h2>
-        <div class="grid">
-        @foreach (var item in Model.Where(x => x.Type == MarketItemTypes.Product))
-        {
-            <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span></article>
-        }
-        </div>
-    </section>
-
     <section id="status" class="section-block neon-card">
         <h2>Статус профиля</h2>
-        <p>Профиль активен. Backend-версия уже использует ASP.NET Identity и роли.</p>
+        <p>Профиль активен. Финансы, сделки и вывод средств теперь находятся внутри профиля.</p>
     </section>
 }
