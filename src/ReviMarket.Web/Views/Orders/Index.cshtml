@@ -3,6 +3,7 @@
     ViewData["Title"] = "Работа";
     var categories = ViewBag.Categories as string[] ?? Array.Empty<string>();
     var activeCategory = ViewBag.Category as string;
+    var onlineLimit = DateTime.UtcNow.AddMinutes(-5);
 }
 
 <section class="section-head">
@@ -38,14 +39,17 @@
 <div class="grid">
 @foreach (var item in Model)
 {
+    var ownerOnline = item.Owner?.LastSeenAt is not null && item.Owner.LastSeenAt > onlineLimit;
     <article class="card">
         <div class="card-top"><span class="tag">@item.Category</span><span class="price">@item.Price.ToString("N0") ₽</span></div>
         <h3>@item.Title</h3>
         <p>@item.Description</p>
         <div class="review-meta">
-            <span>@(item.Owner?.DisplayName ?? "Заказчик")</span>
-            <span>@DisplayOrderStatus(item)</span>
+            <span>Заказчик: <a asp-controller="Profile" asp-action="Public" asp-route-id="@item.OwnerId">@(item.Owner?.DisplayName ?? "-")</a></span>
+            <span>★ @((item.Owner?.Rating ?? 0).ToString("0.00"))</span>
+            <span>@(ownerOnline ? "В сети" : "Не в сети")</span>
         </div>
+        <div class="review-meta"><span>@DisplayOrderStatus(item)</span></div>
         <div class="card-bottom"><a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Открыть заказ</a></div>
     </article>
 }
