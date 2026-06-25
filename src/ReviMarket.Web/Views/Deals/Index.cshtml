@@ -7,9 +7,9 @@
     <div>
         <p class="eyebrow">deals</p>
         <h1>Мои сделки</h1>
-        <p>Здесь отображаются сделки, деньги в холде, комиссия и статусы выполнения.</p>
+        <p>Сделки создаются автоматически после того, как исполнитель взял заказ, а заказчик оплатил его в холд.</p>
     </div>
-    <a class="btn btn-primary" asp-controller="Deals" asp-action="Create">Создать сделку</a>
+    <a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Перейти к заказам</a>
 </section>
 
 <div class="review-list">
@@ -21,7 +21,7 @@
                 <b>Сделка #@deal.Id</b>
                 <span class="tag">@deal.Status</span>
             </div>
-            <p>@(deal.MarketItem?.Title ?? "Ручная сделка")</p>
+            <p>@(deal.MarketItem?.Title ?? "Заказ")</p>
             <div class="review-meta">
                 <span>Сумма: @deal.Amount.ToString("N0") ₽</span>
                 <span>Комиссия: @deal.CommissionAmount.ToString("N0") ₽</span>
@@ -50,6 +50,6 @@
 {
     <section class="empty neon-card">
         <h2>Сделок пока нет</h2>
-        <p>Создай первую сделку, чтобы проверить холд, комиссию и выплату исполнителю.</p>
+        <p>Создай заказ в разделе “Работа”, дождись исполнителя и оплати заказ в холд.</p>
     </section>
 }
