@@ -32,8 +32,11 @@ public class OrdersController : Controller
 
     public async Task<IActionResult> Details(int id)
     {
+        var uid = _userManager.GetUserId(User);
         var item = await _db.MarketItems.Include(x => x.Owner).Include(x => x.AssignedExecutor).FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (item is null) return NotFound();
+        var canSee = item.ReviewStatus == ReviewStatuses.Approved || item.OwnerId == uid || User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Moderator);
+        if (!canSee) return NotFound();
         ViewBag.Deal = await _db.Deals.FirstOrDefaultAsync(x => x.MarketItemId == id);
         return View(item);
     }
@@ -64,7 +67,7 @@ public class OrdersController : Controller
         item.ReviewStatus = User.IsInRole(UserRoles.Admin) ? ReviewStatuses.Approved : ReviewStatuses.Pending;
         _db.MarketItems.Add(item);
         await _db.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("Index", "Profile");
     }
 
     [Authorize(Roles = UserRoles.Creator + "," + UserRoles.Admin)]
@@ -75,7 +78,7 @@ public class OrdersController : Controller
         var uid = _userManager.GetUserId(User)!;
         var order = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (order is null) return NotFound();
-        if (order.OwnerId == uid || order.OrderStatus != OrderStatuses.Open) return BadRequest();
+        if (order.ReviewStatus != ReviewStatuses.Approved || order.OwnerId == uid || order.OrderStatus != OrderStatuses.Open) return BadRequest();
 
         order.AssignedExecutorId = uid;
         order.AssignedAt = DateTime.UtcNow;
@@ -92,7 +95,7 @@ public class OrdersController : Controller
         var uid = _userManager.GetUserId(User)!;
         var order = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (order is null) return NotFound();
-        if (order.OwnerId != uid || string.IsNullOrWhiteSpace(order.AssignedExecutorId)) return BadRequest();
+        if (order.ReviewStatus != ReviewStatuses.Approved || order.OwnerId != uid || string.IsNullOrWhiteSpace(order.AssignedExecutorId)) return BadRequest();
         if (await _db.Deals.AnyAsync(x => x.MarketItemId == id)) return RedirectToAction(nameof(Details), new { id });
 
         var wallet = await GetWallet(uid);
