@@ -26,5 +26,11 @@ public class ApplicationUser : IdentityUser
     [MaxLength(250)]
     public string? LegalAddress { get; set; }
 
+    public decimal Rating { get; set; }
+
+    public int ReviewsCount { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime? LastSeenAt { get; set; }
 }
