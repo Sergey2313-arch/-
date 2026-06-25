@@ -7,21 +7,22 @@
 <section class="auth-card neon-card">
     <p class="eyebrow">new work order</p>
     <h1>Создать заказ</h1>
+    <p>После создания заказ попадёт на проверку. После одобрения он появится в общей ленте “Работа”.</p>
 
     <form asp-action="Create" method="post" class="form">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="validation"></div>
 
         <label>Название</label>
-        <input asp-for="Title" />
+        <input asp-for="Title" placeholder="Например: сделать дизайн карточек" />
 
         <label>Описание / ТЗ</label>
-        <textarea asp-for="Description"></textarea>
+        <textarea asp-for="Description" placeholder="Что нужно сделать, сроки, требования, результат"></textarea>
 
         <label>Бюджет</label>
-        <input asp-for="Price" type="number" min="0" step="100" />
+        <input asp-for="Price" type="number" min="100" step="100" />
 
-        <label>Блок / категория</label>
+        <label>Категория</label>
         <select asp-for="Category">
             @foreach (var category in categories)
             {
@@ -29,6 +30,6 @@
             }
         </select>
 
-        <button class="btn btn-primary" type="submit">Опубликовать заказ</button>
+        <button class="btn btn-primary" type="submit">Отправить на проверку</button>
     </form>
 </section>
