@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Профиль";
     var currentUser = ViewBag.User as ApplicationUser;
+    var wallet = ViewBag.Wallet as Wallet;
+    var createdOrders = ViewBag.CreatedOrders as List<MarketItem> ?? new();
+    var takenOrders = ViewBag.TakenOrders as List<MarketItem> ?? new();
+    var deals = ViewBag.Deals as List<Deal> ?? new();
 }
 
 <section class="profile-page neon-card">
@@ -9,41 +13,35 @@
     @if (currentUser is null)
     {
         <h1>Профиль</h1>
-        <p>Чтобы видеть свои заказы, сделки и сообщения, нужно войти или зарегистрироваться.</p>
-        <div class="profile-tabs">
-            <a class="btn btn-primary" href="/Account/Login">Войти</a>
-            <a class="btn btn-soft" href="/Account/Register">Регистрация</a>
-        </div>
+        <p>Войди, чтобы видеть заказы, сделки и баланс.</p>
+        <div class="profile-tabs"><a class="btn btn-primary" href="/Account/Login">Войти</a><a class="btn btn-soft" href="/Account/Register">Регистрация</a></div>
     }
     else
     {
         <h1>@currentUser.DisplayName</h1>
-        <p>@currentUser.AccountType • @currentUser.Email</p>
+        <p>@currentUser.AccountType • @currentUser.LegalType • @currentUser.Email</p>
         <div class="profile-tabs">
             <a class="btn btn-soft" href="/Wallet">Кошелёк</a>
-            <a class="btn btn-soft" href="/Withdrawals">Вывод средств</a>
-            <a class="btn btn-soft" href="/Deals">Мои сделки</a>
-            <a class="btn btn-soft" href="/Inbox">Сообщения</a>
-            <a class="btn btn-soft" href="#my-orders">Мои заказы</a>
-            <a class="btn btn-soft" href="#status">Статус профиля</a>
+            <a class="btn btn-soft" href="/Withdrawals">Вывод</a>
+            <a class="btn btn-soft" href="/Deals">Сделки</a>
+            <a class="btn btn-soft" href="/Inbox">Чат</a>
+            <a class="btn btn-primary" href="/Orders/Create">Создать заказ</a>
         </div>
     }
 </section>
 
 @if (currentUser is not null)
 {
-    <section id="my-orders" class="section-block">
-        <h2>Мои заказы</h2>
-        <div class="grid">
-        @foreach (var item in Model.Where(x => x.Type == MarketItemTypes.Order))
-        {
-            <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span></article>
-        }
-        </div>
+    <section class="admin-stats">
+        <div class="stat-card neon-card"><span>Доступно</span><b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></div>
+        <div class="stat-card neon-card"><span>В холде</span><b>@((wallet?.HoldBalance ?? 0).ToString("N0")) ₽</b></div>
+        <div class="stat-card neon-card"><span>Создано заказов</span><b>@createdOrders.Count</b></div>
+        <div class="stat-card neon-card"><span>Взято в работу</span><b>@takenOrders.Count</b></div>
     </section>
 
-    <section id="status" class="section-block neon-card">
-        <h2>Статус профиля</h2>
-        <p>Профиль активен. Финансы, сделки и вывод средств теперь находятся внутри профиля.</p>
-    </section>
+    <section class="section-block neon-card"><h2>Мои заказы</h2><div class="grid">@foreach (var item in createdOrders) { <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span><a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a></article> }</div></section>
+
+    <section class="section-block neon-card"><h2>Взятые заказы</h2><div class="grid">@foreach (var item in takenOrders) { <article class="card"><h3>@item.Title</h3><p>@item.Description</p><span class="price">@item.Price.ToString("N0") ₽</span><a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a></article> }</div></section>
+
+    <section class="section-block neon-card"><h2>Последние сделки</h2><div class="grid">@foreach (var deal in deals) { <article class="card"><h3>Сделка #@deal.Id</h3><p>@(deal.MarketItem?.Title ?? "Заказ")</p><span class="price">@deal.Amount.ToString("N0") ₽</span><span class="tag">@deal.Status</span></article> }</div></section>
 }
