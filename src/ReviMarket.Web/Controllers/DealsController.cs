@@ -10,7 +10,6 @@ namespace ReviMarket.Web.Controllers;
 [Authorize]
 public class DealsController : Controller
 {
-    private const decimal Fee = 10m;
     private readonly ApplicationDbContext _db;
     private readonly UserManager<ApplicationUser> _users;
 
@@ -35,49 +34,16 @@ public class DealsController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create() => View();
+    public IActionResult Create()
+    {
+        return RedirectToAction("Index", "Orders");
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(string executorEmail, decimal amount, int? marketItemId)
+    public IActionResult Create(string executorEmail, decimal amount, int? marketItemId)
     {
-        var customerId = _users.GetUserId(User)!;
-        var executor = await _users.FindByEmailAsync(executorEmail.Trim());
-        if (executor is null || executor.Id == customerId || amount <= 0) return View();
-
-        var wallet = await GetWallet(customerId);
-        if (wallet.Balance < amount) return View();
-
-        var feeAmount = Math.Round(amount * Fee / 100m, 2);
-
-        await using var tx = await _db.Database.BeginTransactionAsync();
-
-        wallet.Balance -= amount;
-        wallet.HoldBalance += amount;
-
-        _db.Deals.Add(new Deal
-        {
-            CustomerId = customerId,
-            ExecutorId = executor.Id,
-            MarketItemId = marketItemId,
-            Amount = amount,
-            CommissionPercent = Fee,
-            CommissionAmount = feeAmount,
-            ExecutorAmount = amount - feeAmount,
-            Status = DealStatuses.Funded
-        });
-
-        _db.PaymentTransactions.Add(new PaymentTransaction
-        {
-            UserId = customerId,
-            Amount = amount,
-            Type = PaymentTypes.Hold,
-            Status = PaymentStatuses.Success
-        });
-
-        await _db.SaveChangesAsync();
-        await tx.CommitAsync();
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("Index", "Orders");
     }
 
     [HttpPost]
