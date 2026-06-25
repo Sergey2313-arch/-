@@ -6,7 +6,7 @@
 <section class="auth-card neon-card">
     <p class="eyebrow">create account</p>
     <h1>Регистрация ReviMarket</h1>
-    <p>Выбери тип аккаунта. Админ-доступ через обычную регистрацию не выдаётся — это делается отдельно через настройки сервера.</p>
+    <p>Выбери роль на бирже и тип аккаунта: физическое лицо или бизнес-аккаунт.</p>
 
     <form asp-action="Register" method="post" class="form">
         @Html.AntiForgeryToken()
@@ -30,6 +30,25 @@
             </label>
         </div>
 
+        <label>Тип лица</label>
+        <div class="role-choice">
+            <label class="role-card">
+                <input asp-for="LegalType" type="radio" value="Individual" checked />
+                <span>
+                    <b>Физ. лицо</b>
+                    <small>Обычный пользователь платформы.</small>
+                </span>
+            </label>
+
+            <label class="role-card">
+                <input asp-for="LegalType" type="radio" value="Business" />
+                <span>
+                    <b>ИП / юр. лицо</b>
+                    <small>Для компаний, предпринимателей и бизнес-заказчиков.</small>
+                </span>
+            </label>
+        </div>
+
         <label>Имя / ник</label>
         <input asp-for="DisplayName" placeholder="Например ReviveCode" />
         <span asp-validation-for="DisplayName" class="validation"></span>
@@ -38,13 +57,25 @@
         <input asp-for="Email" placeholder="mail@example.com" />
         <span asp-validation-for="Email" class="validation"></span>
 
+        <label>Название ИП / организации</label>
+        <input asp-for="OrganizationName" placeholder="Например ИП Коробков С. А. или ООО РевиМаркет" />
+
+        <label>ИНН</label>
+        <input asp-for="Inn" placeholder="ИНН для бизнес-аккаунта" />
+
+        <label>ОГРН / ОГРНИП</label>
+        <input asp-for="OgrnOrOgrnip" placeholder="Можно заполнить позже" />
+
+        <label>Юридический адрес</label>
+        <input asp-for="LegalAddress" placeholder="Можно заполнить позже" />
+
         <label>Пароль</label>
         <input asp-for="Password" placeholder="Минимум 6 символов" />
         <span asp-validation-for="Password" class="validation"></span>
 
         <div class="admin-note">
-            <b>Как стать админом?</b>
-            <span>Сначала зарегистрируй обычный аккаунт, потом укажи его email в настройке <code>Admin:BootstrapEmail</code> или переменной окружения <code>Admin__BootstrapEmail</code>. После перезапуска сайт выдаст роль Admin.</span>
+            <b>Зачем это нужно?</b>
+            <span>Тип лица пригодится для платежей, договоров, чеков, безопасных сделок и выплат.</span>
         </div>
 
         <button class="btn btn-primary" type="submit">Зарегистрироваться</button>
