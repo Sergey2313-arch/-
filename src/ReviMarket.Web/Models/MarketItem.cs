@@ -27,10 +27,17 @@ public class MarketItem
     [Required, MaxLength(20)]
     public string ReviewStatus { get; set; } = ReviewStatuses.Pending;
 
+    [Required, MaxLength(30)]
+    public string OrderStatus { get; set; } = OrderStatuses.Open;
+
     public string? OwnerId { get; set; }
     public ApplicationUser? Owner { get; set; }
 
+    public string? AssignedExecutorId { get; set; }
+    public ApplicationUser? AssignedExecutor { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? AssignedAt { get; set; }
 }
 
 public static class MarketItemTypes
@@ -45,4 +52,12 @@ public static class ReviewStatuses
     public const string Pending = "Pending";
     public const string Approved = "Approved";
     public const string Blocked = "Blocked";
+}
+
+public static class OrderStatuses
+{
+    public const string Open = "Open";
+    public const string InWork = "InWork";
+    public const string Done = "Done";
+    public const string Cancelled = "Cancelled";
 }
