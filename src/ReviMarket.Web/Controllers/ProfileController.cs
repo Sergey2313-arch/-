@@ -25,14 +25,19 @@ public class ProfileController : Controller
             return View(new List<MarketItem>());
         }
 
-        var userId = _userManager.GetUserId(User);
+        var userId = _userManager.GetUserId(User)!;
         var user = await _userManager.GetUserAsync(User);
-        var items = await _db.MarketItems
-            .Where(x => x.OwnerId == userId)
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
+        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId) ?? new Wallet { UserId = userId };
+        var createdOrders = await _db.MarketItems.Include(x => x.AssignedExecutor).Where(x => x.Type == MarketItemTypes.Order && x.OwnerId == userId).OrderByDescending(x => x.CreatedAt).ToListAsync();
+        var takenOrders = await _db.MarketItems.Include(x => x.Owner).Where(x => x.Type == MarketItemTypes.Order && x.AssignedExecutorId == userId).OrderByDescending(x => x.AssignedAt).ToListAsync();
 
         ViewBag.User = user;
-        return View(items);
+        ViewBag.Wallet = wallet;
+        ViewBag.CreatedOrders = createdOrders;
+        ViewBag.TakenOrders = takenOrders;
+        ViewBag.Deals = await _db.Deals.Include(x => x.MarketItem).Where(x => x.CustomerId == userId || x.ExecutorId == userId).OrderByDescending(x => x.CreatedAt).Take(8).ToListAsync();
+        ViewBag.Withdrawals = await _db.WithdrawalRequests.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedAt).Take(5).ToListAsync();
+
+        return View(createdOrders);
     }
 }
