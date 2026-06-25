@@ -1,0 +1,40 @@
+@model PaymentInvoice
+@{
+    ViewData["Title"] = "Оплата счёта";
+}
+
+<section class="auth-card neon-card payment-checkout">
+    <p class="eyebrow">payment checkout</p>
+    <h1>Оплата счёта #@Model.Id</h1>
+    <p>Это beta-режим ReviMarket: платёжный сценарий работает как настоящая платёжка, но деньги пока тестовые.</p>
+
+    <div class="detail-price-box">
+        <span>Сумма к оплате</span>
+        <b>@Model.Amount.ToString("N0") ₽</b>
+    </div>
+
+    <div class="detail-info-list">
+        <div><span>Провайдер</span><b>@Model.Provider</b></div>
+        <div><span>Статус</span><b>@Model.Status</b></div>
+        <div><span>ID платежа</span><b>@Model.ProviderPaymentId</b></div>
+    </div>
+
+    @if (Model.Status == PaymentStatuses.Pending)
+    {
+        <form asp-action="ConfirmDemo" method="post" class="form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button class="btn btn-primary" type="submit">Подтвердить demo-оплату</button>
+        </form>
+    }
+    else
+    {
+        <a class="btn btn-primary" href="/Wallet">Вернуться в кошелёк</a>
+    }
+</section>
+
+<section class="section-block neon-card">
+    <p class="eyebrow">future real payment</p>
+    <h2>Как будет с реальной платёжкой</h2>
+    <p>На этом месте пользователь будет уходить на страницу ЮKassa, Т-Банка или другого провайдера. После успешной оплаты webhook подтвердит счёт и пополнит баланс.</p>
+</section>
