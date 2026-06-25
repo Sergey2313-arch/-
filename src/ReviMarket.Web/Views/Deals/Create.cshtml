@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Создать сделку";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">new deal</p>
+    <h1>Создать сделку</h1>
+    <p>Деньги будут списаны с баланса заказчика и переведены в холд до завершения сделки.</p>
+
+    <form asp-action="Create" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <label>Email исполнителя</label>
+        <input name="executorEmail" placeholder="creator@example.com" />
+
+        <label>Сумма сделки</label>
+        <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
+
+        <label>ID товара / заказа</label>
+        <input name="marketItemId" type="number" placeholder="Можно оставить пустым" />
+
+        <button class="btn btn-primary" type="submit">Заморозить деньги и создать сделку</button>
+    </form>
+</section>
