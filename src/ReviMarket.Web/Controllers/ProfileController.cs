@@ -46,4 +46,15 @@ public class ProfileController : Controller
 
         return View();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Public(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return NotFound();
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null) return NotFound();
+        ViewBag.Reviews = await _db.UserReviews.Include(x => x.Author).Include(x => x.Deal).ThenInclude(x => x!.MarketItem).Where(x => x.TargetUserId == id).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
+        ViewBag.IsOnline = user.LastSeenAt is not null && user.LastSeenAt > DateTime.UtcNow.AddMinutes(-5);
+        return View(user);
+    }
 }
