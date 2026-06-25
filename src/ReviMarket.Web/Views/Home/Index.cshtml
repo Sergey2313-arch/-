@@ -5,18 +5,18 @@
 <section class="hero">
     <div>
         <p class="eyebrow">российская beta-биржа</p>
-        <h1>ReviMarket — площадка для заказчиков, исполнителей и продавцов</h1>
+        <h1>ReviMarket — площадка для заказчиков и исполнителей</h1>
         <p class="hero-text">
-            ASP.NET-версия проекта: регистрация, вход, роли, товары, работа и профиль уже перенесены на backend.
+            ASP.NET-версия проекта: регистрация, вход, роли, работа, сделки, кошелёк и профиль уже перенесены на backend.
         </p>
         <div class="actions">
             <a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Открыть работу</a>
-            <a class="btn btn-soft" asp-controller="Catalog" asp-action="Index">Открыть товары</a>
+            <a class="btn btn-soft" asp-controller="Deals" asp-action="Index">Мои сделки</a>
         </div>
     </div>
     <div class="neon-card hero-card">
         <b>@ViewBag.OrdersCount</b><span>заказов</span>
-        <b>@ViewBag.ProductsCount</b><span>товаров</span>
+        <b>@ViewBag.ProductsCount</b><span>товаров позже</span>
         <b>ASP.NET</b><span>backend</span>
     </div>
 </section>
