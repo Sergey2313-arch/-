@@ -5,11 +5,11 @@
 
 <section class="auth-card neon-card payment-checkout">
     <p class="eyebrow">payment checkout</p>
-    <h1>Оплата счёта #@Model.Id</h1>
-    <p>Это beta-режим ReviMarket: платёжный сценарий работает как настоящая платёжка, но деньги пока тестовые.</p>
+    <h1>Счёт #@Model.Id</h1>
+    <p>Demo-режим: карта не списывается. Проверяется сценарий оплаты, зачисления на баланс и истории операций.</p>
 
     <div class="detail-price-box">
-        <span>Сумма к оплате</span>
+        <span>Сумма счёта</span>
         <b>@Model.Amount.ToString("N0") ₽</b>
     </div>
 
@@ -24,7 +24,7 @@
         <form asp-action="ConfirmDemo" method="post" class="form">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="@Model.Id" />
-            <button class="btn btn-primary" type="submit">Подтвердить demo-оплату</button>
+            <button class="btn btn-primary" type="submit">Симулировать успешную оплату</button>
         </form>
     }
     else
@@ -34,7 +34,7 @@
 </section>
 
 <section class="section-block neon-card">
-    <p class="eyebrow">future real payment</p>
-    <h2>Как будет с реальной платёжкой</h2>
-    <p>На этом месте пользователь будет уходить на страницу ЮKassa, Т-Банка или другого провайдера. После успешной оплаты webhook подтвердит счёт и пополнит баланс.</p>
+    <p class="eyebrow">real provider later</p>
+    <h2>Под реальную платёжку</h2>
+    <p>Позже этот экран заменится переходом к платёжному провайдеру. После webhook баланс будет пополняться автоматически.</p>
 </section>
