@@ -1,6 +1,7 @@
 @model List<Deal>
 @{
     ViewData["Title"] = "Мои сделки";
+    var myReviews = ViewBag.MyReviews as List<UserReview> ?? new();
 }
 
 <section class="section-head">
@@ -15,6 +16,12 @@
 <div class="review-list">
 @foreach (var deal in Model)
 {
+    var currentEmail = User.Identity?.Name;
+    var isCustomer = currentEmail == deal.Customer?.Email;
+    var isExecutor = currentEmail == deal.Executor?.Email;
+    var reviewTargetId = isCustomer ? deal.ExecutorId : deal.CustomerId;
+    var canReview = deal.Status == DealStatuses.Completed && !myReviews.Any(x => x.DealId == deal.Id && x.TargetUserId == reviewTargetId);
+
     <article class="review-row neon-card">
         <div>
             <div class="review-title">
@@ -28,17 +35,35 @@
                 <span>Исполнителю: @deal.ExecutorAmount.ToString("N0") ₽</span>
             </div>
             <div class="review-meta">
-                <span>Заказчик: @(deal.Customer?.DisplayName ?? "-")</span>
-                <span>Исполнитель: @(deal.Executor?.DisplayName ?? "-")</span>
+                <span>Заказчик: <a asp-controller="Profile" asp-action="Public" asp-route-id="@deal.CustomerId">@(deal.Customer?.DisplayName ?? "-")</a></span>
+                <span>Исполнитель: <a asp-controller="Profile" asp-action="Public" asp-route-id="@deal.ExecutorId">@(deal.Executor?.DisplayName ?? "-")</a></span>
             </div>
         </div>
         <div class="review-actions">
-            @if (deal.Status == DealStatuses.Funded && User.Identity?.Name == deal.Customer?.Email)
+            @if (deal.Status == DealStatuses.Funded && isCustomer)
             {
                 <form asp-action="Complete" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@deal.Id" />
                     <button class="btn btn-primary" type="submit">Завершить</button>
+                </form>
+            }
+
+            @if (canReview)
+            {
+                <form asp-controller="Reviews" asp-action="Create" method="post" class="form compact-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="dealId" value="@deal.Id" />
+                    <input type="hidden" name="targetUserId" value="@reviewTargetId" />
+                    <select name="rating">
+                        <option value="5">5 — отлично</option>
+                        <option value="4">4 — хорошо</option>
+                        <option value="3">3 — нормально</option>
+                        <option value="2">2 — плохо</option>
+                        <option value="1">1 — ужасно</option>
+                    </select>
+                    <textarea name="text" placeholder="Напиши отзыв" maxlength="600"></textarea>
+                    <button class="btn btn-primary" type="submit">Оставить отзыв</button>
                 </form>
             }
         </div>
