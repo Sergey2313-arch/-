@@ -1,6 +1,24 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@{
+    var layoutUser = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+    var layoutRole = layoutUser?.AccountType;
+    var canOpenPanel = User.IsInRole(UserRoles.Admin)
+        || User.IsInRole(UserRoles.Manager)
+        || User.IsInRole(UserRoles.Owner)
+        || User.IsInRole(UserRoles.CoOwner)
+        || User.IsInRole(UserRoles.Moderator)
+        || User.IsInRole(UserRoles.Lawyer)
+        || User.IsInRole(UserRoles.SupportAgent)
+        || layoutRole == UserRoles.Admin
+        || layoutRole == UserRoles.Manager
+        || layoutRole == UserRoles.Owner
+        || layoutRole == UserRoles.CoOwner
+        || layoutRole == UserRoles.Moderator
+        || layoutRole == UserRoles.Lawyer
+        || layoutRole == UserRoles.SupportAgent;
+}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -26,7 +44,10 @@
             @if (SignInManager.IsSignedIn(User))
             {
                 <a href="/Profile">Профиль</a>
-                <a href="/admin.html">Панель</a>
+                @if (canOpenPanel)
+                {
+                    <a href="/admin.html">Панель</a>
+                }
             }
         </nav>
         <div class="auth">
