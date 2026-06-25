@@ -25,7 +25,7 @@
                 <input asp-for="AccountType" type="radio" value="Creator" />
                 <span>
                     <b>Исполнитель</b>
-                    <small>Добавляет услуги/товары, откликается на заказы, общается с заказчиком.</small>
+                    <small>Откликается на заказы и получает выплаты.</small>
                 </span>
             </label>
         </div>
@@ -44,7 +44,7 @@
                 <input asp-for="LegalType" type="radio" value="Business" />
                 <span>
                     <b>ИП / юр. лицо</b>
-                    <small>Для компаний, предпринимателей и бизнес-заказчиков.</small>
+                    <small>Для компаний, ИП и бизнес-заказчиков.</small>
                 </span>
             </label>
         </div>
@@ -72,6 +72,12 @@
         <label>Пароль</label>
         <input asp-for="Password" placeholder="Минимум 6 символов" />
         <span asp-validation-for="Password" class="validation"></span>
+
+        <label class="consent-line">
+            <input asp-for="AcceptTerms" />
+            <span>Я принимаю <a href="/Info/Rules" target="_blank">правила сервиса</a> и <a href="/Info/Privacy" target="_blank">политику конфиденциальности</a>.</span>
+        </label>
+        <span asp-validation-for="AcceptTerms" class="validation"></span>
 
         <div class="admin-note">
             <b>Зачем это нужно?</b>
