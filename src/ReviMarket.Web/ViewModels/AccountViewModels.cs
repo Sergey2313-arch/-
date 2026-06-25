@@ -36,8 +36,7 @@ public class RegisterViewModel
     [MaxLength(250)]
     public string? LegalAddress { get; set; }
 
-    [Range(typeof(bool), "true", "true", ErrorMessage = "Нужно принять правила сервиса и политику конфиденциальности")]
-    public bool AcceptTerms { get; set; }
+    public bool AcceptTerms { get; set; } = true;
 }
 
 public class LoginViewModel
