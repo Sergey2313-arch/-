@@ -1,0 +1,44 @@
+@model List<WithdrawalRequest>
+@{
+    ViewData["Title"] = "Вывод средств";
+    var wallet = ViewBag.Wallet as Wallet;
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">withdraw</p>
+        <h1>Вывод средств</h1>
+        <p>Создай заявку на вывод денег. В beta-режиме обработка выполняется админом вручную.</p>
+    </div>
+</section>
+
+<section class="auth-card neon-card">
+    <h2>Новая заявка</h2>
+    <p>Доступно: <b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></p>
+    <form asp-action="Create" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <label>Сумма</label>
+        <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
+
+        <label>Куда вывести</label>
+        <input name="paymentInfo" placeholder="Карта, СБП, банк или реквизиты" />
+
+        <button class="btn btn-primary" type="submit">Запросить вывод</button>
+    </form>
+</section>
+
+<div class="review-list">
+@foreach (var item in Model)
+{
+    <article class="review-row neon-card">
+        <div>
+            <div class="review-title">
+                <b>@item.Amount.ToString("N0") ₽</b>
+                <span class="tag">@item.Status</span>
+            </div>
+            <p>@item.PaymentInfo</p>
+            <div class="review-meta"><span>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span></div>
+        </div>
+    </article>
+}
+</div>
