@@ -3,9 +3,9 @@
 }
 
 <section class="auth-card neon-card">
-    <p class="eyebrow">top up</p>
+    <p class="eyebrow">create invoice</p>
     <h1>Пополнить баланс</h1>
-    <p>Сейчас это тестовое пополнение для разработки. Позже здесь будет переход на ЮKassa или Т-Банк.</p>
+    <p>Создай счёт на оплату. В beta-режиме используется demo-подтверждение. Позже сюда подключим ЮKassa или Т-Банк.</p>
 
     <form asp-action="TopUp" method="post" class="form">
         @Html.AntiForgeryToken()
@@ -14,15 +14,12 @@
         <label>Сумма</label>
         <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
 
-        <button class="btn btn-primary" type="submit">Пополнить тестово</button>
+        <button class="btn btn-primary" type="submit">Создать счёт</button>
     </form>
 </section>
 
 <section class="section-block neon-card">
-    <p class="eyebrow">real payments</p>
-    <h2>Как будет с реальными деньгами</h2>
-    <p>
-        Пользователь нажимает пополнить, сайт создаёт платёж, платёжный сервис возвращает ссылку на оплату,
-        пользователь платит картой или СБП, а после webhook мы пополняем баланс.
-    </p>
+    <p class="eyebrow">payment flow</p>
+    <h2>Почти реальный сценарий</h2>
+    <p>Сайт создаёт счёт, пользователь подтверждает оплату, затем баланс обновляется и операция попадает в историю.</p>
 </section>
