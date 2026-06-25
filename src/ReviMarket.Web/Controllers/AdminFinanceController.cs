@@ -18,10 +18,10 @@ public class AdminFinanceController : Controller
 
     public async Task<IActionResult> Index()
     {
-        ViewBag.TotalDeals = await _db.Deals.SumAsync(x => x.Amount);
-        ViewBag.TotalCommission = await _db.PlatformTransactions.SumAsync(x => x.Amount);
-        ViewBag.TotalHold = await _db.Wallets.SumAsync(x => x.HoldBalance);
-        ViewBag.TotalBalance = await _db.Wallets.SumAsync(x => x.Balance);
+        ViewBag.TotalDeals = await _db.Deals.Select(x => (decimal?)x.Amount).SumAsync() ?? 0m;
+        ViewBag.TotalCommission = await _db.PlatformTransactions.Select(x => (decimal?)x.Amount).SumAsync() ?? 0m;
+        ViewBag.TotalHold = await _db.Wallets.Select(x => (decimal?)x.HoldBalance).SumAsync() ?? 0m;
+        ViewBag.TotalBalance = await _db.Wallets.Select(x => (decimal?)x.Balance).SumAsync() ?? 0m;
         ViewBag.Withdrawals = await _db.WithdrawalRequests.Include(x => x.User).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
         ViewBag.Deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
         return View();
@@ -50,7 +50,7 @@ public class AdminFinanceController : Controller
         var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == item.UserId);
         if (wallet is not null)
         {
-            wallet.HoldBalance -= item.Amount;
+            wallet.HoldBalance = Math.Max(0, wallet.HoldBalance - item.Amount);
             wallet.Balance += item.Amount;
         }
         item.Status = WithdrawalStatuses.Rejected;
