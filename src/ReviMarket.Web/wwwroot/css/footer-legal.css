@@ -1,6 +1,19 @@
+html, body {
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1 0 auto;
+}
+
 .site-footer {
     width: min(1180px, calc(100% - 32px));
-    margin: 10px auto 32px;
+    margin: auto auto 32px;
     padding: 18px 22px;
     display: flex;
     justify-content: space-between;
@@ -32,6 +45,19 @@
 .consent-line input { width: auto; margin-top: 4px; }
 .consent-line a { color: #d8b4fe; font-weight: 900; }
 
+.withdraw-methods {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.withdraw-method.active {
+    border-color: rgba(216, 180, 254, .75);
+    background: linear-gradient(135deg, rgba(124,44,255,.45), rgba(255,43,214,.18));
+    color: #fff;
+}
+
 @media (max-width: 760px) {
     .site-footer { align-items: flex-start; flex-direction: column; }
+    .withdraw-methods { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
