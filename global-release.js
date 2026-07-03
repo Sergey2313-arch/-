@@ -4,20 +4,39 @@
     ['Beta', 'Global'],
     ['beta', 'global'],
     ['demo login', 'global login'],
+    ['demo-чат', 'чат'],
+    ['demo-данные', 'локальные данные'],
+    ['Демо-данные', 'Локальные данные'],
+    ['demo-заказ', 'заказ'],
+    ['Демо-заказ', 'Заказ'],
+    ['demo-предложение', 'предложение'],
+    ['demo-предложения', 'предложения'],
+    ['demo-стоимость', 'стоимость'],
+    ['Demo-сделки', 'Сделки'],
+    ['demo-сделки', 'сделки'],
+    ['demo', 'global'],
+    ['Demo', 'Global'],
     ['beta-режим', 'режим платформы'],
     ['beta-версия', 'frontend-версия'],
     ['beta версии', 'frontend версии'],
-    ['beta', 'global']
+    ['Вход в ReviMarket', 'Вход в ReviMarket Global'],
+    ['Войди в Global-режим', 'Войди в ReviMarket Global'],
+    ['Войди в global-режим', 'Войди в ReviMarket Global'],
+    ['Войди в режим платформы', 'Войди в ReviMarket Global']
   ];
 
-  function replaceText(node) {
-    if (!node || node.nodeType !== Node.TEXT_NODE) return;
-    let text = node.nodeValue;
-    let next = text;
+  function replaceString(value) {
+    let next = String(value || '');
     replacements.forEach(([from, to]) => {
       next = next.split(from).join(to);
     });
-    if (next !== text) node.nodeValue = next;
+    return next;
+  }
+
+  function replaceText(node) {
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
+    const next = replaceString(node.nodeValue);
+    if (next !== node.nodeValue) node.nodeValue = next;
   }
 
   function walk(root = document.body) {
@@ -32,15 +51,18 @@
     walk();
     document.title = 'ReviMarket Global — freelance, design, goods';
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.content = 'ReviMarket Global — фриланс-биржа, заказы для дизайнеров и маркет товаров.';
+    if (meta) meta.content = 'ReviMarket Global — фриланс-платформа, заказы для дизайнеров и маркетплейс цифровых услуг.';
+
+    document.querySelectorAll('[placeholder]').forEach((item) => {
+      item.setAttribute('placeholder', replaceString(item.getAttribute('placeholder')));
+    });
 
     document.querySelectorAll('.eyebrow').forEach((item) => {
-      item.textContent = item.textContent.replace('beta', 'global').replace('Beta', 'Global');
+      item.textContent = replaceString(item.textContent);
     });
 
-    document.querySelectorAll('#countOrders, #countProducts').forEach((item) => {
-      if (!item.textContent.trim()) item.textContent = '0';
-    });
+    const statusMetric = [...document.querySelectorAll('.metrics b')].find((item) => ['global', 'beta'].includes(item.textContent.trim().toLowerCase()));
+    if (statusMetric) statusMetric.textContent = 'Global';
   }
 
   if (document.readyState === 'loading') {
@@ -49,5 +71,7 @@
     polishGlobal();
   }
 
-  setInterval(polishGlobal, 900);
+  setTimeout(polishGlobal, 250);
+  setTimeout(polishGlobal, 1000);
+  setInterval(polishGlobal, 1600);
 })();
