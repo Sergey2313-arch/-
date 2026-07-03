@@ -10,7 +10,7 @@
 }
 
 <section class="detail-page">
-    <a class="btn btn-soft detail-back" asp-action="Index">← Назад к заказам</a>
+    <a class="btn btn-soft detail-back" asp-action="Index">Назад к заказам</a>
 
     <div class="detail-layout neon-card">
         <article class="detail-main">
@@ -20,12 +20,12 @@
 
             <div class="detail-block">
                 <h2>Как работает заказ</h2>
-                <p>Заказчик публикует заказ, исполнитель берёт его в работу, затем заказчик оплачивает заказ через холд ReviMarket.</p>
+                <p>Заказчик публикует задачу, исполнитель берет ее в работу, затем заказчик оплачивает заказ через холд ReviMarket.</p>
             </div>
 
             <div class="detail-block">
                 <h2>Правило биржи</h2>
-                <p>Контакты вне ReviMarket запрещены. Все договорённости, оплата, спор и переписка должны идти внутри платформы.</p>
+                <p>Контакты вне ReviMarket запрещены. Договоренности, оплата, спор и переписка должны идти внутри платформы.</p>
             </div>
         </article>
 
@@ -74,9 +74,25 @@
                 <a class="btn btn-soft detail-action" asp-controller="Deals" asp-action="Index">Открыть сделку</a>
             }
 
-            @if (Model.OrderStatus == OrderStatuses.InWork && (isOwner || isExecutor))
+            @if (Model.OrderStatus == OrderStatuses.InWork && isOwner && Model.AssignedExecutorId is not null)
             {
-                <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Index">Чат ReviMarket</a>
+                <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.AssignedExecutorId">Чат с исполнителем</a>
+            }
+
+            @if (Model.OrderStatus == OrderStatuses.InWork && isExecutor && Model.OwnerId is not null)
+            {
+                <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.OwnerId">Чат с заказчиком</a>
+            }
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form asp-controller="Reports" asp-action="Order" method="post" class="form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <label>Жалоба</label>
+                    <input name="reason" maxlength="600" placeholder="Причина жалобы" />
+                    <button class="btn btn-soft detail-action" type="submit">Пожаловаться</button>
+                </form>
             }
         </aside>
     </div>
@@ -90,8 +106,8 @@
         {
             OrderStatuses.Open => "Открыт",
             OrderStatuses.InWork => "В работе",
-            OrderStatuses.Done => "Завершён",
-            OrderStatuses.Cancelled => "Отменён",
+            OrderStatuses.Done => "Завершен",
+            OrderStatuses.Cancelled => "Отменен",
             _ => item.OrderStatus
         };
     }

@@ -1,0 +1,34 @@
+@model SupportRequest
+@{
+    ViewData["Title"] = "Новое обращение";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">support ticket</p>
+    <h1>Новое обращение</h1>
+    <p>Опиши проблему. Команда поддержки увидит тикет в очереди.</p>
+
+    <form asp-action="Create" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <label>Тема</label>
+        <input asp-for="Title" maxlength="120" placeholder="Например: не проходит оплата" />
+        <span asp-validation-for="Title" class="validation"></span>
+
+        <label>Приоритет</label>
+        <select asp-for="Priority">
+            <option value="Normal">Обычный</option>
+            <option value="High">Высокий</option>
+            <option value="Urgent">Срочный</option>
+            <option value="Low">Низкий</option>
+        </select>
+
+        <label>Описание</label>
+        <textarea asp-for="Text" maxlength="1200" rows="7" placeholder="Что произошло, где именно, какой заказ или платеж затронут"></textarea>
+        <span asp-validation-for="Text" class="validation"></span>
+
+        <button class="btn btn-primary" type="submit">Отправить</button>
+        <a class="btn btn-soft" asp-action="Index">Назад</a>
+    </form>
+</section>

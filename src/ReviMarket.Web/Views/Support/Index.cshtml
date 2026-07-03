@@ -1,0 +1,43 @@
+@model SupportIndexViewModel
+@{
+    ViewData["Title"] = "Поддержка";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">support</p>
+        <h1>Поддержка</h1>
+        <p>Обращения по заказам, оплатам, профилю, безопасности и работе биржи.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">Новое обращение</a>
+</section>
+
+@if (!Model.Requests.Any())
+{
+    <section class="empty neon-card">
+        <h2>Обращений пока нет</h2>
+        <p>Создай тикет, если нужна помощь команды ReviMarket.</p>
+    </section>
+}
+else
+{
+    <section class="section-block neon-card">
+        <h2>Мои обращения</h2>
+        <div class="admin-list">
+            @foreach (var item in Model.Requests)
+            {
+                <div class="admin-row">
+                    <div>
+                        <b>@item.Title</b>
+                        <p>@item.Text</p>
+                        <small>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm") • агент: @(item.Agent?.DisplayName ?? "не назначен")</small>
+                    </div>
+                    <div class="review-actions">
+                        <span class="tag">@item.Status</span>
+                        <a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}

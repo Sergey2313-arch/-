@@ -113,3 +113,360 @@ body {
 @media (max-width: 620px) {
     .admin-stats { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 820px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    .topbar {
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .brand {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .brand small,
+    .brand b,
+    .nav a,
+    .btn,
+    .tag,
+    .price,
+    .detail-meta span,
+    .review-meta span {
+        overflow-wrap: anywhere;
+    }
+
+    .nav {
+        order: 3;
+        width: 100%;
+        margin-left: 0;
+        padding-bottom: 4px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .nav a {
+        flex: 0 0 auto;
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .auth {
+        margin-left: auto;
+    }
+
+    .container {
+        width: min(100% - 24px, 1180px);
+        padding: 24px 0 34px;
+    }
+
+    h1 {
+        font-size: clamp(34px, 10vw, 54px);
+        line-height: 1.02;
+    }
+
+    h2 {
+        font-size: 25px;
+        line-height: 1.15;
+    }
+
+    .section-head,
+    .toolbar {
+        align-items: stretch;
+    }
+
+    .section-head .btn,
+    .toolbar .btn {
+        width: 100%;
+    }
+
+    .neon-card,
+    .card,
+    .auth-card,
+    .detail,
+    .toolbar,
+    .profile-page,
+    .section-block,
+    .admin-section,
+    .review-row,
+    .empty {
+        border-radius: 18px;
+    }
+
+    .profile-page,
+    .auth-card,
+    .detail,
+    .section-block,
+    .admin-section {
+        padding: 20px;
+    }
+
+    .profile-page h1 {
+        font-size: clamp(34px, 11vw, 46px);
+    }
+
+    .profile-page p {
+        overflow-wrap: anywhere;
+    }
+
+    .profile-tabs,
+    .actions,
+    .review-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .profile-tabs .btn,
+    .actions .btn,
+    .review-actions .btn,
+    .review-actions form,
+    .review-actions button {
+        width: 100%;
+    }
+
+    .admin-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .stat-card {
+        min-height: 104px;
+        padding: 16px;
+    }
+
+    .stat-card b {
+        font-size: clamp(26px, 7vw, 34px);
+        overflow-wrap: anywhere;
+    }
+
+    .grid,
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        min-width: 0;
+        padding: 18px;
+    }
+
+    .card h3,
+    .card p,
+    .admin-row b,
+    .admin-row p,
+    .admin-row small {
+        overflow-wrap: anywhere;
+    }
+
+    .admin-row {
+        align-items: stretch;
+        flex-direction: column;
+        display: flex;
+    }
+
+    .admin-row > * {
+        min-width: 0;
+    }
+
+    .admin-row .btn,
+    .admin-row button,
+    .admin-row form {
+        width: 100%;
+    }
+
+    .category-blocks {
+        display: flex;
+        gap: 10px;
+        padding: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+    }
+
+    .category-block {
+        min-width: 170px;
+        min-height: 110px;
+        scroll-snap-align: start;
+    }
+
+    .detail-layout {
+        gap: 16px;
+        padding: 18px;
+    }
+
+    .detail-back,
+    .detail-action,
+    .detail-sidebar form {
+        width: 100%;
+    }
+
+    .detail-block,
+    .detail-sidebar,
+    .detail-price-box {
+        border-radius: 18px;
+    }
+
+    .detail-price-box b {
+        font-size: clamp(28px, 8vw, 34px);
+        overflow-wrap: anywhere;
+    }
+
+    .detail-info-list b,
+    .detail-lead,
+    .detail-block p {
+        overflow-wrap: anywhere;
+    }
+
+    .review-row {
+        align-items: stretch;
+        padding: 16px;
+    }
+
+    .review-title {
+        align-items: flex-start;
+    }
+
+    .review-meta {
+        gap: 7px;
+    }
+
+    .review-meta span {
+        border-radius: 12px;
+        max-width: 100%;
+    }
+
+    .compact-form textarea {
+        min-height: 96px;
+    }
+
+    input,
+    textarea,
+    select {
+        min-width: 0;
+        font-size: 16px;
+    }
+
+    .btn {
+        min-height: 44px;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .site-footer {
+        width: min(100% - 24px, 1180px);
+        margin-bottom: 18px;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+    .topbar {
+        align-items: stretch;
+    }
+
+    .brand {
+        width: 100%;
+    }
+
+    .brand-icon {
+        flex: 0 0 38px;
+    }
+
+    .auth {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .auth form,
+    .auth .btn,
+    .auth button {
+        width: 100%;
+    }
+
+    .auth form:only-child {
+        grid-column: 1 / -1;
+    }
+
+    .container {
+        width: min(100% - 20px, 1180px);
+        padding-top: 18px;
+    }
+
+    h1 {
+        font-size: clamp(31px, 12vw, 42px);
+    }
+
+    .profile-page,
+    .auth-card,
+    .detail,
+    .section-block,
+    .admin-section {
+        padding: 16px;
+    }
+
+    .profile-tabs,
+    .actions,
+    .review-actions,
+    .admin-stats,
+    .withdraw-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .card-top,
+    .card-bottom,
+    .detail-meta,
+    .review-title {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .card-bottom .btn,
+    .card-top .tag,
+    .card-top .price {
+        width: 100%;
+    }
+
+    .category-block {
+        min-width: 148px;
+    }
+
+    .detail-layout {
+        padding: 14px;
+    }
+
+    .detail-main h1 {
+        font-size: clamp(30px, 12vw, 40px);
+    }
+
+    .detail-lead {
+        font-size: 16px;
+    }
+
+    .detail-info-list div,
+    .detail-block,
+    .detail-sidebar,
+    .detail-price-box {
+        padding: 14px;
+    }
+
+    .review-meta span {
+        width: 100%;
+    }
+
+    .admin-row {
+        padding: 13px;
+    }
+
+    .stat-card {
+        min-height: auto;
+    }
+
+    .empty {
+        padding: 20px;
+    }
+}

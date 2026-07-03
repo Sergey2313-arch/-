@@ -6,7 +6,7 @@
 <section class="auth-card neon-card">
     <p class="eyebrow">create account</p>
     <h1>Регистрация ReviMarket</h1>
-    <p>Выбери роль на бирже и тип аккаунта: физическое лицо или бизнес-аккаунт.</p>
+    <p>Выбери роль на бирже и тип аккаунта. Заказчик и исполнитель могут быть как физлицом, так и ИП или юрлицом.</p>
 
     <form asp-action="Register" method="post" class="form">
         @Html.AntiForgeryToken()
@@ -14,18 +14,18 @@
 
         <div class="role-choice">
             <label class="role-card">
-                <input asp-for="AccountType" type="radio" value="Customer" checked />
+                <input asp-for="AccountType" type="radio" value="@UserRoles.Customer" />
                 <span>
                     <b>Заказчик</b>
-                    <small>Создаёт заказы, выбирает исполнителя, ведёт сделку.</small>
+                    <small>Создает заказы, выбирает исполнителя и ведет сделку.</small>
                 </span>
             </label>
 
             <label class="role-card">
-                <input asp-for="AccountType" type="radio" value="Creator" />
+                <input asp-for="AccountType" type="radio" value="@UserRoles.Creator" />
                 <span>
                     <b>Исполнитель</b>
-                    <small>Откликается на заказы и получает выплаты.</small>
+                    <small>Откликается на заказы, выполняет работу и получает выплаты.</small>
                 </span>
             </label>
         </div>
@@ -33,18 +33,18 @@
         <label>Тип лица</label>
         <div class="role-choice">
             <label class="role-card">
-                <input asp-for="LegalType" type="radio" value="Individual" checked />
+                <input asp-for="LegalType" type="radio" value="@AccountLegalTypes.Individual" />
                 <span>
-                    <b>Физ. лицо</b>
+                    <b>Физлицо</b>
                     <small>Обычный пользователь платформы.</small>
                 </span>
             </label>
 
             <label class="role-card">
-                <input asp-for="LegalType" type="radio" value="Business" />
+                <input asp-for="LegalType" type="radio" value="@AccountLegalTypes.Business" />
                 <span>
-                    <b>ИП / юр. лицо</b>
-                    <small>Для компаний, ИП и бизнес-заказчиков.</small>
+                    <b>ИП / юрлицо</b>
+                    <small>Для компаний, ИП, бизнес-заказчиков и бизнес-исполнителей.</small>
                 </span>
             </label>
         </div>
@@ -58,10 +58,12 @@
         <span asp-validation-for="Email" class="validation"></span>
 
         <label>Название ИП / организации</label>
-        <input asp-for="OrganizationName" placeholder="Например ИП Коробков С. А. или ООО РевиМаркет" />
+        <input asp-for="OrganizationName" placeholder="Например ИП Иванов И. И. или ООО РевиМаркет" />
+        <span asp-validation-for="OrganizationName" class="validation"></span>
 
         <label>ИНН</label>
-        <input asp-for="Inn" placeholder="ИНН для бизнес-аккаунта" />
+        <input asp-for="Inn" placeholder="10 или 12 цифр" />
+        <span asp-validation-for="Inn" class="validation"></span>
 
         <label>ОГРН / ОГРНИП</label>
         <input asp-for="OgrnOrOgrnip" placeholder="Можно заполнить позже" />
@@ -81,7 +83,7 @@
 
         <div class="admin-note">
             <b>Зачем это нужно?</b>
-            <span>Тип лица пригодится для платежей, договоров, чеков, безопасных сделок и выплат.</span>
+            <span>Тип лица нужен для платежей, договоров, чеков, безопасных сделок и выплат.</span>
         </div>
 
         <button class="btn btn-primary" type="submit">Зарегистрироваться</button>

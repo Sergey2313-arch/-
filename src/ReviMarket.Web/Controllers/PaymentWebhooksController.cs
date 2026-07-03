@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReviMarket.Web.Data;
 using ReviMarket.Web.Models;
+using ReviMarket.Web.Services.Payments;
 
 namespace ReviMarket.Web.Controllers;
 
@@ -10,10 +12,58 @@ namespace ReviMarket.Web.Controllers;
 public class PaymentWebhooksController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
+    private readonly PaymentProviderSelector _paymentProviders;
+    private readonly PaymentLedger _ledger;
 
-    public PaymentWebhooksController(ApplicationDbContext db)
+    public PaymentWebhooksController(
+        ApplicationDbContext db,
+        PaymentProviderSelector paymentProviders,
+        PaymentLedger ledger)
     {
         _db = db;
+        _paymentProviders = paymentProviders;
+        _ledger = ledger;
+    }
+
+    [HttpPost("yookassa")]
+    public async Task<IActionResult> YooKassa()
+    {
+        using var document = await JsonDocument.ParseAsync(Request.Body, cancellationToken: HttpContext.RequestAborted);
+        var root = document.RootElement;
+
+        if (!root.TryGetProperty("object", out var paymentObject)
+            || !paymentObject.TryGetProperty("id", out var idProperty))
+        {
+            return BadRequest();
+        }
+
+        var providerPaymentId = idProperty.GetString();
+        if (string.IsNullOrWhiteSpace(providerPaymentId))
+        {
+            return BadRequest();
+        }
+
+        var invoice = await _db.PaymentInvoices
+            .FirstOrDefaultAsync(
+                x => x.Provider == PaymentProviders.YooKassa && x.ProviderPaymentId == providerPaymentId,
+                HttpContext.RequestAborted);
+
+        if (invoice is null)
+        {
+            return Ok();
+        }
+
+        var status = await ResolveProviderStatusAsync(providerPaymentId, paymentObject);
+        if (status == PaymentStatuses.Success)
+        {
+            await _ledger.MarkInvoicePaidAsync(invoice, $"Оплата счета #{invoice.Id} через ЮKassa", HttpContext.RequestAborted);
+        }
+        else if (status == PaymentStatuses.Failed)
+        {
+            await _ledger.MarkInvoiceFailedAsync(invoice, HttpContext.RequestAborted);
+        }
+
+        return Ok();
     }
 
     [HttpPost("test-success/{invoiceId:int}")]
@@ -21,29 +71,28 @@ public class PaymentWebhooksController : ControllerBase
     {
         var invoice = await _db.PaymentInvoices.FirstOrDefaultAsync(x => x.Id == invoiceId);
         if (invoice is null) return NotFound();
-        if (invoice.Status == PaymentStatuses.Success) return Ok();
+        if (invoice.Provider != PaymentProviders.Test) return BadRequest();
 
-        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == invoice.UserId);
-        if (wallet is null)
+        await _ledger.MarkInvoicePaidAsync(invoice, $"Тестовая оплата счета #{invoice.Id}", HttpContext.RequestAborted);
+        return Ok();
+    }
+
+    private async Task<string> ResolveProviderStatusAsync(string providerPaymentId, JsonElement paymentObject)
+    {
+        var provider = _paymentProviders.Current;
+        if (provider.Name == PaymentProviders.YooKassa)
         {
-            wallet = new Wallet { UserId = invoice.UserId };
-            _db.Wallets.Add(wallet);
+            var remoteStatus = await provider.GetPaymentAsync(providerPaymentId, HttpContext.RequestAborted);
+            if (remoteStatus is not null)
+            {
+                return remoteStatus.Status;
+            }
         }
 
-        invoice.Status = PaymentStatuses.Success;
-        invoice.PaidAt = DateTime.UtcNow;
-        wallet.Balance += invoice.Amount;
+        var payloadStatus = paymentObject.TryGetProperty("status", out var statusProperty)
+            ? statusProperty.GetString()
+            : null;
 
-        _db.PaymentTransactions.Add(new PaymentTransaction
-        {
-            UserId = invoice.UserId,
-            Amount = invoice.Amount,
-            Type = PaymentTypes.TopUp,
-            Status = PaymentStatuses.Success,
-            Comment = "Payment invoice success"
-        });
-
-        await _db.SaveChangesAsync();
-        return Ok();
+        return YooKassaPaymentProvider.MapStatus(payloadStatus);
     }
 }

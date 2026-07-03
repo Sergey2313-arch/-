@@ -1,0 +1,34 @@
+@model SupportQueueViewModel
+@{
+    ViewData["Title"] = "Очередь поддержки";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">support queue</p>
+        <h1>Очередь поддержки</h1>
+        <p>Тикеты пользователей для агентов поддержки и администраторов.</p>
+    </div>
+    <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">В панель</a>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Обращения</h2>
+    <div class="admin-list">
+        @foreach (var item in Model.Requests)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>@item.Title</b>
+                    <p>@item.Text</p>
+                    <small>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm") • автор: @(item.User?.DisplayName ?? "-") • агент: @(item.Agent?.DisplayName ?? "не назначен")</small>
+                </div>
+                <div class="review-actions">
+                    <span class="tag">@item.Priority</span>
+                    <span class="tag">@item.Status</span>
+                    <a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+                </div>
+            </div>
+        }
+    </div>
+</section>

@@ -22,6 +22,7 @@ public class AdminController : Controller
         ViewBag.OrdersCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Order);
         ViewBag.ProductsCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Product);
         ViewBag.MessagesCount = await _db.ChatMessages.CountAsync();
+        ViewBag.SupportCount = await _db.SupportRequests.CountAsync(x => x.Status != CaseStatuses.Done);
         return View();
     }
 }

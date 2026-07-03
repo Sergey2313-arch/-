@@ -1,0 +1,122 @@
+@model ModerationDashboardViewModel
+@{
+    ViewData["Title"] = "Модерация";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">moderation</p>
+        <h1>Модерация</h1>
+        <p>Проверка заказов, сообщений, пользователей и открытых обращений поддержки.</p>
+    </div>
+    <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">В панель</a>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Заказы</h2>
+    <div class="admin-list">
+        @foreach (var item in Model.Orders)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>@item.Title</b>
+                    <p>@item.Description</p>
+                    <small>@item.Category • @item.Price.ToString("N0") ₽ • @(item.Owner?.DisplayName ?? "заказчик")</small>
+                </div>
+                <div class="review-actions">
+                    <span class="tag">@item.ReviewStatus</span>
+                    <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+                    <form asp-action="ApproveOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button class="btn btn-primary" type="submit">Опубликовать</button>
+                    </form>
+                    <form asp-action="ReturnOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button class="btn btn-soft" type="submit">На проверку</button>
+                    </form>
+                    <form asp-action="BlockOrder" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button class="btn btn-soft" type="submit">Скрыть</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Сообщения</h2>
+    <div class="admin-list">
+        @foreach (var message in Model.Messages)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>@(message.Sender?.DisplayName ?? "Отправитель") → @(message.Receiver?.DisplayName ?? "Получатель")</b>
+                    <p>@message.Text</p>
+                    <small>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                </div>
+                <form asp-action="DeleteMessage" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@message.Id" />
+                    <button class="btn btn-soft" type="submit">Удалить</button>
+                </form>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Пользователи</h2>
+    <div class="admin-list">
+        @foreach (var user in Model.Users)
+        {
+            var locked = user.LockoutEnd is not null && user.LockoutEnd > DateTimeOffset.UtcNow;
+            <div class="admin-row">
+                <div>
+                    <b>@user.DisplayName</b>
+                    <p>@user.Email • @user.AccountType • @user.LegalType</p>
+                    <small>создан @user.CreatedAt.ToString("dd.MM.yyyy") • @(locked ? "заблокирован" : "активен")</small>
+                </div>
+                <div class="review-actions">
+                    <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@user.Id">Профиль</a>
+                    @if (locked)
+                    {
+                        <form asp-action="UnlockUser" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button class="btn btn-primary" type="submit">Разблокировать</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="LockUser" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button class="btn btn-soft" type="submit">Заблокировать</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Открытые обращения</h2>
+    <div class="admin-list">
+        @foreach (var request in Model.SupportRequests)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>@request.Title</b>
+                    <p>@request.Text</p>
+                    <small>@request.Priority • @(request.User?.DisplayName ?? "пользователь")</small>
+                </div>
+                <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Открыть</a>
+            </div>
+        }
+    </div>
+</section>

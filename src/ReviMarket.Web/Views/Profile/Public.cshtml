@@ -8,11 +8,19 @@
 <section class="profile-page neon-card">
     <p class="eyebrow">public profile</p>
     <h1>@Model.DisplayName</h1>
-    <p>@Model.AccountType • @Model.LegalType</p>
+    <p>@DisplayRole(Model) • @DisplayLegalType(Model)</p>
+    @if (Model.LegalType == AccountLegalTypes.Business)
+    {
+        <p>@Model.OrganizationName • ИНН @Model.Inn</p>
+    }
     <div class="profile-tabs">
         <span class="tag">@(isOnline ? "В сети" : "Не в сети")</span>
         <span class="tag">★ @Model.Rating.ToString("0.00")</span>
         <span class="tag">@Model.ReviewsCount отзывов</span>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a class="btn btn-soft" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.Id">Написать</a>
+        }
     </div>
 </section>
 
@@ -29,7 +37,7 @@
         {
             <div class="admin-row">
                 <div>
-                    <b>★ @review.Rating — @(review.Author?.DisplayName ?? "Пользователь")</b>
+                    <b>★ @review.Rating - @(review.Author?.DisplayName ?? "Пользователь")</b>
                     <p>@review.Text</p>
                     <small>@(review.Deal?.MarketItem?.Title ?? "Сделка") • @review.CreatedAt.ToString("dd.MM.yyyy")</small>
                 </div>
@@ -37,3 +45,23 @@
         }
     </div>
 </section>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <section class="auth-card neon-card">
+        <h2>Пожаловаться на профиль</h2>
+        <form asp-controller="Reports" asp-action="UserProfile" method="post" class="form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <label>Причина</label>
+            <input name="reason" maxlength="600" placeholder="Спам, мошенничество, нарушение правил" />
+            <button class="btn btn-soft" type="submit">Отправить жалобу</button>
+        </form>
+    </section>
+}
+
+@functions {
+    string DisplayRole(ApplicationUser user) => user.AccountType == UserRoles.Creator ? "исполнитель" : "заказчик";
+
+    string DisplayLegalType(ApplicationUser user) => user.LegalType == AccountLegalTypes.Business ? "ИП / юрлицо" : "физлицо";
+}

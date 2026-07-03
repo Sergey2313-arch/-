@@ -1,40 +1,57 @@
 @model PaymentInvoice
 @{
-    ViewData["Title"] = "Оплата счёта";
+    ViewData["Title"] = "Оплата счета";
+    var canUseDemoConfirmation = ViewBag.CanUseDemoConfirmation as bool? ?? false;
 }
 
 <section class="auth-card neon-card payment-checkout">
     <p class="eyebrow">payment checkout</p>
-    <h1>Счёт #@Model.Id</h1>
-    <p>Demo-режим: карта не списывается. Проверяется сценарий оплаты, зачисления на баланс и истории операций.</p>
+    <h1>Счет #@Model.Id</h1>
+    <p>Статус счета обновляется после подтверждения платежа провайдером или тестовой оплаты в dev-режиме.</p>
 
     <div class="detail-price-box">
-        <span>Сумма счёта</span>
+        <span>Сумма счета</span>
         <b>@Model.Amount.ToString("N0") ₽</b>
     </div>
 
     <div class="detail-info-list">
         <div><span>Провайдер</span><b>@Model.Provider</b></div>
-        <div><span>Статус</span><b>@Model.Status</b></div>
-        <div><span>ID платежа</span><b>@Model.ProviderPaymentId</b></div>
+        <div><span>Статус</span><b>@DisplayStatus(Model.Status)</b></div>
+        <div><span>ID платежа</span><b>@(Model.ProviderPaymentId ?? "-")</b></div>
     </div>
 
     @if (Model.Status == PaymentStatuses.Pending)
     {
-        <form asp-action="ConfirmDemo" method="post" class="form">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="id" value="@Model.Id" />
-            <button class="btn btn-primary" type="submit">Симулировать успешную оплату</button>
-        </form>
+        @if (!canUseDemoConfirmation && !string.IsNullOrWhiteSpace(Model.ConfirmationUrl))
+        {
+            <a class="btn btn-primary" href="@Model.ConfirmationUrl">Перейти к оплате</a>
+        }
+        else if (canUseDemoConfirmation)
+        {
+            <form asp-action="ConfirmDemo" method="post" class="form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button class="btn btn-primary" type="submit">Симулировать успешную оплату</button>
+            </form>
+        }
     }
     else
     {
-        <a class="btn btn-primary" href="/Wallet">Вернуться в кошелёк</a>
+        <a class="btn btn-primary" href="/Wallet">Вернуться в кошелек</a>
     }
 </section>
 
 <section class="section-block neon-card">
-    <p class="eyebrow">real provider later</p>
-    <h2>Под реальную платёжку</h2>
-    <p>Позже этот экран заменится переходом к платёжному провайдеру. После webhook баланс будет пополняться автоматически.</p>
+    <p class="eyebrow">payment safety</p>
+    <h2>Как зачисляется баланс</h2>
+    <p>Баланс пополняется только после статуса успешной оплаты. Повторный webhook не начислит деньги второй раз.</p>
 </section>
+
+@functions {
+    string DisplayStatus(string status) => status switch
+    {
+        PaymentStatuses.Success => "Оплачен",
+        PaymentStatuses.Failed => "Ошибка",
+        _ => "Ожидает оплаты"
+    };
+}

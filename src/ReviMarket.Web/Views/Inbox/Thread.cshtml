@@ -1,0 +1,62 @@
+@model ChatThreadViewModel
+@{
+    ViewData["Title"] = $"Чат с {Model.OtherUser.DisplayName}";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">chat</p>
+        <h1>@Model.OtherUser.DisplayName</h1>
+        <p>@DisplayRole(Model.OtherUser) • @DisplayLegalType(Model.OtherUser)</p>
+    </div>
+    <a class="btn btn-soft" asp-action="Index">Назад к сообщениям</a>
+</section>
+
+@if (TempData["Error"] is string error)
+{
+    <section class="admin-note">
+        <b>Сообщение не отправлено</b>
+        <span>@error</span>
+    </section>
+}
+
+<section class="section-block neon-card">
+    <h2>Переписка</h2>
+    @if (!Model.Messages.Any())
+    {
+        <p>Диалог пока пуст. Напиши первое сообщение.</p>
+    }
+    else
+    {
+        <div class="admin-list">
+            @foreach (var message in Model.Messages)
+            {
+                var mine = message.SenderId == Model.CurrentUser.Id;
+                <div class="admin-row">
+                    <div>
+                        <b>@(mine ? "Вы" : Model.OtherUser.DisplayName)</b>
+                        <p>@message.Text</p>
+                        <small>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+<section class="auth-card neon-card">
+    <h2>Новое сообщение</h2>
+    <form asp-action="Send" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="receiverId" value="@Model.OtherUser.Id" />
+        <label>Текст</label>
+        <textarea name="text" maxlength="1000" rows="5" placeholder="Напиши сообщение"></textarea>
+        <button class="btn btn-primary" type="submit">Отправить</button>
+    </form>
+</section>
+
+@functions {
+    string DisplayRole(ApplicationUser user) => user.AccountType == UserRoles.Creator ? "Исполнитель" : user.AccountType == UserRoles.Customer ? "Заказчик" : user.AccountType;
+
+    string DisplayLegalType(ApplicationUser user) => user.LegalType == AccountLegalTypes.Business ? "ИП / юрлицо" : "физлицо";
+}

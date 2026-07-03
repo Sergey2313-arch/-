@@ -1,0 +1,76 @@
+@model SupportDetailsViewModel
+@{
+    ViewData["Title"] = Model.Request.Title;
+    var item = Model.Request;
+    var isStaff = User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager) || User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.CoOwner) || User.IsInRole(UserRoles.SupportAgent);
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">support ticket</p>
+        <h1>@item.Title</h1>
+        <p>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm") • @item.Priority • @item.Status</p>
+    </div>
+    <a class="btn btn-soft" asp-action="Index">Мои обращения</a>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Описание</h2>
+    <p>@item.Text</p>
+    <div class="detail-info-list">
+        <div><span>Автор</span><b>@(item.User?.DisplayName ?? "Пользователь")</b></div>
+        <div><span>Агент</span><b>@(item.Agent?.DisplayName ?? "не назначен")</b></div>
+        <div><span>Статус</span><b>@item.Status</b></div>
+    </div>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Связь</h2>
+    @if (isStaff && item.UserId is not null)
+    {
+        <a class="btn btn-primary" asp-controller="Inbox" asp-action="Thread" asp-route-id="@item.UserId">Написать пользователю</a>
+    }
+    else if (item.AgentId is not null)
+    {
+        <a class="btn btn-primary" asp-controller="Inbox" asp-action="Thread" asp-route-id="@item.AgentId">Написать агенту</a>
+    }
+    else
+    {
+        <p>Агент поддержки еще не назначен. Ответ появится после обработки тикета.</p>
+    }
+</section>
+
+@if (isStaff)
+{
+    <section class="auth-card neon-card">
+        <h2>Работа с тикетом</h2>
+        <div class="profile-tabs">
+            <form asp-action="Take" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@item.Id" />
+                <button class="btn btn-primary" type="submit">Взять в работу</button>
+            </form>
+
+            <form asp-action="SetStatus" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@item.Id" />
+                <input type="hidden" name="status" value="@CaseStatuses.Open" />
+                <button class="btn btn-soft" type="submit">Открыт</button>
+            </form>
+
+            <form asp-action="SetStatus" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@item.Id" />
+                <input type="hidden" name="status" value="@CaseStatuses.InProgress" />
+                <button class="btn btn-soft" type="submit">В работе</button>
+            </form>
+
+            <form asp-action="SetStatus" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@item.Id" />
+                <input type="hidden" name="status" value="@CaseStatuses.Done" />
+                <button class="btn btn-soft" type="submit">Закрыть</button>
+            </form>
+        </div>
+    </section>
+}

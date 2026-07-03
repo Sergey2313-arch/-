@@ -25,13 +25,19 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var role = model.AccountType == UserRoles.Creator ? UserRoles.Creator : UserRoles.Customer;
+        var role = NormalizeAccountType(model.AccountType);
+        var legalType = NormalizeLegalType(model.LegalType);
         var user = new ApplicationUser
         {
             DisplayName = model.DisplayName.Trim(),
             UserName = model.Email.Trim(),
             Email = model.Email.Trim(),
-            AccountType = role
+            AccountType = role,
+            LegalType = legalType,
+            OrganizationName = legalType == AccountLegalTypes.Business ? model.OrganizationName?.Trim() : null,
+            Inn = legalType == AccountLegalTypes.Business ? NormalizeDigits(model.Inn) : null,
+            OgrnOrOgrnip = legalType == AccountLegalTypes.Business ? NormalizeDigits(model.OgrnOrOgrnip) : null,
+            LegalAddress = legalType == AccountLegalTypes.Business ? model.LegalAddress?.Trim() : null
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);
@@ -70,7 +76,7 @@ public class AccountController : Controller
             return LocalRedirect(returnUrl ?? Url.Action("Index", "Profile")!);
         }
 
-        ModelState.AddModelError(string.Empty, "Неверный email или пароль");
+        ModelState.AddModelError(string.Empty, "Неверный email или пароль.");
         return View(model);
     }
 
@@ -83,4 +89,25 @@ public class AccountController : Controller
     }
 
     public IActionResult AccessDenied() => View();
+
+    internal static string NormalizeAccountType(string? accountType)
+    {
+        return accountType == UserRoles.Creator ? UserRoles.Creator : UserRoles.Customer;
+    }
+
+    internal static string NormalizeLegalType(string? legalType)
+    {
+        return legalType == AccountLegalTypes.Business ? AccountLegalTypes.Business : AccountLegalTypes.Individual;
+    }
+
+    internal static string? NormalizeDigits(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var digits = new string(value.Where(char.IsDigit).ToArray());
+        return string.IsNullOrWhiteSpace(digits) ? null : digits;
+    }
 }

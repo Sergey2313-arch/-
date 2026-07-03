@@ -1,0 +1,73 @@
+@model ProfileEditViewModel
+@{
+    ViewData["Title"] = "Настройки профиля";
+}
+
+<section class="auth-card neon-card">
+    <p class="eyebrow">profile settings</p>
+    <h1>Настройки профиля</h1>
+    <p>Здесь можно изменить роль на бирже и данные физлица, ИП или юрлица.</p>
+
+    <form asp-action="Edit" method="post" class="form">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+
+        <div class="role-choice">
+            <label class="role-card">
+                <input asp-for="AccountType" type="radio" value="@UserRoles.Customer" />
+                <span>
+                    <b>Заказчик</b>
+                    <small>Публикую заказы и оплачиваю работу.</small>
+                </span>
+            </label>
+
+            <label class="role-card">
+                <input asp-for="AccountType" type="radio" value="@UserRoles.Creator" />
+                <span>
+                    <b>Исполнитель</b>
+                    <small>Беру заказы и получаю выплаты.</small>
+                </span>
+            </label>
+        </div>
+
+        <label>Тип лица</label>
+        <div class="role-choice">
+            <label class="role-card">
+                <input asp-for="LegalType" type="radio" value="@AccountLegalTypes.Individual" />
+                <span>
+                    <b>Физлицо</b>
+                    <small>Профиль обычного пользователя.</small>
+                </span>
+            </label>
+
+            <label class="role-card">
+                <input asp-for="LegalType" type="radio" value="@AccountLegalTypes.Business" />
+                <span>
+                    <b>ИП / юрлицо</b>
+                    <small>Профиль компании или индивидуального предпринимателя.</small>
+                </span>
+            </label>
+        </div>
+
+        <label>Имя / название профиля</label>
+        <input asp-for="DisplayName" />
+        <span asp-validation-for="DisplayName" class="validation"></span>
+
+        <label>Название ИП / организации</label>
+        <input asp-for="OrganizationName" placeholder="Например ИП Иванов И. И. или ООО РевиМаркет" />
+        <span asp-validation-for="OrganizationName" class="validation"></span>
+
+        <label>ИНН</label>
+        <input asp-for="Inn" placeholder="10 или 12 цифр" />
+        <span asp-validation-for="Inn" class="validation"></span>
+
+        <label>ОГРН / ОГРНИП</label>
+        <input asp-for="OgrnOrOgrnip" />
+
+        <label>Юридический адрес</label>
+        <input asp-for="LegalAddress" />
+
+        <button class="btn btn-primary" type="submit">Сохранить</button>
+        <a class="btn btn-soft" href="/Profile">Назад</a>
+    </form>
+</section>

@@ -43,10 +43,12 @@
             <a href="/Creators">Исполнители</a>
             @if (SignInManager.IsSignedIn(User))
             {
+                <a href="/Inbox">Сообщения</a>
+                <a href="/Support">Поддержка</a>
                 <a href="/Profile">Профиль</a>
                 @if (canOpenPanel)
                 {
-                    <a href="/admin.html">Панель</a>
+                    <a href="/Panel">Панель</a>
                 }
             }
         </nav>

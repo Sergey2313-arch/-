@@ -17,10 +17,16 @@
 {
     var online = user.LastSeenAt is not null && user.LastSeenAt > onlineLimit;
     <article class="card">
-        <div class="card-top"><span class="tag">@(online ? "В сети" : "Не в сети")</span><span class="price">★ @user.Rating.ToString("0.00")</span></div>
+        <div class="card-top">
+            <span class="tag">@(online ? "В сети" : "Не в сети")</span>
+            <span class="price">★ @user.Rating.ToString("0.00")</span>
+        </div>
         <h3>@user.DisplayName</h3>
         <p>@user.ReviewsCount отзывов • на платформе с @user.CreatedAt.ToString("dd.MM.yyyy")</p>
-        <div class="card-bottom"><a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@user.Id">Профиль</a><a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Найти заказ</a></div>
+        <div class="card-bottom">
+            <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@user.Id">Профиль</a>
+            <a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Найти заказ</a>
+        </div>
     </article>
 }
 </div>

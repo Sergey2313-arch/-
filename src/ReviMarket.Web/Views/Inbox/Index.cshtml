@@ -1,4 +1,4 @@
-@model List<ChatMessage>
+@model InboxIndexViewModel
 @{
     ViewData["Title"] = "Сообщения";
 }
@@ -7,27 +7,55 @@
     <div>
         <p class="eyebrow">inbox</p>
         <h1>Сообщения</h1>
-        <p>Пока это backend-заготовка для чатов по сделкам.</p>
+        <p>Диалоги между заказчиками, исполнителями и пользователями ReviMarket.</p>
     </div>
+    <a class="btn btn-primary" asp-controller="Support" asp-action="Create">Написать в поддержку</a>
 </section>
 
-@if (!Model.Any())
+@if (Model.Conversations.Any())
 {
-    <section class="neon-card empty">
-        <h2>Сообщений пока нет</h2>
-        <p>После отклика на заказ или покупки товара здесь появится переписка.</p>
+    <section class="section-block neon-card">
+        <h2>Диалоги</h2>
+        <div class="admin-list">
+            @foreach (var conversation in Model.Conversations)
+            {
+                <div class="admin-row">
+                    <div>
+                        <b>@conversation.User.DisplayName</b>
+                        <p>@conversation.LatestMessage.Text</p>
+                        <small>@conversation.MessagesCount сообщений • @conversation.LatestMessage.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                    </div>
+                    <a class="btn btn-soft" asp-action="Thread" asp-route-id="@conversation.User.Id">Открыть</a>
+                </div>
+            }
+        </div>
     </section>
 }
 else
 {
+    <section class="neon-card empty">
+        <h2>Сообщений пока нет</h2>
+        <p>Открой профиль пользователя, заказ или выбери контакт ниже, чтобы начать диалог.</p>
+    </section>
+}
+
+<section class="section-block neon-card">
+    <h2>Пользователи</h2>
     <div class="grid">
-    @foreach (var message in Model)
-    {
-        <article class="card">
-            <h3>@message.Sender?.DisplayName → @message.Receiver?.DisplayName</h3>
-            <p>@message.Text</p>
-            <span>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
-        </article>
-    }
+        @foreach (var user in Model.Contacts)
+        {
+            <article class="card">
+                <span class="tag">@DisplayRole(user)</span>
+                <h3>@user.DisplayName</h3>
+                <p>@DisplayLegalType(user) • ★ @user.Rating.ToString("0.00")</p>
+                <a class="btn btn-primary" asp-action="Thread" asp-route-id="@user.Id">Написать</a>
+            </article>
+        }
     </div>
+</section>
+
+@functions {
+    string DisplayRole(ApplicationUser user) => user.AccountType == UserRoles.Creator ? "Исполнитель" : user.AccountType == UserRoles.Customer ? "Заказчик" : user.AccountType;
+
+    string DisplayLegalType(ApplicationUser user) => user.LegalType == AccountLegalTypes.Business ? "ИП / юрлицо" : "физлицо";
 }
