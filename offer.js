@@ -1,0 +1,1 @@
+// ReviMarket Global compatibility script.
