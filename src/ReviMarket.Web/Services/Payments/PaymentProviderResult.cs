@@ -8,4 +8,12 @@ public sealed record PaymentProviderResult(
 public sealed record PaymentProviderStatus(
     string ProviderPaymentId,
     string Status,
-    bool Paid);
+    bool Paid,
+    decimal? Amount = null,
+    string? Currency = null,
+    string? InvoiceId = null);
+
+public sealed record PaymentReconciliationResult(
+    string? Status,
+    bool Changed,
+    string? Error = null);

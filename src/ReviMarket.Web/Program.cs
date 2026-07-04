@@ -86,14 +86,17 @@ builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection("Pay
 builder.Services.PostConfigure<PaymentOptions>(options =>
 {
     options.Provider = builder.Configuration["PAYMENT_PROVIDER"] ?? options.Provider;
+    options.Currency = builder.Configuration["PAYMENT_CURRENCY"] ?? options.Currency;
     options.YooKassa.ShopId = builder.Configuration["PAYMENT_SHOP_ID"] ?? options.YooKassa.ShopId;
     options.YooKassa.SecretKey = builder.Configuration["PAYMENT_SECRET_KEY"] ?? options.YooKassa.SecretKey;
+    options.YooKassa.ApiBaseUrl = builder.Configuration["PAYMENT_YOOKASSA_API_BASE_URL"] ?? options.YooKassa.ApiBaseUrl;
     options.ReturnUrl = builder.Configuration["PAYMENT_RETURN_URL"] ?? options.ReturnUrl;
 });
 builder.Services.AddSingleton<TestPaymentProvider>();
 builder.Services.AddHttpClient<YooKassaPaymentProvider>();
 builder.Services.AddScoped<PaymentProviderSelector>();
 builder.Services.AddScoped<PaymentLedger>();
+builder.Services.AddScoped<PaymentReconciliationService>();
 builder.Services.AddSingleton<TextSecurityService>();
 
 var app = builder.Build();

@@ -2,6 +2,9 @@
     ViewData["Title"] = "Пополнить баланс";
     var paymentProvider = ViewBag.PaymentProvider as string ?? PaymentProviders.Test;
     var isTestProvider = paymentProvider == PaymentProviders.Test;
+    var providerError = ViewBag.PaymentProviderError as string;
+    var minTopUpAmount = ViewBag.MinTopUpAmount is decimal minAmount ? minAmount : 100m;
+    var maxTopUpAmount = ViewBag.MaxTopUpAmount is decimal maxAmount ? maxAmount : 500000m;
 }
 
 <section class="auth-card neon-card">
@@ -14,15 +17,22 @@
         <div asp-validation-summary="ModelOnly" class="validation"></div>
 
         <label>Сумма</label>
-        <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
+        <input name="amount" type="number" min="@minTopUpAmount" max="@maxTopUpAmount" step="100" placeholder="Например 1000" />
 
-        <button class="btn btn-primary" type="submit">Создать счет</button>
+        <button class="btn btn-primary" type="submit" disabled="@(providerError is not null)">Создать счет</button>
     </form>
 </section>
 
 <section class="section-block neon-card">
     <p class="eyebrow">payment provider</p>
     <h2>@(isTestProvider ? "Тестовый режим" : $"Провайдер: {paymentProvider}")</h2>
+    @if (providerError is not null)
+    {
+        <div class="admin-note">
+            <b>Реальные платежи не настроены</b>
+            <span>@providerError</span>
+        </div>
+    }
     <p>
         @if (isTestProvider)
         {
@@ -30,7 +40,8 @@
         }
         else
         {
-            <span>После создания счета пользователь будет перенаправлен на страницу оплаты провайдера.</span>
+            <span>После создания счета пользователь будет перенаправлен на защищенную страницу оплаты YooKassa. Баланс пополнится только после подтверждения платежа через API или webhook.</span>
         }
     </p>
+    <p>Лимиты пополнения: от @minTopUpAmount.ToString("N0") ₽ до @maxTopUpAmount.ToString("N0") ₽.</p>
 </section>

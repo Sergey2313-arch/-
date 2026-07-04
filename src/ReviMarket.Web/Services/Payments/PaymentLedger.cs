@@ -15,28 +15,43 @@ public sealed class PaymentLedger
 
     public async Task<bool> MarkInvoicePaidAsync(PaymentInvoice invoice, string comment, CancellationToken cancellationToken)
     {
-        if (invoice.Status == PaymentStatuses.Success)
+        await using var tx = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+        var pendingInvoice = await _db.PaymentInvoices
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == invoice.Id, cancellationToken);
+
+        if (pendingInvoice is null || pendingInvoice.Status != PaymentStatuses.Pending)
         {
+            await tx.CommitAsync(cancellationToken);
             return false;
         }
 
-        await using var tx = await _db.Database.BeginTransactionAsync(cancellationToken);
+        var updated = await _db.PaymentInvoices
+            .Where(x => x.Id == invoice.Id && x.Status == PaymentStatuses.Pending)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Status, PaymentStatuses.Success)
+                .SetProperty(x => x.PaidAt, DateTime.UtcNow), cancellationToken);
 
-        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == invoice.UserId, cancellationToken);
+        if (updated == 0)
+        {
+            await tx.CommitAsync(cancellationToken);
+            return false;
+        }
+
+        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == pendingInvoice.UserId, cancellationToken);
         if (wallet is null)
         {
-            wallet = new Wallet { UserId = invoice.UserId };
+            wallet = new Wallet { UserId = pendingInvoice.UserId };
             _db.Wallets.Add(wallet);
         }
 
-        invoice.Status = PaymentStatuses.Success;
-        invoice.PaidAt = DateTime.UtcNow;
-        wallet.Balance += invoice.Amount;
+        wallet.Balance += pendingInvoice.Amount;
 
         _db.PaymentTransactions.Add(new PaymentTransaction
         {
-            UserId = invoice.UserId,
-            Amount = invoice.Amount,
+            UserId = pendingInvoice.UserId,
+            Amount = pendingInvoice.Amount,
             Type = PaymentTypes.TopUp,
             Status = PaymentStatuses.Success,
             Comment = comment
@@ -49,12 +64,8 @@ public sealed class PaymentLedger
 
     public async Task MarkInvoiceFailedAsync(PaymentInvoice invoice, CancellationToken cancellationToken)
     {
-        if (invoice.Status == PaymentStatuses.Success || invoice.Status == PaymentStatuses.Failed)
-        {
-            return;
-        }
-
-        invoice.Status = PaymentStatuses.Failed;
-        await _db.SaveChangesAsync(cancellationToken);
+        await _db.PaymentInvoices
+            .Where(x => x.Id == invoice.Id && x.Status == PaymentStatuses.Pending)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Status, PaymentStatuses.Failed), cancellationToken);
     }
 }

@@ -10,12 +10,22 @@ public class PaymentOptions
 
     public string ReturnUrl { get; set; } = string.Empty;
 
+    public decimal MinTopUpAmount { get; set; } = 100m;
+
+    public decimal MaxTopUpAmount { get; set; } = 500000m;
+
     public YooKassaOptions YooKassa { get; set; } = new();
 
     public bool IsYooKassaConfigured =>
         string.Equals(Provider, PaymentProviders.YooKassa, StringComparison.OrdinalIgnoreCase)
         && !string.IsNullOrWhiteSpace(YooKassa.ShopId)
-        && !string.IsNullOrWhiteSpace(YooKassa.SecretKey);
+        && !string.IsNullOrWhiteSpace(YooKassa.SecretKey)
+        && Uri.TryCreate(YooKassa.ApiBaseUrl, UriKind.Absolute, out _);
+
+    public string NormalizedProvider =>
+        string.Equals(Provider, PaymentProviders.YooKassa, StringComparison.OrdinalIgnoreCase)
+            ? PaymentProviders.YooKassa
+            : PaymentProviders.Test;
 }
 
 public class YooKassaOptions

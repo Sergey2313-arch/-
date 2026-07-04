@@ -15,15 +15,33 @@ public sealed class PaymentProviderSelector
         _options = options.Value;
     }
 
+    public string CurrentName => _options.NormalizedProvider;
+
+    public string? ConfigurationError
+    {
+        get
+        {
+            if (CurrentName == PaymentProviders.YooKassa && !_options.IsYooKassaConfigured)
+            {
+                return "Выбрана YooKassa, но не настроены PAYMENT_SHOP_ID, PAYMENT_SECRET_KEY или адрес API.";
+            }
+
+            return null;
+        }
+    }
+
     public IPaymentProvider Current
     {
         get
         {
-            if (string.Equals(_options.Provider, PaymentProviders.YooKassa, StringComparison.OrdinalIgnoreCase))
+            if (CurrentName == PaymentProviders.YooKassa)
             {
-                return _options.IsYooKassaConfigured
-                    ? _services.GetRequiredService<YooKassaPaymentProvider>()
-                    : _services.GetRequiredService<TestPaymentProvider>();
+                if (!_options.IsYooKassaConfigured)
+                {
+                    throw new InvalidOperationException(ConfigurationError);
+                }
+
+                return _services.GetRequiredService<YooKassaPaymentProvider>();
             }
 
             return _services.GetRequiredService<TestPaymentProvider>();

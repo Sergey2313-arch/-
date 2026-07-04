@@ -47,14 +47,14 @@ public class WalletController : Controller
 
         ViewBag.Transactions = transactions;
         ViewBag.Invoices = invoices;
-        ViewBag.PaymentProvider = _paymentProviders.Current.Name;
+        SetPaymentViewBag();
         return View(wallet);
     }
 
     [HttpGet]
     public IActionResult TopUp()
     {
-        ViewBag.PaymentProvider = _paymentProviders.Current.Name;
+        SetPaymentViewBag();
         return View();
     }
 
@@ -62,11 +62,23 @@ public class WalletController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TopUp(decimal amount)
     {
-        ViewBag.PaymentProvider = _paymentProviders.Current.Name;
+        SetPaymentViewBag();
 
-        if (amount < 100)
+        if (amount < _paymentOptions.MinTopUpAmount)
         {
-            ModelState.AddModelError(string.Empty, "Минимальная сумма пополнения - 100 ₽.");
+            ModelState.AddModelError(string.Empty, $"Минимальная сумма пополнения - {_paymentOptions.MinTopUpAmount:N0} ₽.");
+            return View();
+        }
+
+        if (amount > _paymentOptions.MaxTopUpAmount)
+        {
+            ModelState.AddModelError(string.Empty, $"Максимальная сумма пополнения - {_paymentOptions.MaxTopUpAmount:N0} ₽.");
+            return View();
+        }
+
+        if (_paymentProviders.ConfigurationError is string configurationError)
+        {
+            ModelState.AddModelError(string.Empty, configurationError);
             return View();
         }
 
@@ -137,5 +149,13 @@ public class WalletController : Controller
         }
 
         return new Uri($"{Request.Scheme}://{Request.Host}{url}");
+    }
+
+    private void SetPaymentViewBag()
+    {
+        ViewBag.PaymentProvider = _paymentProviders.CurrentName;
+        ViewBag.PaymentProviderError = _paymentProviders.ConfigurationError;
+        ViewBag.MinTopUpAmount = _paymentOptions.MinTopUpAmount;
+        ViewBag.MaxTopUpAmount = _paymentOptions.MaxTopUpAmount;
     }
 }

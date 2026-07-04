@@ -12,17 +12,17 @@ namespace ReviMarket.Web.Controllers;
 public class PaymentWebhooksController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
-    private readonly PaymentProviderSelector _paymentProviders;
     private readonly PaymentLedger _ledger;
+    private readonly PaymentReconciliationService _reconciliation;
 
     public PaymentWebhooksController(
         ApplicationDbContext db,
-        PaymentProviderSelector paymentProviders,
-        PaymentLedger ledger)
+        PaymentLedger ledger,
+        PaymentReconciliationService reconciliation)
     {
         _db = db;
-        _paymentProviders = paymentProviders;
         _ledger = ledger;
+        _reconciliation = reconciliation;
     }
 
     [HttpPost("yookassa")]
@@ -30,6 +30,15 @@ public class PaymentWebhooksController : ControllerBase
     {
         using var document = await JsonDocument.ParseAsync(Request.Body, cancellationToken: HttpContext.RequestAborted);
         var root = document.RootElement;
+
+        var eventName = root.TryGetProperty("event", out var eventProperty)
+            ? eventProperty.GetString()
+            : null;
+
+        if (eventName is not ("payment.succeeded" or "payment.canceled" or "payment.waiting_for_capture"))
+        {
+            return Ok();
+        }
 
         if (!root.TryGetProperty("object", out var paymentObject)
             || !paymentObject.TryGetProperty("id", out var idProperty))
@@ -53,14 +62,12 @@ public class PaymentWebhooksController : ControllerBase
             return Ok();
         }
 
-        var status = await ResolveProviderStatusAsync(providerPaymentId, paymentObject);
-        if (status == PaymentStatuses.Success)
+        var result = await _reconciliation.ReconcileInvoiceAsync(invoice, $"webhook:{eventName}", HttpContext.RequestAborted);
+        if (result.Error is not null)
         {
-            await _ledger.MarkInvoicePaidAsync(invoice, $"Оплата счета #{invoice.Id} через ЮKassa", HttpContext.RequestAborted);
-        }
-        else if (status == PaymentStatuses.Failed)
-        {
-            await _ledger.MarkInvoiceFailedAsync(invoice, HttpContext.RequestAborted);
+            return result.Error.Contains("configured", StringComparison.OrdinalIgnoreCase)
+                ? StatusCode(StatusCodes.Status503ServiceUnavailable)
+                : BadRequest();
         }
 
         return Ok();
@@ -77,22 +84,4 @@ public class PaymentWebhooksController : ControllerBase
         return Ok();
     }
 
-    private async Task<string> ResolveProviderStatusAsync(string providerPaymentId, JsonElement paymentObject)
-    {
-        var provider = _paymentProviders.Current;
-        if (provider.Name == PaymentProviders.YooKassa)
-        {
-            var remoteStatus = await provider.GetPaymentAsync(providerPaymentId, HttpContext.RequestAborted);
-            if (remoteStatus is not null)
-            {
-                return remoteStatus.Status;
-            }
-        }
-
-        var payloadStatus = paymentObject.TryGetProperty("status", out var statusProperty)
-            ? statusProperty.GetString()
-            : null;
-
-        return YooKassaPaymentProvider.MapStatus(payloadStatus);
-    }
 }
