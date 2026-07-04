@@ -56,23 +56,48 @@ public class ReportsController : Controller
         var order = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (order is null) return NotFound();
 
+        var userId = _users.GetUserId(User);
         var text = _textSecurity.CleanText(reason, 600);
         if (string.IsNullOrWhiteSpace(text))
         {
             text = "Пользователь отправил жалобу без комментария.";
         }
 
+        var duplicateOpenCase = await _db.OrderCases.AnyAsync(x =>
+            x.MarketItemId == order.Id
+            && x.CreatedById == userId
+            && x.Status != CaseStatuses.Done
+            && x.Title.StartsWith("Жалоба на заказ"));
+
+        if (duplicateOpenCase)
+        {
+            TempData["ReportInfo"] = "Жалоба по этому заказу уже отправлена и ждет проверки.";
+            return RedirectToAction("Details", "Orders", new { id });
+        }
+
         _db.SupportRequests.Add(new SupportRequest
         {
-            UserId = _users.GetUserId(User),
+            UserId = userId,
             Title = $"Жалоба на заказ #{order.Id}: {order.Title}",
             Text = text,
             Status = CaseStatuses.Open,
             Priority = "High",
             CreatedAt = DateTime.UtcNow
         });
+
+        _db.OrderCases.Add(new OrderCase
+        {
+            MarketItemId = order.Id,
+            CreatedById = userId,
+            Title = $"Жалоба на заказ #{order.Id}: {order.Title}",
+            Text = text,
+            Status = CaseStatuses.Open,
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _db.SaveChangesAsync();
 
+        TempData["ReportSuccess"] = "Жалоба отправлена. Поддержка и модерация проверят заказ.";
         return RedirectToAction("Details", "Orders", new { id });
     }
 }

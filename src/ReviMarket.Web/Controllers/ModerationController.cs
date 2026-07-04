@@ -51,11 +51,21 @@ public class ModerationController : Controller
             .Take(30)
             .ToListAsync();
 
+        var orderCases = await _db.OrderCases
+            .Include(x => x.MarketItem)
+            .Include(x => x.CreatedBy)
+            .Include(x => x.Agent)
+            .Where(x => x.Status != CaseStatuses.Done)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(50)
+            .ToListAsync();
+
         return View(new ModerationDashboardViewModel
         {
             Orders = orders,
             Messages = messages,
             Users = users,
+            OrderCases = orderCases,
             SupportRequests = supportRequests
         });
     }

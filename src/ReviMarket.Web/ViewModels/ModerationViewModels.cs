@@ -10,5 +10,7 @@ public sealed class ModerationDashboardViewModel
 
     public List<ApplicationUser> Users { get; set; } = new();
 
+    public List<OrderCase> OrderCases { get; set; } = new();
+
     public List<SupportRequest> SupportRequests { get; set; } = new();
 }

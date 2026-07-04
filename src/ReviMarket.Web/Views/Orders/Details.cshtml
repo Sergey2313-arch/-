@@ -12,6 +12,21 @@
 <section class="detail-page">
     <a class="btn btn-soft detail-back" asp-action="Index">Назад к заказам</a>
 
+    @if (TempData["ReportSuccess"] is string reportSuccess)
+    {
+        <div class="admin-note">
+            <b>Жалоба отправлена</b>
+            <span>@reportSuccess</span>
+        </div>
+    }
+    @if (TempData["ReportInfo"] is string reportInfo)
+    {
+        <div class="admin-note">
+            <b>Жалоба уже есть</b>
+            <span>@reportInfo</span>
+        </div>
+    }
+
     <div class="detail-layout neon-card">
         <article class="detail-main">
             <p class="eyebrow">order detail</p>

@@ -48,6 +48,28 @@
 </section>
 
 <section class="section-block neon-card">
+    <h2>Жалобы и споры по заказам</h2>
+    <div class="admin-list">
+        @foreach (var item in Model.OrderCases)
+        {
+            <div class="admin-row">
+                <div>
+                    <b>@item.Title</b>
+                    <p>@item.Text</p>
+                    <small>@item.Status • @(item.CreatedBy?.DisplayName ?? "пользователь") • @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                </div>
+                <div class="review-actions">
+                    @if (item.MarketItemId is not null)
+                    {
+                        <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.MarketItemId">Открыть заказ</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-block neon-card">
     <h2>Сообщения</h2>
     <div class="admin-list">
         @foreach (var message in Model.Messages)
