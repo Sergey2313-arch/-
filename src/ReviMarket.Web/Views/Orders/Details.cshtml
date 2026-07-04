@@ -104,8 +104,19 @@
                 <form asp-controller="Reports" asp-action="Order" method="post" class="form">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <label>Жалоба</label>
-                    <input name="reason" maxlength="600" placeholder="Причина жалобы" />
+                    <label>Что не нравится</label>
+                    <select name="reportType">
+                        <option value="fraud">Мошенник или обман</option>
+                        <option value="outside_payment">Просит оплату или контакты вне биржи</option>
+                        <option value="spam">Спам или реклама</option>
+                        <option value="illegal">Запрещенный или незаконный заказ</option>
+                        <option value="abuse">Оскорбления, угрозы или давление</option>
+                        <option value="copyright">Нарушение авторских прав</option>
+                        <option value="wrong_category">Неверная категория или описание</option>
+                        <option value="other">Другое нарушение</option>
+                    </select>
+                    <label>Комментарий</label>
+                    <textarea name="reason" maxlength="600" rows="4" placeholder="Опиши, что произошло. Можно оставить пустым."></textarea>
                     <button class="btn btn-soft detail-action" type="submit">Пожаловаться</button>
                 </form>
             }

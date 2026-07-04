@@ -51,16 +51,22 @@ public class ReportsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Order(int id, string? reason)
+    public async Task<IActionResult> Order(int id, string? reportType, string? reason)
     {
         var order = await _db.MarketItems.FirstOrDefaultAsync(x => x.Id == id && x.Type == MarketItemTypes.Order);
         if (order is null) return NotFound();
 
         var userId = _users.GetUserId(User);
-        var text = _textSecurity.CleanText(reason, 600);
-        if (string.IsNullOrWhiteSpace(text))
+        var reportTypeLabel = GetOrderReportTypeLabel(reportType);
+        var comment = _textSecurity.CleanText(reason, 600);
+        var text = string.IsNullOrWhiteSpace(comment)
+            ? $"Тип жалобы: {reportTypeLabel}. Пользователь не добавил комментарий."
+            : $"Тип жалобы: {reportTypeLabel}. Комментарий: {comment}";
+
+        if (_textSecurity.LooksDangerous(text))
         {
-            text = "Пользователь отправил жалобу без комментария.";
+            TempData["ReportInfo"] = "Жалоба похожа на вредоносный текст и не отправлена.";
+            return RedirectToAction("Details", "Orders", new { id });
         }
 
         var duplicateOpenCase = await _db.OrderCases.AnyAsync(x =>
@@ -78,7 +84,7 @@ public class ReportsController : Controller
         _db.SupportRequests.Add(new SupportRequest
         {
             UserId = userId,
-            Title = $"Жалоба на заказ #{order.Id}: {order.Title}",
+            Title = $"Жалоба на заказ #{order.Id}: {reportTypeLabel}",
             Text = text,
             Status = CaseStatuses.Open,
             Priority = "High",
@@ -89,7 +95,7 @@ public class ReportsController : Controller
         {
             MarketItemId = order.Id,
             CreatedById = userId,
-            Title = $"Жалоба на заказ #{order.Id}: {order.Title}",
+            Title = $"Жалоба на заказ #{order.Id}: {reportTypeLabel}",
             Text = text,
             Status = CaseStatuses.Open,
             CreatedAt = DateTime.UtcNow
@@ -100,4 +106,16 @@ public class ReportsController : Controller
         TempData["ReportSuccess"] = "Жалоба отправлена. Поддержка и модерация проверят заказ.";
         return RedirectToAction("Details", "Orders", new { id });
     }
+
+    private static string GetOrderReportTypeLabel(string? reportType) => reportType switch
+    {
+        "fraud" => "Мошенник или обман",
+        "outside_payment" => "Просит оплату или контакты вне биржи",
+        "spam" => "Спам или реклама",
+        "illegal" => "Запрещенный или незаконный заказ",
+        "abuse" => "Оскорбления, угрозы или давление",
+        "copyright" => "Нарушение авторских прав",
+        "wrong_category" => "Неверная категория или описание",
+        _ => "Другое нарушение"
+    };
 }
