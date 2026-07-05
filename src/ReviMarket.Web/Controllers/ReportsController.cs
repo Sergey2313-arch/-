@@ -29,23 +29,56 @@ public class ReportsController : Controller
         var target = await _users.FindByIdAsync(id);
         if (target is null) return NotFound();
 
+        var userId = _users.GetUserId(User);
+        if (string.IsNullOrWhiteSpace(userId) || userId == target.Id) return BadRequest();
+
         var text = _textSecurity.CleanText(reason, 600);
         if (string.IsNullOrWhiteSpace(text))
         {
             text = "Пользователь отправил жалобу без комментария.";
         }
 
+        if (_textSecurity.LooksDangerous(text))
+        {
+            TempData["ReportInfo"] = "Жалоба похожа на вредоносный текст и не отправлена.";
+            return RedirectToAction("Public", "Profile", new { id });
+        }
+
+        var duplicateOpenCase = await _db.UserCases.AnyAsync(x =>
+            x.TargetUserId == target.Id
+            && x.CreatedById == userId
+            && x.Status != CaseStatuses.Done
+            && x.Title.StartsWith("Жалоба на пользователя"));
+
+        if (duplicateOpenCase)
+        {
+            TempData["ReportInfo"] = "Жалоба на этого пользователя уже отправлена и ждет проверки.";
+            return RedirectToAction("Public", "Profile", new { id });
+        }
+
         _db.SupportRequests.Add(new SupportRequest
         {
-            UserId = _users.GetUserId(User),
+            UserId = userId,
             Title = $"Жалоба на пользователя {target.DisplayName}",
             Text = text,
             Status = CaseStatuses.Open,
             Priority = "High",
             CreatedAt = DateTime.UtcNow
         });
+
+        _db.UserCases.Add(new UserCase
+        {
+            CreatedById = userId,
+            TargetUserId = target.Id,
+            Title = $"Жалоба на пользователя {target.DisplayName}",
+            Text = text,
+            Status = CaseStatuses.Open,
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _db.SaveChangesAsync();
 
+        TempData["ReportSuccess"] = "Жалоба отправлена. Модерация проверит профиль.";
         return RedirectToAction("Public", "Profile", new { id });
     }
 

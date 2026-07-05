@@ -5,6 +5,21 @@
     var isOnline = ViewBag.IsOnline as bool? ?? false;
 }
 
+@if (TempData["ReportSuccess"] is string reportSuccess)
+{
+    <section class="admin-note">
+        <b>Жалоба отправлена</b>
+        <span>@reportSuccess</span>
+    </section>
+}
+@if (TempData["ReportInfo"] is string reportInfo)
+{
+    <section class="admin-note">
+        <b>Жалоба не отправлена</b>
+        <span>@reportInfo</span>
+    </section>
+}
+
 <section class="profile-page neon-card">
     <p class="eyebrow">public profile</p>
     <h1>@Model.DisplayName</h1>

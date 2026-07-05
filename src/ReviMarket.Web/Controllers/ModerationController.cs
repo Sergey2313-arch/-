@@ -43,12 +43,14 @@ public class ModerationController : Controller
             .Take(100)
             .ToListAsync();
 
-        var supportRequests = await _db.SupportRequests
-            .Include(x => x.User)
+        var userCases = await _db.UserCases
+            .Include(x => x.CreatedBy)
+            .Include(x => x.TargetUser)
             .Include(x => x.Agent)
             .Where(x => x.Status != CaseStatuses.Done)
-            .OrderByDescending(x => x.CreatedAt)
-            .Take(30)
+            .OrderBy(x => x.Status == CaseStatuses.Open ? 0 : 1)
+            .ThenByDescending(x => x.CreatedAt)
+            .Take(50)
             .ToListAsync();
 
         var orderCases = await _db.OrderCases
@@ -56,8 +58,18 @@ public class ModerationController : Controller
             .Include(x => x.CreatedBy)
             .Include(x => x.Agent)
             .Where(x => x.Status != CaseStatuses.Done)
-            .OrderByDescending(x => x.CreatedAt)
+            .OrderBy(x => x.Status == CaseStatuses.Open ? 0 : 1)
+            .ThenByDescending(x => x.CreatedAt)
             .Take(50)
+            .ToListAsync();
+
+        var supportRequests = await _db.SupportRequests
+            .Include(x => x.User)
+            .Include(x => x.Agent)
+            .Where(x => x.Status != CaseStatuses.Done)
+            .OrderBy(x => x.Status == CaseStatuses.Open ? 0 : 1)
+            .ThenByDescending(x => x.CreatedAt)
+            .Take(30)
             .ToListAsync();
 
         return View(new ModerationDashboardViewModel
@@ -65,6 +77,7 @@ public class ModerationController : Controller
             Orders = orders,
             Messages = messages,
             Users = users,
+            UserCases = userCases,
             OrderCases = orderCases,
             SupportRequests = supportRequests
         });
@@ -79,6 +92,7 @@ public class ModerationController : Controller
 
         item.ReviewStatus = ReviewStatuses.Approved;
         await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Заказ #{item.Id} опубликован.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -91,6 +105,7 @@ public class ModerationController : Controller
 
         item.ReviewStatus = ReviewStatuses.Pending;
         await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Заказ #{item.Id} возвращен на проверку.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -103,6 +118,49 @@ public class ModerationController : Controller
 
         item.ReviewStatus = ReviewStatuses.Blocked;
         await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Заказ #{item.Id} скрыт с биржи.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetOrderCaseStatus(int id, string status)
+    {
+        var item = await _db.OrderCases.FirstOrDefaultAsync(x => x.Id == id);
+        if (item is null) return NotFound();
+
+        item.Status = NormalizeStatus(status);
+        item.AgentId = _users.GetUserId(User);
+        await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Дело по заказу #{item.Id} обновлено.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetUserCaseStatus(int id, string status)
+    {
+        var item = await _db.UserCases.FirstOrDefaultAsync(x => x.Id == id);
+        if (item is null) return NotFound();
+
+        item.Status = NormalizeStatus(status);
+        item.AgentId = _users.GetUserId(User);
+        await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Жалоба на пользователя #{item.Id} обновлена.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetSupportStatus(int id, string status)
+    {
+        var request = await _db.SupportRequests.FirstOrDefaultAsync(x => x.Id == id);
+        if (request is null) return NotFound();
+
+        request.Status = NormalizeStatus(status);
+        request.AgentId = _users.GetUserId(User);
+        await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Обращение #{request.Id} обновлено.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -115,6 +173,7 @@ public class ModerationController : Controller
 
         _db.ChatMessages.Remove(message);
         await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Сообщение #{id} удалено.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -127,11 +186,13 @@ public class ModerationController : Controller
 
         var user = await _users.FindByIdAsync(id);
         if (user is null) return NotFound();
+        if (!await CanLockUserAsync(user)) return Forbid();
 
         await _users.SetLockoutEnabledAsync(user, true);
         await _users.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddYears(100));
         await _users.UpdateSecurityStampAsync(user);
 
+        TempData["ModerationNotice"] = $"Пользователь {user.DisplayName} заблокирован.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -141,10 +202,37 @@ public class ModerationController : Controller
     {
         var user = await _users.FindByIdAsync(id);
         if (user is null) return NotFound();
+        if (!await CanLockUserAsync(user)) return Forbid();
 
         await _users.SetLockoutEndDateAsync(user, null);
         await _users.UpdateSecurityStampAsync(user);
 
+        TempData["ModerationNotice"] = $"Пользователь {user.DisplayName} разблокирован.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task<bool> CanLockUserAsync(ApplicationUser target)
+    {
+        var currentUserId = _users.GetUserId(User);
+        if (target.Id == currentUserId)
+        {
+            return false;
+        }
+
+        var targetIsOwner = await _users.IsInRoleAsync(target, UserRoles.Owner);
+        var targetIsAdmin = await _users.IsInRoleAsync(target, UserRoles.Admin);
+        if ((targetIsOwner || targetIsAdmin) && !User.IsInRole(UserRoles.Owner))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static string NormalizeStatus(string? status)
+    {
+        return status is CaseStatuses.Open or CaseStatuses.InProgress or CaseStatuses.Done
+            ? status
+            : CaseStatuses.Open;
     }
 }

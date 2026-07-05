@@ -7,9 +7,24 @@
     <div>
         <p class="eyebrow">moderation</p>
         <h1>Модерация</h1>
-        <p>Проверка заказов, сообщений, пользователей и открытых обращений поддержки.</p>
+        <p>Очередь заказов, жалобы, споры, сообщения, пользователи и обращения поддержки.</p>
     </div>
     <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">В панель</a>
+</section>
+
+@if (TempData["ModerationNotice"] is string notice)
+{
+    <section class="admin-note">
+        <b>Готово</b>
+        <span>@notice</span>
+    </section>
+}
+
+<section class="admin-stats">
+    <div class="stat-card neon-card"><span>Заказы</span><b>@Model.Orders.Count</b></div>
+    <div class="stat-card neon-card"><span>Жалобы</span><b>@(Model.OrderCases.Count + Model.UserCases.Count)</b></div>
+    <div class="stat-card neon-card"><span>Сообщения</span><b>@Model.Messages.Count</b></div>
+    <div class="stat-card neon-card"><span>Поддержка</span><b>@Model.SupportRequests.Count</b></div>
 </section>
 
 <section class="section-block neon-card">
@@ -21,10 +36,10 @@
                 <div>
                     <b>@item.Title</b>
                     <p>@item.Description</p>
-                    <small>@item.Category • @item.Price.ToString("N0") ₽ • @(item.Owner?.DisplayName ?? "заказчик")</small>
+                    <small>@item.Category • @item.Price.ToString("N0") ₽ • @(item.Owner?.DisplayName ?? "заказчик") • @DisplayReviewStatus(item.ReviewStatus)</small>
                 </div>
                 <div class="review-actions">
-                    <span class="tag">@item.ReviewStatus</span>
+                    <span class="tag">@DisplayReviewStatus(item.ReviewStatus)</span>
                     <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
                     <form asp-action="ApproveOrder" method="post">
                         @Html.AntiForgeryToken()
@@ -56,13 +71,64 @@
                 <div>
                     <b>@item.Title</b>
                     <p>@item.Text</p>
-                    <small>@item.Status • @(item.CreatedBy?.DisplayName ?? "пользователь") • @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                    <small>@DisplayCaseStatus(item.Status) • @(item.CreatedBy?.DisplayName ?? "пользователь") • исполнитель: @(item.Agent?.DisplayName ?? "не назначен") • @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
                 </div>
                 <div class="review-actions">
                     @if (item.MarketItemId is not null)
                     {
-                        <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.MarketItemId">Открыть заказ</a>
+                        <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.MarketItemId">Заказ</a>
+                        <form asp-action="BlockOrder" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.MarketItemId" />
+                            <button class="btn btn-soft" type="submit">Скрыть заказ</button>
+                        </form>
+                        <form asp-action="ApproveOrder" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.MarketItemId" />
+                            <button class="btn btn-primary" type="submit">Одобрить заказ</button>
+                        </form>
                     }
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetOrderCaseStatus" })' />
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section-block neon-card">
+    <h2>Жалобы на пользователей</h2>
+    <div class="admin-list">
+        @foreach (var item in Model.UserCases)
+        {
+            var locked = item.TargetUser?.LockoutEnd is not null && item.TargetUser.LockoutEnd > DateTimeOffset.UtcNow;
+            <div class="admin-row">
+                <div>
+                    <b>@item.Title</b>
+                    <p>@item.Text</p>
+                    <small>@DisplayCaseStatus(item.Status) • жалоба от @(item.CreatedBy?.DisplayName ?? "пользователь") • модератор: @(item.Agent?.DisplayName ?? "не назначен") • @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                </div>
+                <div class="review-actions">
+                    @if (item.TargetUser is not null)
+                    {
+                        <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@item.TargetUserId">Профиль</a>
+                        if (locked)
+                        {
+                            <form asp-action="UnlockUser" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.TargetUserId" />
+                                <button class="btn btn-primary" type="submit">Разблокировать</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="LockUser" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.TargetUserId" />
+                                <button class="btn btn-soft" type="submit">Заблокировать</button>
+                            </form>
+                        }
+                    }
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetUserCaseStatus" })' />
                 </div>
             </div>
         }
@@ -135,10 +201,29 @@
                 <div>
                     <b>@request.Title</b>
                     <p>@request.Text</p>
-                    <small>@request.Priority • @(request.User?.DisplayName ?? "пользователь")</small>
+                    <small>@request.Priority • @DisplayCaseStatus(request.Status) • @(request.User?.DisplayName ?? "пользователь") • агент: @(request.Agent?.DisplayName ?? "не назначен")</small>
                 </div>
-                <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Открыть</a>
+                <div class="review-actions">
+                    <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Открыть</a>
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = request.Id, Action = "SetSupportStatus" })' />
+                </div>
             </div>
         }
     </div>
 </section>
+
+@functions {
+    string DisplayReviewStatus(string status) => status switch
+    {
+        ReviewStatuses.Approved => "опубликован",
+        ReviewStatuses.Blocked => "скрыт",
+        _ => "на проверке"
+    };
+
+    string DisplayCaseStatus(string status) => status switch
+    {
+        CaseStatuses.InProgress => "в работе",
+        CaseStatuses.Done => "закрыто",
+        _ => "открыто"
+    };
+}
