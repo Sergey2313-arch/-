@@ -16,9 +16,23 @@ public class CreatorsController : Controller
 
     public async Task<IActionResult> Index()
     {
+        var creatorRoleId = await _db.Roles
+            .Where(x => x.Name == UserRoles.Creator)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync();
+
+        var creatorRoleUserIds = string.IsNullOrWhiteSpace(creatorRoleId)
+            ? new HashSet<string>()
+            : (await _db.UserRoles
+                .Where(x => x.RoleId == creatorRoleId)
+                .Select(x => x.UserId)
+                .ToListAsync())
+                .ToHashSet();
+
         var creators = (await _db.Users
-            .Where(x => x.AccountType == UserRoles.Creator)
+            .AsNoTracking()
             .ToListAsync())
+            .Where(x => x.AccountType == UserRoles.Creator || creatorRoleUserIds.Contains(x.Id))
             .OrderByDescending(x => x.Rating)
             .ThenByDescending(x => x.ReviewsCount)
             .ThenByDescending(x => x.LastSeenAt)

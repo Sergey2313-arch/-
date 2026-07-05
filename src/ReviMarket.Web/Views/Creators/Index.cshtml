@@ -12,6 +12,16 @@
     </div>
 </section>
 
+@if (!Model.Any())
+{
+    <section class="empty neon-card">
+        <h2>Исполнители скоро появятся</h2>
+        <p>Пока в базе нет активных профилей исполнителей. После регистрации исполнители появятся здесь автоматически.</p>
+        <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Стать исполнителем</a>
+    </section>
+}
+else
+{
 <div class="grid">
 @foreach (var user in Model)
 {
@@ -30,3 +40,4 @@
     </article>
 }
 </div>
+}

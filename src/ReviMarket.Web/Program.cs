@@ -106,6 +106,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var db = services.GetRequiredService<ApplicationDbContext>();
     await db.Database.EnsureCreatedAsync();
+    await DatabaseSchemaRepair.EnsureSqliteSchemaAsync(db);
     await SeedData.InitializeAsync(services);
 }
 
