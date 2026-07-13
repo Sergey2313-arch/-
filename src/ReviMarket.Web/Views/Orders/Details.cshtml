@@ -2,8 +2,9 @@
 @{
     ViewData["Title"] = Model.Title;
     var deal = ViewBag.Deal as Deal;
-    var isOwner = User.Identity?.Name == Model.Owner?.Email;
-    var isExecutor = User.Identity?.Name == Model.AssignedExecutor?.Email;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isOwner = currentUserId is not null && currentUserId == Model.OwnerId;
+    var isExecutor = currentUserId is not null && currentUserId == Model.AssignedExecutorId;
     var onlineLimit = DateTime.UtcNow.AddMinutes(-5);
     var ownerOnline = Model.Owner?.LastSeenAt is not null && Model.Owner.LastSeenAt > onlineLimit;
     var executorOnline = Model.AssignedExecutor?.LastSeenAt is not null && Model.AssignedExecutor.LastSeenAt > onlineLimit;
@@ -89,14 +90,23 @@
                 <a class="btn btn-soft detail-action" asp-controller="Deals" asp-action="Index">Открыть сделку</a>
             }
 
-            @if (Model.OrderStatus == OrderStatuses.InWork && isOwner && Model.AssignedExecutorId is not null)
+            @if (User.Identity?.IsAuthenticated == true)
             {
-                <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.AssignedExecutorId">Чат с исполнителем</a>
-            }
-
-            @if (Model.OrderStatus == OrderStatuses.InWork && isExecutor && Model.OwnerId is not null)
-            {
-                <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.OwnerId">Чат с заказчиком</a>
+                <div class="order-chat-panel">
+                    <span>Чат по заказу</span>
+                    @if (!isOwner && Model.OwnerId is not null)
+                    {
+                        <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.OwnerId">Чат с заказчиком</a>
+                    }
+                    @if (!isExecutor && Model.AssignedExecutorId is not null)
+                    {
+                        <a class="btn btn-soft detail-action" asp-controller="Inbox" asp-action="Thread" asp-route-id="@Model.AssignedExecutorId">Чат с исполнителем</a>
+                    }
+                    @if (isOwner && Model.AssignedExecutorId is null)
+                    {
+                        <small>Исполнитель появится здесь после взятия заказа в работу.</small>
+                    }
+                </div>
             }
 
             @if (User.Identity?.IsAuthenticated == true)
