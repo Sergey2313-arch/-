@@ -9,6 +9,7 @@
     var canSeeFinance = isOwner || isAdmin;
     var canSeeModeration = isOwner || isAdmin || User.IsInRole(UserRoles.Moderator) || accountType == UserRoles.Moderator;
     var canSeeSupport = isOwner || isAdmin || User.IsInRole(UserRoles.SupportAgent) || accountType == UserRoles.SupportAgent;
+    var canSeeDisputes = isOwner || isAdmin || User.IsInRole(UserRoles.Lawyer) || accountType == UserRoles.Lawyer;
     var canSeeTeam = isOwner || isAdmin;
 }
 
@@ -24,6 +25,7 @@
             @if (canSeeAdmin) { <a href="/Admin">Администрация</a> }
             @if (canSeeModeration) { <a href="/Moderation">Модерация</a> }
             @if (canSeeSupport) { <a href="/Support/Queue">Поддержка</a> }
+            @if (canSeeDisputes) { <a href="/Disputes">Споры</a> }
             @if (canSeeFinance) { <a href="/AdminFinance">Финансы</a> }
             @if (canSeeTeam) { <a href="/Team">Команда</a> }
             <a href="/Inbox">Сообщения</a>
@@ -50,6 +52,7 @@
             <article class="admin-stat neon-card"><span>Заказы</span><h3>@ViewBag.AllOrdersCount</h3><p>всего на бирже</p></article>
             <article class="admin-stat neon-card"><span>В работе</span><h3>@ViewBag.InWorkOrdersCount</h3><p>заказов с исполнителем</p></article>
             <article class="admin-stat neon-card"><span>Сделки</span><h3>@ViewBag.ActiveDealsCount</h3><p>активный холд</p></article>
+            <article class="admin-stat neon-card"><span>Споры</span><h3>@ViewBag.DisputesCount</h3><p>юридический разбор</p></article>
             <article class="admin-stat neon-card"><span>Поддержка</span><h3>@ViewBag.OpenSupportCount</h3><p>открытых обращений</p></article>
         </section>
 
@@ -79,6 +82,15 @@
                     <h3>Поддержка</h3>
                     <p>Очередь тикетов и связь с пользователями через чат.</p>
                     <a class="btn btn-primary" href="/Support/Queue">Открыть</a>
+                </article>
+            }
+            @if (canSeeDisputes)
+            {
+                <article class="card">
+                    <span class="tag">Legal</span>
+                    <h3>Споры</h3>
+                    <p>Очередь спорных сделок, назначение юриста и решение по холду.</p>
+                    <a class="btn btn-primary" href="/Disputes">Открыть</a>
                 </article>
             }
             @if (canSeeFinance)

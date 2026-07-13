@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Мои сделки";
     var myReviews = ViewBag.MyReviews as List<UserReview> ?? new();
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
 <section class="section-head">
@@ -16,12 +17,19 @@
     </div>
 </section>
 
+@if (TempData["DealNotice"] is string notice)
+{
+    <section class="admin-note">
+        <b>Сделка</b>
+        <span>@notice</span>
+    </section>
+}
+
 <div class="review-list">
 @foreach (var deal in Model)
 {
-    var currentEmail = User.Identity?.Name;
-    var isCustomer = currentEmail == deal.Customer?.Email;
-    var isExecutor = currentEmail == deal.Executor?.Email;
+    var isCustomer = currentUserId == deal.CustomerId;
+    var isExecutor = currentUserId == deal.ExecutorId;
     var reviewTargetId = isCustomer ? deal.ExecutorId : deal.CustomerId;
     var canReview = deal.Status == DealStatuses.Completed && !myReviews.Any(x => x.DealId == deal.Id && x.TargetUserId == reviewTargetId);
 
@@ -50,6 +58,20 @@
                     <input type="hidden" name="id" value="@deal.Id" />
                     <button class="btn btn-primary" type="submit">Завершить</button>
                 </form>
+            }
+
+            @if ((deal.Status == DealStatuses.Funded || deal.Status == DealStatuses.InProgress) && (isCustomer || isExecutor))
+            {
+                <form asp-controller="Disputes" asp-action="Open" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="dealId" value="@deal.Id" />
+                    <button class="btn btn-soft" type="submit">Открыть спор</button>
+                </form>
+            }
+
+            @if (deal.Status == DealStatuses.Dispute)
+            {
+                <span class="tag">Спор открыт</span>
             }
 
             @if (canReview)

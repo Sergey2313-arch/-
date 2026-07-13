@@ -13,6 +13,7 @@ public sealed class AdminDashboardViewModel
     public int OpenReportsCount { get; set; }
     public int LockedUsersCount { get; set; }
     public int ActiveDealsCount { get; set; }
+    public int DisputesCount { get; set; }
 
     public string[] Roles { get; set; } = UserRoles.All;
     public List<ApplicationUser> Users { get; set; } = new();

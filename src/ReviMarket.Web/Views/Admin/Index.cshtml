@@ -28,7 +28,7 @@
 <section class="admin-stats">
     <article class="admin-stat neon-card"><span>Пользователи</span><h3>@Model.UsersCount</h3><p>@Model.LockedUsersCount заблокировано</p></article>
     <article class="admin-stat neon-card"><span>Заказы</span><h3>@Model.OrdersCount</h3><p>@Model.PendingOrdersCount на проверке</p></article>
-    <article class="admin-stat neon-card"><span>Жалобы</span><h3>@Model.OpenReportsCount</h3><p>открытые дела модерации</p></article>
+    <article class="admin-stat neon-card"><span>Споры</span><h3>@Model.DisputesCount</h3><p>сделки в юридическом разборе</p></article>
     <article class="admin-stat neon-card"><span>Поддержка</span><h3>@Model.SupportCount</h3><p>открытых обращений</p></article>
 </section>
 
@@ -44,6 +44,12 @@
         <h3>Поддержка</h3>
         <p>Очередь обращений и чат поддержки внутри тикетов.</p>
         <a class="btn btn-soft" asp-controller="Support" asp-action="Queue">Открыть</a>
+    </article>
+    <article class="card">
+        <span class="tag">Legal</span>
+        <h3>Споры</h3>
+        <p>Юридическая очередь спорных сделок и решения по удержанным средствам.</p>
+        <a class="btn btn-soft" asp-controller="Disputes" asp-action="Index">Открыть</a>
     </article>
     <article class="card">
         <span class="tag">Finance</span>

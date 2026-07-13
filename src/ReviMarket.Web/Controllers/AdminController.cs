@@ -69,6 +69,7 @@ public class AdminController : Controller
             OpenReportsCount = await _db.UserCases.CountAsync(x => x.Status != CaseStatuses.Done) + await _db.OrderCases.CountAsync(x => x.Status != CaseStatuses.Done),
             LockedUsersCount = users.Count(x => x.LockoutEnd is not null && x.LockoutEnd > now),
             ActiveDealsCount = await _db.Deals.CountAsync(x => x.Status == DealStatuses.Funded || x.Status == DealStatuses.InProgress),
+            DisputesCount = await _db.Deals.CountAsync(x => x.Status == DealStatuses.Dispute),
             Roles = UserRoles.All,
             Users = users
                 .OrderByDescending(x => x.LockoutEnd is not null && x.LockoutEnd > now)
