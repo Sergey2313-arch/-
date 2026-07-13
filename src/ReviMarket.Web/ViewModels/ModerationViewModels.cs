@@ -24,4 +24,6 @@ public sealed class CaseActionViewModel
     public int Id { get; set; }
 
     public string Action { get; set; } = string.Empty;
+
+    public string Status { get; set; } = CaseStatuses.Open;
 }

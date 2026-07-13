@@ -568,7 +568,19 @@ select option { color: #111; }
 
 @media (max-width: 900px) {
     .topbar { flex-wrap: wrap; }
-    .nav { order: 3; width: 100%; overflow-x: auto; }
+    .nav {
+        order: 3;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+        overflow-x: visible;
+    }
+    .nav a {
+        display: inline-flex;
+        justify-content: center;
+        text-align: center;
+        min-width: 0;
+    }
     .hero { grid-template-columns: 1fr; }
     .grid, .admin-grid, .role-choice { grid-template-columns: 1fr; }
     .category-blocks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1003,12 +1015,12 @@ html {
 
 @media (max-width: 900px) {
     .nav {
-        scroll-snap-type: x proximity;
+        scroll-snap-type: none;
     }
 
     .nav a {
-        flex: 0 0 auto;
-        scroll-snap-align: start;
+        flex: initial;
+        scroll-snap-align: unset;
     }
 
     .profile-section-tabs {

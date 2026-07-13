@@ -280,6 +280,273 @@
     font-size: 18px;
 }
 
+.moderation-head {
+    align-items: center;
+}
+
+.moderation-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.moderation-note {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.moderation-tabs {
+    position: sticky;
+    top: 10px;
+    z-index: 6;
+    display: flex;
+    gap: 10px;
+    margin: 22px 0;
+    padding: 10px;
+    border: 1px solid rgba(168,85,247,.18);
+    border-radius: 22px;
+    background: rgba(10, 4, 24, .84);
+    backdrop-filter: blur(18px);
+    overflow-x: auto;
+}
+
+.moderation-tabs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 14px;
+    border-radius: 15px;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 900;
+    white-space: nowrap;
+    background: rgba(255,255,255,.045);
+    border: 1px solid transparent;
+}
+
+.moderation-tabs a:hover {
+    border-color: rgba(168,85,247,.38);
+    background: rgba(168,85,247,.16);
+}
+
+.moderation-tabs b,
+.moderation-counter,
+.moderation-lane-title span {
+    display: inline-grid;
+    place-items: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(168,85,247,.24);
+    color: #fff;
+    font-size: 13px;
+}
+
+.moderation-section {
+    display: grid;
+    gap: 16px;
+    margin-top: 24px;
+    scroll-margin-top: 98px;
+}
+
+.moderation-section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-end;
+}
+
+.moderation-section-head h2 {
+    margin: 4px 0 8px;
+    font-size: clamp(28px, 4vw, 46px);
+}
+
+.moderation-section-head p {
+    max-width: 860px;
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.moderation-board,
+.moderation-message-grid {
+    align-items: start;
+}
+
+.moderation-board {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.moderation-lane {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+    padding: 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(168,85,247,.18);
+    background: rgba(255,255,255,.035);
+}
+
+.moderation-lane-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.moderation-lane-title h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.moderation-card-list,
+.moderation-active-grid,
+.moderation-support-list {
+    display: grid;
+    gap: 12px;
+}
+
+.moderation-active-grid,
+.moderation-support-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+
+.moderation-card {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    padding: 18px;
+    border-radius: 22px;
+    border: 1px solid rgba(168,85,247,.18);
+    background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+    box-shadow: 0 18px 42px rgba(0,0,0,.16);
+}
+
+.moderation-card-active {
+    border-color: rgba(255,43,214,.28);
+    box-shadow: 0 0 0 1px rgba(255,43,214,.08), 0 18px 42px rgba(0,0,0,.18);
+}
+
+.moderation-card header {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+}
+
+.moderation-card h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(20px, 2.3vw, 28px);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+}
+
+.moderation-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.moderation-type,
+.moderation-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.moderation-type {
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.045);
+}
+
+.moderation-status {
+    color: #fff;
+    border: 1px solid rgba(168,85,247,.26);
+    background: rgba(168,85,247,.18);
+}
+
+.moderation-status.is-progress {
+    border-color: rgba(255,43,214,.34);
+    background: rgba(255,43,214,.18);
+}
+
+.moderation-status.is-done {
+    border-color: rgba(60, 220, 165, .32);
+    background: rgba(60, 220, 165, .14);
+}
+
+.moderation-status.is-blocked {
+    border-color: rgba(255, 92, 122, .34);
+    background: rgba(255, 92, 122, .15);
+}
+
+.moderation-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.moderation-meta-grid div {
+    min-width: 0;
+    padding: 10px;
+    border-radius: 15px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+}
+
+.moderation-meta-grid span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.moderation-meta-grid b {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.moderation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.moderation-actions form,
+.moderation-compact-list form {
+    margin: 0;
+}
+
+.moderation-actions .btn,
+.moderation-actions button {
+    min-height: 40px;
+}
+
+.moderation-empty {
+    margin: 0;
+    border-radius: 18px;
+}
+
 button:disabled,
 select:disabled {
     cursor: not-allowed;
@@ -298,6 +565,7 @@ select:disabled {
     .admin-stats,
     .admin-grid,
     .admin-mini-grid,
+    .moderation-board,
     .moderation-message-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -306,6 +574,7 @@ select:disabled {
 @media (max-width: 700px) {
     .admin-top,
     .admin-section-head,
+    .moderation-section-head,
     .admin-row {
         grid-template-columns: 1fr;
         display: grid;
@@ -314,9 +583,42 @@ select:disabled {
     .admin-stats,
     .admin-grid,
     .admin-mini-grid,
+    .moderation-board,
     .moderation-message-grid,
-    .admin-role-form {
+    .admin-role-form,
+    .moderation-meta-grid {
         grid-template-columns: 1fr;
+    }
+
+    .moderation-head-actions,
+    .moderation-actions,
+    .moderation-tabs {
+        width: 100%;
+    }
+
+    .moderation-tabs {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow-x: visible;
+    }
+
+    .moderation-tabs a {
+        justify-content: space-between;
+        min-width: 0;
+        white-space: normal;
+    }
+
+    .moderation-head-actions .btn,
+    .moderation-actions .btn,
+    .moderation-actions form,
+    .moderation-actions button {
+        width: 100%;
+    }
+
+    .moderation-card header,
+    .moderation-lane-title {
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .admin-user-actions {

@@ -1,20 +1,41 @@
 @model CaseActionViewModel
+@{
+    var isOpen = Model.Status == CaseStatuses.Open;
+    var isInProgress = Model.Status == CaseStatuses.InProgress;
+}
 
-<form asp-action="@Model.Action" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.Id" />
-    <input type="hidden" name="status" value="@CaseStatuses.InProgress" />
-    <button class="btn btn-soft" type="submit">Взять</button>
-</form>
-<form asp-action="@Model.Action" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.Id" />
-    <input type="hidden" name="status" value="@CaseStatuses.Done" />
-    <button class="btn btn-primary" type="submit">Закрыть</button>
-</form>
-<form asp-action="@Model.Action" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@Model.Id" />
-    <input type="hidden" name="status" value="@CaseStatuses.Open" />
-    <button class="btn btn-soft" type="submit">Вернуть</button>
-</form>
+@if (isOpen)
+{
+    <form asp-action="@Model.Action" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="hidden" name="status" value="@CaseStatuses.InProgress" />
+        <button class="btn btn-primary" type="submit">Взять в работу</button>
+    </form>
+}
+
+@if (isInProgress)
+{
+    <form asp-action="@Model.Action" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="hidden" name="status" value="@CaseStatuses.Done" />
+        <button class="btn btn-primary" type="submit">Закрыть</button>
+    </form>
+    <form asp-action="@Model.Action" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="hidden" name="status" value="@CaseStatuses.Open" />
+        <button class="btn btn-soft" type="submit">Вернуть в очередь</button>
+    </form>
+}
+
+@if (!isOpen && !isInProgress)
+{
+    <form asp-action="@Model.Action" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="hidden" name="status" value="@CaseStatuses.Open" />
+        <button class="btn btn-soft" type="submit">Открыть снова</button>
+    </form>
+}

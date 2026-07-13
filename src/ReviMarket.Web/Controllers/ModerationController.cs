@@ -138,10 +138,11 @@ public class ModerationController : Controller
         var item = await _db.OrderCases.FirstOrDefaultAsync(x => x.Id == id);
         if (item is null) return NotFound();
 
-        item.Status = NormalizeStatus(status);
-        item.AgentId = _users.GetUserId(User);
+        var normalizedStatus = NormalizeStatus(status);
+        item.Status = normalizedStatus;
+        item.AgentId = GetAgentIdForStatus(normalizedStatus);
         await _db.SaveChangesAsync();
-        TempData["ModerationNotice"] = $"Дело по заказу #{item.Id} обновлено.";
+        TempData["ModerationNotice"] = $"Дело по заказу #{item.Id}: {DisplayCaseStatus(normalizedStatus)}.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -152,10 +153,11 @@ public class ModerationController : Controller
         var item = await _db.UserCases.FirstOrDefaultAsync(x => x.Id == id);
         if (item is null) return NotFound();
 
-        item.Status = NormalizeStatus(status);
-        item.AgentId = _users.GetUserId(User);
+        var normalizedStatus = NormalizeStatus(status);
+        item.Status = normalizedStatus;
+        item.AgentId = GetAgentIdForStatus(normalizedStatus);
         await _db.SaveChangesAsync();
-        TempData["ModerationNotice"] = $"Жалоба на пользователя #{item.Id} обновлена.";
+        TempData["ModerationNotice"] = $"Жалоба на пользователя #{item.Id}: {DisplayCaseStatus(normalizedStatus)}.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -166,10 +168,11 @@ public class ModerationController : Controller
         var request = await _db.SupportRequests.FirstOrDefaultAsync(x => x.Id == id);
         if (request is null) return NotFound();
 
-        request.Status = NormalizeStatus(status);
-        request.AgentId = _users.GetUserId(User);
+        var normalizedStatus = NormalizeStatus(status);
+        request.Status = normalizedStatus;
+        request.AgentId = GetAgentIdForStatus(normalizedStatus);
         await _db.SaveChangesAsync();
-        TempData["ModerationNotice"] = $"Обращение #{request.Id} обновлено.";
+        TempData["ModerationNotice"] = $"Обращение #{request.Id}: {DisplayCaseStatus(normalizedStatus)}.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -256,5 +259,20 @@ public class ModerationController : Controller
         return status is CaseStatuses.Open or CaseStatuses.InProgress or CaseStatuses.Done
             ? status
             : CaseStatuses.Open;
+    }
+
+    private string? GetAgentIdForStatus(string status)
+    {
+        return status == CaseStatuses.Open ? null : _users.GetUserId(User);
+    }
+
+    private static string DisplayCaseStatus(string status)
+    {
+        return status switch
+        {
+            CaseStatuses.InProgress => "взято в работу",
+            CaseStatuses.Done => "закрыто",
+            _ => "возвращено в очередь"
+        };
     }
 }

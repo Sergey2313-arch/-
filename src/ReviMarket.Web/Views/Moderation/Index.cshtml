@@ -1,35 +1,308 @@
 @model ModerationDashboardViewModel
 @{
     ViewData["Title"] = "Модерация";
+
+    var pendingOrders = Model.Orders.Where(x => x.ReviewStatus == ReviewStatuses.Pending).ToList();
+    var blockedOrders = Model.Orders.Where(x => x.ReviewStatus == ReviewStatuses.Blocked).ToList();
+    var openOrderCases = Model.OrderCases.Where(x => x.Status == CaseStatuses.Open).ToList();
+    var activeOrderCases = Model.OrderCases.Where(x => x.Status == CaseStatuses.InProgress).ToList();
+    var openUserCases = Model.UserCases.Where(x => x.Status == CaseStatuses.Open).ToList();
+    var activeUserCases = Model.UserCases.Where(x => x.Status == CaseStatuses.InProgress).ToList();
+    var openSupportRequests = Model.SupportRequests.Where(x => x.Status == CaseStatuses.Open).ToList();
+    var activeSupportRequests = Model.SupportRequests.Where(x => x.Status == CaseStatuses.InProgress).ToList();
+    var openComplaintsCount = openOrderCases.Count + openUserCases.Count;
+    var activeWorkCount = activeOrderCases.Count + activeUserCases.Count + activeSupportRequests.Count;
+    var lockedUsersCount = Model.Users.Count(x => x.LockoutEnd is not null && x.LockoutEnd > DateTimeOffset.UtcNow);
 }
 
-<section class="section-head">
+<section class="section-head moderation-head">
     <div>
-        <p class="eyebrow">moderation</p>
+        <p class="eyebrow">moderation workspace</p>
         <h1>Модерация</h1>
-        <p>Очередь заказов, жалобы, споры, сообщения, пользователи и обращения поддержки.</p>
+        <p>Очередь жалоб, проверка заказов, сообщения, блокировки и обращения поддержки в одном рабочем экране.</p>
     </div>
-    <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">В панель</a>
+    <div class="moderation-head-actions">
+        <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">Панель</a>
+        <a class="btn btn-soft" asp-controller="Disputes" asp-action="Index">Юр. споры</a>
+        <a class="btn btn-primary" asp-controller="Support" asp-action="Index">Поддержка</a>
+    </div>
 </section>
 
 @if (TempData["ModerationNotice"] is string notice)
 {
-    <section class="admin-note">
+    <section class="admin-note moderation-note">
         <b>Готово</b>
         <span>@notice</span>
     </section>
 }
 
-<section class="admin-stats">
-    <div class="stat-card neon-card"><span>Заказы</span><b>@Model.Orders.Count</b></div>
-    <div class="stat-card neon-card"><span>Жалобы</span><b>@(Model.OrderCases.Count + Model.UserCases.Count)</b></div>
-    <div class="stat-card neon-card"><span>Сообщения</span><b>@(Model.Messages.Count + Model.SupportMessages.Count)</b></div>
-    <div class="stat-card neon-card"><span>Поддержка</span><b>@Model.SupportRequests.Count</b></div>
+<nav class="moderation-tabs" aria-label="Разделы модерации">
+    <a href="#queue">Очередь <b>@(openComplaintsCount + pendingOrders.Count)</b></a>
+    <a href="#work">В работе <b>@activeWorkCount</b></a>
+    <a href="#content">Контент <b>@Model.Orders.Count</b></a>
+    <a href="#messages">Сообщения <b>@(Model.Messages.Count + Model.SupportMessages.Count)</b></a>
+    <a href="#users">Пользователи <b>@Model.Users.Count</b></a>
+    <a href="#support">Поддержка <b>@Model.SupportRequests.Count</b></a>
+</nav>
+
+<section class="admin-stats moderation-stats">
+    <div class="stat-card neon-card"><span>Новая очередь</span><b>@(openComplaintsCount + pendingOrders.Count)</b></div>
+    <div class="stat-card neon-card"><span>В работе</span><b>@activeWorkCount</b></div>
+    <div class="stat-card neon-card"><span>Скрытые заказы</span><b>@blockedOrders.Count</b></div>
+    <div class="stat-card neon-card"><span>Блокировки</span><b>@lockedUsersCount</b></div>
 </section>
 
-<section class="section-block neon-card">
-    <h2>Заказы</h2>
-    <div class="admin-list">
+<section class="moderation-section" id="queue">
+    <div class="moderation-section-head">
+        <div>
+            <p class="eyebrow">queue</p>
+            <h2>Новая очередь</h2>
+            <p>Здесь лежат задачи без ответственного. Кнопка “Взять в работу” назначает задачу на текущего модератора и переносит ее в рабочий блок.</p>
+        </div>
+    </div>
+
+    <div class="moderation-board">
+        <div class="moderation-lane">
+            <div class="moderation-lane-title">
+                <h3>Жалобы и споры</h3>
+                <span>@openComplaintsCount</span>
+            </div>
+            <div class="moderation-card-list">
+                @if (!openOrderCases.Any() && !openUserCases.Any())
+                {
+                    <div class="empty moderation-empty">Новых жалоб нет.</div>
+                }
+
+                @foreach (var item in openOrderCases)
+                {
+                    <article class="moderation-card">
+                        <header>
+                            <span class="moderation-type">Спор по заказу</span>
+                            <span class="moderation-status @CaseStatusClass(item.Status)">@DisplayCaseStatus(item.Status)</span>
+                        </header>
+                        <h3>@item.Title</h3>
+                        <p>@item.Text</p>
+                        <div class="moderation-meta-grid">
+                            <div><span>Заявитель</span><b>@(item.CreatedBy?.DisplayName ?? "пользователь")</b></div>
+                            <div><span>Ответственный</span><b>@(item.Agent?.DisplayName ?? "свободно")</b></div>
+                            <div><span>Создано</span><b>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</b></div>
+                        </div>
+                        <div class="moderation-actions">
+                            @if (item.MarketItemId is int orderId)
+                            {
+                                <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@orderId">Заказ</a>
+                                <form asp-action="BlockOrder" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@orderId" />
+                                    <button class="btn btn-soft" type="submit">Скрыть заказ</button>
+                                </form>
+                            }
+                            <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetOrderCaseStatus", Status = item.Status })' />
+                        </div>
+                    </article>
+                }
+
+                @foreach (var item in openUserCases)
+                {
+                    var locked = item.TargetUser?.LockoutEnd is not null && item.TargetUser.LockoutEnd > DateTimeOffset.UtcNow;
+                    <article class="moderation-card">
+                        <header>
+                            <span class="moderation-type">Жалоба на пользователя</span>
+                            <span class="moderation-status @CaseStatusClass(item.Status)">@DisplayCaseStatus(item.Status)</span>
+                        </header>
+                        <h3>@item.Title</h3>
+                        <p>@item.Text</p>
+                        <div class="moderation-meta-grid">
+                            <div><span>Жалоба от</span><b>@(item.CreatedBy?.DisplayName ?? "пользователь")</b></div>
+                            <div><span>Пользователь</span><b>@(item.TargetUser?.DisplayName ?? "не найден")</b></div>
+                            <div><span>Создано</span><b>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</b></div>
+                        </div>
+                        <div class="moderation-actions">
+                            @if (item.TargetUser is not null)
+                            {
+                                <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@item.TargetUserId">Профиль</a>
+                                if (locked)
+                                {
+                                    <form asp-action="UnlockUser" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.TargetUserId" />
+                                        <button class="btn btn-primary" type="submit">Разблокировать</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="LockUser" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.TargetUserId" />
+                                        <button class="btn btn-soft" type="submit">Заблокировать</button>
+                                    </form>
+                                }
+                            }
+                            <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetUserCaseStatus", Status = item.Status })' />
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+
+        <div class="moderation-lane">
+            <div class="moderation-lane-title">
+                <h3>Заказы на проверке</h3>
+                <span>@pendingOrders.Count</span>
+            </div>
+            <div class="moderation-card-list">
+                @if (!pendingOrders.Any())
+                {
+                    <div class="empty moderation-empty">Заказов на проверке нет.</div>
+                }
+
+                @foreach (var item in pendingOrders)
+                {
+                    <article class="moderation-card">
+                        <header>
+                            <span class="moderation-type">Заказ</span>
+                            <span class="moderation-status @ReviewStatusClass(item.ReviewStatus)">@DisplayReviewStatus(item.ReviewStatus)</span>
+                        </header>
+                        <h3>@item.Title</h3>
+                        <p>@item.Description</p>
+                        <div class="moderation-meta-grid">
+                            <div><span>Категория</span><b>@item.Category</b></div>
+                            <div><span>Бюджет</span><b>@item.Price.ToString("N0") ₽</b></div>
+                            <div><span>Заказчик</span><b>@(item.Owner?.DisplayName ?? "заказчик")</b></div>
+                        </div>
+                        <div class="moderation-actions">
+                            <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+                            <form asp-action="ApproveOrder" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button class="btn btn-primary" type="submit">Опубликовать</button>
+                            </form>
+                            <form asp-action="BlockOrder" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button class="btn btn-soft" type="submit">Скрыть</button>
+                            </form>
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="moderation-section" id="work">
+    <div class="moderation-section-head">
+        <div>
+            <p class="eyebrow">active</p>
+            <h2>В работе у команды</h2>
+            <p>Задачи, которые уже взяли модераторы или агенты поддержки. Здесь видно ответственного и следующий шаг.</p>
+        </div>
+        <span class="moderation-counter">@activeWorkCount</span>
+    </div>
+
+    <div class="moderation-active-grid">
+        @if (activeWorkCount == 0)
+        {
+            <div class="empty moderation-empty">Сейчас нет задач в работе.</div>
+        }
+
+        @foreach (var item in activeOrderCases)
+        {
+            <article class="moderation-card moderation-card-active">
+                <header>
+                    <span class="moderation-type">Спор по заказу</span>
+                    <span class="moderation-status @CaseStatusClass(item.Status)">@DisplayCaseStatus(item.Status)</span>
+                </header>
+                <h3>@item.Title</h3>
+                <p>@item.Text</p>
+                <div class="moderation-meta-grid">
+                    <div><span>Ответственный</span><b>@(item.Agent?.DisplayName ?? "не назначен")</b></div>
+                    <div><span>Заявитель</span><b>@(item.CreatedBy?.DisplayName ?? "пользователь")</b></div>
+                    <div><span>Создано</span><b>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</b></div>
+                </div>
+                <div class="moderation-actions">
+                    @if (item.MarketItemId is int orderId)
+                    {
+                        <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@orderId">Заказ</a>
+                    }
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetOrderCaseStatus", Status = item.Status })' />
+                </div>
+            </article>
+        }
+
+        @foreach (var item in activeUserCases)
+        {
+            var locked = item.TargetUser?.LockoutEnd is not null && item.TargetUser.LockoutEnd > DateTimeOffset.UtcNow;
+            <article class="moderation-card moderation-card-active">
+                <header>
+                    <span class="moderation-type">Жалоба на пользователя</span>
+                    <span class="moderation-status @CaseStatusClass(item.Status)">@DisplayCaseStatus(item.Status)</span>
+                </header>
+                <h3>@item.Title</h3>
+                <p>@item.Text</p>
+                <div class="moderation-meta-grid">
+                    <div><span>Ответственный</span><b>@(item.Agent?.DisplayName ?? "не назначен")</b></div>
+                    <div><span>Пользователь</span><b>@(item.TargetUser?.DisplayName ?? "не найден")</b></div>
+                    <div><span>Создано</span><b>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</b></div>
+                </div>
+                <div class="moderation-actions">
+                    @if (item.TargetUser is not null)
+                    {
+                        <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@item.TargetUserId">Профиль</a>
+                        if (locked)
+                        {
+                            <form asp-action="UnlockUser" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.TargetUserId" />
+                                <button class="btn btn-primary" type="submit">Разблокировать</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="LockUser" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.TargetUserId" />
+                                <button class="btn btn-soft" type="submit">Заблокировать</button>
+                            </form>
+                        }
+                    }
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetUserCaseStatus", Status = item.Status })' />
+                </div>
+            </article>
+        }
+
+        @foreach (var request in activeSupportRequests)
+        {
+            <article class="moderation-card moderation-card-active">
+                <header>
+                    <span class="moderation-type">Поддержка</span>
+                    <span class="moderation-status @CaseStatusClass(request.Status)">@DisplayCaseStatus(request.Status)</span>
+                </header>
+                <h3>@request.Title</h3>
+                <p>@request.Text</p>
+                <div class="moderation-meta-grid">
+                    <div><span>Ответственный</span><b>@(request.Agent?.DisplayName ?? "не назначен")</b></div>
+                    <div><span>Приоритет</span><b>@DisplayPriority(request.Priority)</b></div>
+                    <div><span>Пользователь</span><b>@(request.User?.DisplayName ?? "пользователь")</b></div>
+                </div>
+                <div class="moderation-actions">
+                    <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Открыть чат</a>
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = request.Id, Action = "SetSupportStatus", Status = request.Status })' />
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
+<section class="moderation-section" id="content">
+    <div class="moderation-section-head">
+        <div>
+            <p class="eyebrow">content</p>
+            <h2>Контент заказов</h2>
+            <p>Быстрая проверка опубликованных, скрытых и ожидающих заказов.</p>
+        </div>
+    </div>
+    <div class="admin-list moderation-compact-list">
         @foreach (var item in Model.Orders)
         {
             <div class="admin-row">
@@ -62,85 +335,25 @@
     </div>
 </section>
 
-<section class="section-block neon-card">
-    <h2>Жалобы и споры по заказам</h2>
-    <div class="admin-list">
-        @foreach (var item in Model.OrderCases)
-        {
-            <div class="admin-row">
-                <div>
-                    <b>@item.Title</b>
-                    <p>@item.Text</p>
-                    <small>@DisplayCaseStatus(item.Status) • @(item.CreatedBy?.DisplayName ?? "пользователь") • исполнитель: @(item.Agent?.DisplayName ?? "не назначен") • @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
-                </div>
-                <div class="review-actions">
-                    @if (item.MarketItemId is not null)
-                    {
-                        <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.MarketItemId">Заказ</a>
-                        <form asp-action="BlockOrder" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@item.MarketItemId" />
-                            <button class="btn btn-soft" type="submit">Скрыть заказ</button>
-                        </form>
-                        <form asp-action="ApproveOrder" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@item.MarketItemId" />
-                            <button class="btn btn-primary" type="submit">Одобрить заказ</button>
-                        </form>
-                    }
-                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetOrderCaseStatus" })' />
-                </div>
-            </div>
-        }
-    </div>
-</section>
-
-<section class="section-block neon-card">
-    <h2>Жалобы на пользователей</h2>
-    <div class="admin-list">
-        @foreach (var item in Model.UserCases)
-        {
-            var locked = item.TargetUser?.LockoutEnd is not null && item.TargetUser.LockoutEnd > DateTimeOffset.UtcNow;
-            <div class="admin-row">
-                <div>
-                    <b>@item.Title</b>
-                    <p>@item.Text</p>
-                    <small>@DisplayCaseStatus(item.Status) • жалоба от @(item.CreatedBy?.DisplayName ?? "пользователь") • модератор: @(item.Agent?.DisplayName ?? "не назначен") • @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
-                </div>
-                <div class="review-actions">
-                    @if (item.TargetUser is not null)
-                    {
-                        <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@item.TargetUserId">Профиль</a>
-                        if (locked)
-                        {
-                            <form asp-action="UnlockUser" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@item.TargetUserId" />
-                                <button class="btn btn-primary" type="submit">Разблокировать</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <form asp-action="LockUser" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@item.TargetUserId" />
-                                <button class="btn btn-soft" type="submit">Заблокировать</button>
-                            </form>
-                        }
-                    }
-                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = item.Id, Action = "SetUserCaseStatus" })' />
-                </div>
-            </div>
-        }
-    </div>
-</section>
-
-<section class="section-block neon-card">
-    <h2>Сообщения</h2>
-    <div class="moderation-message-grid">
+<section class="moderation-section" id="messages">
+    <div class="moderation-section-head">
         <div>
-            <h3>Личные чаты</h3>
+            <p class="eyebrow">messages</p>
+            <h2>Сообщения</h2>
+            <p>Личные чаты и сообщения поддержки для быстрой очистки нарушений.</p>
+        </div>
+    </div>
+    <div class="moderation-message-grid">
+        <div class="moderation-lane">
+            <div class="moderation-lane-title">
+                <h3>Личные чаты</h3>
+                <span>@Model.Messages.Count</span>
+            </div>
             <div class="admin-list">
+                @if (!Model.Messages.Any())
+                {
+                    <div class="empty moderation-empty">Сообщений нет.</div>
+                }
                 @foreach (var message in Model.Messages)
                 {
                     <div class="admin-row">
@@ -159,9 +372,16 @@
             </div>
         </div>
 
-        <div>
-            <h3>Чаты поддержки</h3>
+        <div class="moderation-lane">
+            <div class="moderation-lane-title">
+                <h3>Чаты поддержки</h3>
+                <span>@Model.SupportMessages.Count</span>
+            </div>
             <div class="admin-list">
+                @if (!Model.SupportMessages.Any())
+                {
+                    <div class="empty moderation-empty">Сообщений поддержки нет.</div>
+                }
                 @foreach (var message in Model.SupportMessages)
                 {
                     <div class="admin-row">
@@ -185,9 +405,15 @@
     </div>
 </section>
 
-<section class="section-block neon-card">
-    <h2>Пользователи</h2>
-    <div class="admin-list">
+<section class="moderation-section" id="users">
+    <div class="moderation-section-head">
+        <div>
+            <p class="eyebrow">users</p>
+            <h2>Пользователи</h2>
+            <p>Профили, роли и быстрые блокировки для рискованных аккаунтов.</p>
+        </div>
+    </div>
+    <div class="admin-list moderation-compact-list">
         @foreach (var user in Model.Users)
         {
             var locked = user.LockoutEnd is not null && user.LockoutEnd > DateTimeOffset.UtcNow;
@@ -221,22 +447,38 @@
     </div>
 </section>
 
-<section class="section-block neon-card">
-    <h2>Открытые обращения</h2>
-    <div class="admin-list">
+<section class="moderation-section" id="support">
+    <div class="moderation-section-head">
+        <div>
+            <p class="eyebrow">support</p>
+            <h2>Поддержка</h2>
+            <p>Открытые обращения можно взять в работу, закрыть или вернуть в общую очередь.</p>
+        </div>
+    </div>
+    <div class="moderation-card-list moderation-support-list">
+        @if (!openSupportRequests.Any() && !activeSupportRequests.Any())
+        {
+            <div class="empty moderation-empty">Открытых обращений нет.</div>
+        }
         @foreach (var request in Model.SupportRequests)
         {
-            <div class="admin-row">
-                <div>
-                    <b>@request.Title</b>
-                    <p>@request.Text</p>
-                    <small>@request.Priority • @DisplayCaseStatus(request.Status) • @(request.User?.DisplayName ?? "пользователь") • агент: @(request.Agent?.DisplayName ?? "не назначен")</small>
+            <article class="moderation-card">
+                <header>
+                    <span class="moderation-type">Тикет #@request.Id</span>
+                    <span class="moderation-status @CaseStatusClass(request.Status)">@DisplayCaseStatus(request.Status)</span>
+                </header>
+                <h3>@request.Title</h3>
+                <p>@request.Text</p>
+                <div class="moderation-meta-grid">
+                    <div><span>Приоритет</span><b>@DisplayPriority(request.Priority)</b></div>
+                    <div><span>Пользователь</span><b>@(request.User?.DisplayName ?? "пользователь")</b></div>
+                    <div><span>Ответственный</span><b>@(request.Agent?.DisplayName ?? "свободно")</b></div>
                 </div>
-                <div class="review-actions">
-                    <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Открыть</a>
-                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = request.Id, Action = "SetSupportStatus" })' />
+                <div class="moderation-actions">
+                    <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Открыть чат</a>
+                    <partial name="_CaseStatusActions" model='@(new CaseActionViewModel { Id = request.Id, Action = "SetSupportStatus", Status = request.Status })' />
                 </div>
-            </div>
+            </article>
         }
     </div>
 </section>
@@ -254,5 +496,26 @@
         CaseStatuses.InProgress => "в работе",
         CaseStatuses.Done => "закрыто",
         _ => "открыто"
+    };
+
+    string DisplayPriority(string priority) => priority switch
+    {
+        "High" => "высокий",
+        "Low" => "низкий",
+        _ => "обычный"
+    };
+
+    string CaseStatusClass(string status) => status switch
+    {
+        CaseStatuses.InProgress => "is-progress",
+        CaseStatuses.Done => "is-done",
+        _ => "is-open"
+    };
+
+    string ReviewStatusClass(string status) => status switch
+    {
+        ReviewStatuses.Approved => "is-done",
+        ReviewStatuses.Blocked => "is-blocked",
+        _ => "is-open"
     };
 }
