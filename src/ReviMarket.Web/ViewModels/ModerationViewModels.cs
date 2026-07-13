@@ -8,6 +8,8 @@ public sealed class ModerationDashboardViewModel
 
     public List<ChatMessage> Messages { get; set; } = new();
 
+    public List<SupportMessage> SupportMessages { get; set; } = new();
+
     public List<ApplicationUser> Users { get; set; } = new();
 
     public List<UserCase> UserCases { get; set; } = new();

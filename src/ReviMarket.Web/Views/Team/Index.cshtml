@@ -10,8 +10,19 @@
         <h1>Команда и роли</h1>
         <p>Назначение ролей для владельцев, админов, модераторов, юристов, поддержки и пользователей.</p>
     </div>
-    <a class="btn btn-soft" href="/admin.html">← В панель</a>
+    <div class="section-actions">
+        <a class="btn btn-soft" href="/Admin">Администрация</a>
+        <a class="btn btn-soft" href="/admin.html">← В панель</a>
+    </div>
 </section>
+
+@if (TempData["TeamNotice"] is string notice)
+{
+    <section class="admin-note">
+        <b>Команда</b>
+        <span>@notice</span>
+    </section>
+}
 
 <div class="review-list">
 @foreach (var user in Model)

@@ -38,6 +38,14 @@ public class ModerationController : Controller
             .Take(100)
             .ToListAsync();
 
+        var supportMessages = await _db.SupportMessages
+            .Include(x => x.Sender)
+            .Include(x => x.SupportRequest)
+            .ThenInclude(x => x!.User)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(100)
+            .ToListAsync();
+
         var users = await _users.Users
             .OrderByDescending(x => x.CreatedAt)
             .Take(100)
@@ -76,6 +84,7 @@ public class ModerationController : Controller
         {
             Orders = orders,
             Messages = messages,
+            SupportMessages = supportMessages,
             Users = users,
             UserCases = userCases,
             OrderCases = orderCases,
@@ -174,6 +183,19 @@ public class ModerationController : Controller
         _db.ChatMessages.Remove(message);
         await _db.SaveChangesAsync();
         TempData["ModerationNotice"] = $"Сообщение #{id} удалено.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteSupportMessage(int id)
+    {
+        var message = await _db.SupportMessages.FirstOrDefaultAsync(x => x.Id == id);
+        if (message is null) return NotFound();
+
+        _db.SupportMessages.Remove(message);
+        await _db.SaveChangesAsync();
+        TempData["ModerationNotice"] = $"Сообщение поддержки #{id} удалено.";
         return RedirectToAction(nameof(Index));
     }
 

@@ -212,6 +212,55 @@
     font-weight: 900;
 }
 
+.admin-user-row {
+    align-items: start;
+}
+
+.admin-user-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.admin-user-actions form {
+    margin: 0;
+}
+
+.admin-role-form {
+    display: grid;
+    grid-template-columns: minmax(150px, 190px) auto;
+    gap: 8px;
+}
+
+.admin-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.admin-mini-grid h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+}
+
+.moderation-message-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.moderation-message-grid h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+}
+
+button:disabled,
+select:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
 @media (max-width: 1100px) {
     .admin-shell {
         grid-template-columns: 1fr;
@@ -222,7 +271,9 @@
     }
 
     .admin-stats,
-    .admin-grid {
+    .admin-grid,
+    .admin-mini-grid,
+    .moderation-message-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
@@ -236,7 +287,21 @@
     }
 
     .admin-stats,
-    .admin-grid {
+    .admin-grid,
+    .admin-mini-grid,
+    .moderation-message-grid,
+    .admin-role-form {
         grid-template-columns: 1fr;
+    }
+
+    .admin-user-actions {
+        justify-content: stretch;
+    }
+
+    .admin-user-actions .btn,
+    .admin-user-actions button,
+    .admin-user-actions form,
+    .admin-role-form {
+        width: 100%;
     }
 }

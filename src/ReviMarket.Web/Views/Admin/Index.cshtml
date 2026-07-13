@@ -1,28 +1,219 @@
+@model AdminDashboardViewModel
 @{
-    ViewData["Title"] = "Админ-панель";
+    ViewData["Title"] = "Администрация";
+    var now = DateTimeOffset.UtcNow;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
 <section class="section-head">
     <div>
-        <p class="eyebrow">admin panel</p>
-        <h1>Админ-панель ReviMarket</h1>
-        <p>Операционная панель для управления биржей.</p>
+        <p class="eyebrow">administration</p>
+        <h1>Администрация ReviMarket</h1>
+        <p>Пользователи, роли, блокировки, очередь модерации, жалобы, поддержка и операционные разделы.</p>
     </div>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">← Панель</a>
+        <a class="btn btn-primary" asp-controller="Moderation" asp-action="Index">Модерация</a>
+    </div>
+</section>
+
+@if (TempData["AdminNotice"] is string notice)
+{
+    <section class="admin-note">
+        <b>Администрирование</b>
+        <span>@notice</span>
+    </section>
+}
+
+<section class="admin-stats">
+    <article class="admin-stat neon-card"><span>Пользователи</span><h3>@Model.UsersCount</h3><p>@Model.LockedUsersCount заблокировано</p></article>
+    <article class="admin-stat neon-card"><span>Заказы</span><h3>@Model.OrdersCount</h3><p>@Model.PendingOrdersCount на проверке</p></article>
+    <article class="admin-stat neon-card"><span>Жалобы</span><h3>@Model.OpenReportsCount</h3><p>открытые дела модерации</p></article>
+    <article class="admin-stat neon-card"><span>Поддержка</span><h3>@Model.SupportCount</h3><p>открытых обращений</p></article>
 </section>
 
 <section class="admin-grid">
-    <article class="card"><span class="tag">Users</span><h3>@ViewBag.UsersCount</h3><p>зарегистрированных пользователей</p></article>
-    <article class="card"><span class="tag">Orders</span><h3>@ViewBag.OrdersCount</h3><p>заказов на бирже</p></article>
-    <article class="card"><span class="tag">Messages</span><h3>@ViewBag.MessagesCount</h3><p>сообщений в системе</p></article>
-    <article class="card"><span class="tag">Support</span><h3>@ViewBag.SupportCount</h3><p>открытых обращений</p></article>
+    <article class="card">
+        <span class="tag">Moderation</span>
+        <h3>Модерация</h3>
+        <p>Проверка заказов, сообщений, жалоб и блокировок пользователей.</p>
+        <a class="btn btn-primary" asp-controller="Moderation" asp-action="Index">Открыть</a>
+    </article>
+    <article class="card">
+        <span class="tag">Support</span>
+        <h3>Поддержка</h3>
+        <p>Очередь обращений и чат поддержки внутри тикетов.</p>
+        <a class="btn btn-soft" asp-controller="Support" asp-action="Queue">Открыть</a>
+    </article>
+    <article class="card">
+        <span class="tag">Finance</span>
+        <h3>Финансы</h3>
+        <p>Холд, комиссии, пополнения, выплаты и заявки на вывод.</p>
+        <a class="btn btn-soft" asp-controller="AdminFinance" asp-action="Index">Открыть</a>
+    </article>
+    <article class="card">
+        <span class="tag">Team</span>
+        <h3>Команда</h3>
+        <p>Отдельный список команды и ролей для быстрой проверки.</p>
+        <a class="btn btn-soft" asp-controller="Team" asp-action="Index">Открыть</a>
+    </article>
 </section>
 
 <section class="section-block neon-card">
-    <h2>Разделы управления</h2>
-    <div class="profile-tabs">
-        <a class="btn btn-primary" href="/Moderation">Модерация</a>
-        <a class="btn btn-soft" href="/Support/Queue">Поддержка</a>
-        <a class="btn btn-soft" href="/AdminFinance">Финансы</a>
-        <a class="btn btn-soft" href="/Team">Команда</a>
+    <div class="admin-section-head">
+        <div>
+            <h2>Пользователи и роли</h2>
+            <p>Роль синхронизируется с Identity-ролью и типом аккаунта. Свой аккаунт изменить или заблокировать нельзя.</p>
+        </div>
+        <span class="tag">@Model.Users.Count показано</span>
+    </div>
+
+    <div class="admin-list">
+        @foreach (var user in Model.Users)
+        {
+            var locked = user.LockoutEnd is not null && user.LockoutEnd > now;
+            var isSelf = user.Id == currentUserId;
+            <div class="admin-row admin-user-row">
+                <div>
+                    <b>@user.DisplayName</b>
+                    <p>@user.Email · @DisplayRole(user.AccountType) · @DisplayLegalType(user.LegalType)</p>
+                    <small>@(locked ? "заблокирован" : "активен") · создан @user.CreatedAt.ToString("dd.MM.yyyy")</small>
+                </div>
+                <div class="admin-user-actions">
+                    <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@user.Id">Профиль</a>
+
+                    <form asp-action="SetRole" method="post" class="admin-role-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="role" disabled="@isSelf">
+                            @foreach (var role in Model.Roles)
+                            {
+                                if (user.AccountType == role)
+                                {
+                                    <option value="@role" selected>@DisplayRole(role)</option>
+                                }
+                                else
+                                {
+                                    <option value="@role">@DisplayRole(role)</option>
+                                }
+                            }
+                        </select>
+                        <button class="btn btn-primary" type="submit" disabled="@isSelf">Назначить</button>
+                    </form>
+
+                    @if (locked)
+                    {
+                        <form asp-action="UnlockUser" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button class="btn btn-primary" type="submit" disabled="@isSelf">Разблокировать</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="LockUser" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button class="btn btn-soft" type="submit" disabled="@isSelf">Заблокировать</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </section>
+
+<section class="section-block neon-card">
+    <div class="admin-section-head">
+        <div>
+            <h2>Быстрая очередь</h2>
+            <p>Самое срочное из модерации и поддержки, без перехода по всем разделам.</p>
+        </div>
+        <a class="btn btn-soft" asp-controller="AdminQueue" asp-action="Index">Очередь заказов</a>
+    </div>
+
+    <div class="admin-mini-grid">
+        <div>
+            <h3>Заказы на проверке</h3>
+            <div class="admin-list">
+                @foreach (var item in Model.PendingOrders)
+                {
+                    <div class="admin-row">
+                        <div>
+                            <b>@item.Title</b>
+                            <p>@item.Category · @item.Price.ToString("N0") ₽ · @(item.Owner?.DisplayName ?? "заказчик")</p>
+                        </div>
+                        <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div>
+            <h3>Жалобы</h3>
+            <div class="admin-list">
+                @foreach (var item in Model.OrderCases)
+                {
+                    <div class="admin-row">
+                        <div>
+                            <b>@item.Title</b>
+                            <p>@DisplayCaseStatus(item.Status) · @(item.CreatedBy?.DisplayName ?? "пользователь")</p>
+                        </div>
+                        <a class="btn btn-soft" asp-controller="Moderation" asp-action="Index">В модерацию</a>
+                    </div>
+                }
+                @foreach (var item in Model.UserCases)
+                {
+                    <div class="admin-row">
+                        <div>
+                            <b>@item.Title</b>
+                            <p>@DisplayCaseStatus(item.Status) · цель: @(item.TargetUser?.DisplayName ?? "пользователь")</p>
+                        </div>
+                        <a class="btn btn-soft" asp-controller="Moderation" asp-action="Index">В модерацию</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div>
+            <h3>Поддержка</h3>
+            <div class="admin-list">
+                @foreach (var request in Model.SupportRequests)
+                {
+                    <div class="admin-row">
+                        <div>
+                            <b>@request.Title</b>
+                            <p>@DisplayCaseStatus(request.Status) · @(request.User?.DisplayName ?? "пользователь")</p>
+                        </div>
+                        <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@request.Id">Чат</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@functions {
+    string DisplayRole(string role) => role switch
+    {
+        UserRoles.Customer => "Заказчик",
+        UserRoles.Creator => "Исполнитель",
+        UserRoles.Admin => "Администратор",
+        UserRoles.Manager => "Менеджер",
+        UserRoles.Owner => "Владелец",
+        UserRoles.CoOwner => "Совладелец",
+        UserRoles.Moderator => "Модератор",
+        UserRoles.Lawyer => "Юрист",
+        UserRoles.SupportAgent => "Поддержка",
+        _ => role
+    };
+
+    string DisplayLegalType(string legalType) => legalType == AccountLegalTypes.Business ? "ИП / юрлицо" : "физлицо";
+
+    string DisplayCaseStatus(string status) => status switch
+    {
+        CaseStatuses.InProgress => "в работе",
+        CaseStatuses.Done => "закрыто",
+        _ => "открыто"
+    };
+}

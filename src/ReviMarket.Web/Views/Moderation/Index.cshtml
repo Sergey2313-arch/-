@@ -23,7 +23,7 @@
 <section class="admin-stats">
     <div class="stat-card neon-card"><span>Заказы</span><b>@Model.Orders.Count</b></div>
     <div class="stat-card neon-card"><span>Жалобы</span><b>@(Model.OrderCases.Count + Model.UserCases.Count)</b></div>
-    <div class="stat-card neon-card"><span>Сообщения</span><b>@Model.Messages.Count</b></div>
+    <div class="stat-card neon-card"><span>Сообщения</span><b>@(Model.Messages.Count + Model.SupportMessages.Count)</b></div>
     <div class="stat-card neon-card"><span>Поддержка</span><b>@Model.SupportRequests.Count</b></div>
 </section>
 
@@ -137,22 +137,51 @@
 
 <section class="section-block neon-card">
     <h2>Сообщения</h2>
-    <div class="admin-list">
-        @foreach (var message in Model.Messages)
-        {
-            <div class="admin-row">
-                <div>
-                    <b>@(message.Sender?.DisplayName ?? "Отправитель") → @(message.Receiver?.DisplayName ?? "Получатель")</b>
-                    <p>@message.Text</p>
-                    <small>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
-                </div>
-                <form asp-action="DeleteMessage" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@message.Id" />
-                    <button class="btn btn-soft" type="submit">Удалить</button>
-                </form>
+    <div class="moderation-message-grid">
+        <div>
+            <h3>Личные чаты</h3>
+            <div class="admin-list">
+                @foreach (var message in Model.Messages)
+                {
+                    <div class="admin-row">
+                        <div>
+                            <b>@(message.Sender?.DisplayName ?? "Отправитель") → @(message.Receiver?.DisplayName ?? "Получатель")</b>
+                            <p>@message.Text</p>
+                            <small>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <form asp-action="DeleteMessage" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@message.Id" />
+                            <button class="btn btn-soft" type="submit">Удалить</button>
+                        </form>
+                    </div>
+                }
             </div>
-        }
+        </div>
+
+        <div>
+            <h3>Чаты поддержки</h3>
+            <div class="admin-list">
+                @foreach (var message in Model.SupportMessages)
+                {
+                    <div class="admin-row">
+                        <div>
+                            <b>@(message.Sender?.DisplayName ?? "Пользователь") · тикет #@message.SupportRequestId</b>
+                            <p>@message.Text</p>
+                            <small>@(message.SupportRequest?.Title ?? "обращение") · @message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <div class="review-actions">
+                            <a class="btn btn-soft" asp-controller="Support" asp-action="Details" asp-route-id="@message.SupportRequestId">Тикет</a>
+                            <form asp-action="DeleteSupportMessage" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@message.Id" />
+                                <button class="btn btn-soft" type="submit">Удалить</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </section>
 

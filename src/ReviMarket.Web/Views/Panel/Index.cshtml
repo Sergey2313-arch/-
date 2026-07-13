@@ -5,6 +5,7 @@
     var isAdmin = User.IsInRole(UserRoles.Admin) || accountType == UserRoles.Admin;
     var isManager = User.IsInRole(UserRoles.Manager) || accountType == UserRoles.Manager;
     var isOwner = accountType == UserRoles.Owner || accountType == UserRoles.CoOwner || isManager;
+    var canSeeAdmin = isOwner || isAdmin;
     var canSeeFinance = isOwner || isAdmin;
     var canSeeModeration = isOwner || isAdmin || User.IsInRole(UserRoles.Moderator) || accountType == UserRoles.Moderator;
     var canSeeSupport = isOwner || isAdmin || User.IsInRole(UserRoles.SupportAgent) || accountType == UserRoles.SupportAgent;
@@ -20,6 +21,7 @@
 
         <nav class="admin-menu">
             <a class="active" href="#dashboard">Dashboard</a>
+            @if (canSeeAdmin) { <a href="/Admin">Администрация</a> }
             @if (canSeeModeration) { <a href="/Moderation">Модерация</a> }
             @if (canSeeSupport) { <a href="/Support/Queue">Поддержка</a> }
             @if (canSeeFinance) { <a href="/AdminFinance">Финансы</a> }
@@ -52,6 +54,15 @@
         </section>
 
         <section class="admin-grid">
+            @if (canSeeAdmin)
+            {
+                <article class="card">
+                    <span class="tag">Admin</span>
+                    <h3>Администрация</h3>
+                    <p>Пользователи, роли, блокировки, быстрые очереди и операционные разделы.</p>
+                    <a class="btn btn-primary" href="/Admin">Открыть</a>
+                </article>
+            }
             @if (canSeeModeration)
             {
                 <article class="card">
