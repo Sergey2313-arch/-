@@ -63,15 +63,33 @@
     }
 </section>
 
+@if (currentUser is not null)
+{
+    <nav class="profile-tabs profile-section-tabs neon-card" aria-label="Навигация по профилю">
+        <a class="btn btn-soft" href="#profile-stats">Сводка</a>
+        @if (isCreator)
+        {
+            <a class="btn btn-soft" href="#profile-work">Моя работа</a>
+            <a class="btn btn-soft" href="#profile-deals">Сделки</a>
+            <a class="btn btn-soft" href="#profile-withdrawals">Вывод</a>
+        }
+        else
+        {
+            <a class="btn btn-soft" href="#profile-orders">Мои заказы</a>
+            <a class="btn btn-soft" href="#profile-deals">Сделки</a>
+        }
+    </nav>
+}
+
 @if (currentUser is not null && isCreator)
 {
-    <section class="admin-stats">
+    <section id="profile-stats" class="admin-stats profile-stats">
         <div class="stat-card neon-card"><span>Доступно</span><b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></div>
         <div class="stat-card neon-card"><span>В холде</span><b>@((wallet?.HoldBalance ?? 0).ToString("N0")) ₽</b></div>
         <div class="stat-card neon-card"><span>Заработано</span><b>@earnedTotal.ToString("N0") ₽</b></div>
         <div class="stat-card neon-card"><span>Взято заказов</span><b>@takenOrders.Count</b></div>
     </section>
-    <section class="section-block neon-card">
+    <section id="profile-work" class="section-block neon-card profile-section">
         <h2>Моя работа</h2>
         <div class="grid">
             @foreach (var item in takenOrders)
@@ -86,7 +104,7 @@
             }
         </div>
     </section>
-    <section class="section-block neon-card">
+    <section id="profile-deals" class="section-block neon-card profile-section">
         <h2>Последние сделки</h2>
         <div class="grid">
             @foreach (var deal in deals)
@@ -100,7 +118,7 @@
             }
         </div>
     </section>
-    <section class="section-block neon-card">
+    <section id="profile-withdrawals" class="section-block neon-card profile-section">
         <h2>Заявки на вывод</h2>
         <div class="admin-list">
             @foreach (var item in withdrawals)
@@ -119,13 +137,13 @@
 
 @if (currentUser is not null && !isCreator)
 {
-    <section class="admin-stats">
+    <section id="profile-stats" class="admin-stats profile-stats">
         <div class="stat-card neon-card"><span>Доступно</span><b>@((wallet?.Balance ?? 0).ToString("N0")) ₽</b></div>
         <div class="stat-card neon-card"><span>В холде</span><b>@((wallet?.HoldBalance ?? 0).ToString("N0")) ₽</b></div>
         <div class="stat-card neon-card"><span>Потрачено</span><b>@spentTotal.ToString("N0") ₽</b></div>
         <div class="stat-card neon-card"><span>Мои заказы</span><b>@createdOrders.Count</b></div>
     </section>
-    <section class="section-block neon-card">
+    <section id="profile-orders" class="section-block neon-card profile-section">
         <h2>Мои заказы</h2>
         <div class="grid">
             @foreach (var item in createdOrders)
@@ -140,7 +158,7 @@
             }
         </div>
     </section>
-    <section class="section-block neon-card">
+    <section id="profile-deals" class="section-block neon-card profile-section">
         <h2>Последние сделки</h2>
         <div class="grid">
             @foreach (var deal in deals)

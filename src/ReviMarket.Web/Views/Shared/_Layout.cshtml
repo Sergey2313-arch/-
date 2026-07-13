@@ -37,7 +37,7 @@
             <span class="brand-icon">R</span>
             <span><b>ReviMarket</b><small>работа • заказы • вакансии</small></span>
         </a>
-        <nav class="nav">
+        <nav class="nav" aria-label="Основная навигация">
             <a href="/Orders">Работа</a>
             <a href="/Board">Вакансии</a>
             <a href="/Creators">Исполнители</a>
@@ -52,7 +52,7 @@
                 }
             }
         </nav>
-        <div class="auth">
+        <div class="auth" aria-label="Аккаунт">
             @if (SignInManager.IsSignedIn(User))
             {
                 <form action="/Account/Logout" method="post">
