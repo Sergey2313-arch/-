@@ -1,13 +1,14 @@
 .panel-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    gap: 14px;
 }
 
 .panel-card {
     display: grid;
     gap: 12px;
-    padding: 22px;
+    padding: 18px;
+    border-radius: var(--radius);
 }
 
 .panel-card h2 {
