@@ -380,12 +380,40 @@ html {
 
 .js-animate {
     opacity: 0;
-    transform: translateY(14px);
+    will-change: opacity, transform;
+}
+
+.js-animate.reveal-up {
+    transform: translateY(12px);
+}
+
+.js-animate.reveal-scale {
+    transform: translateY(8px) scale(.985);
+}
+
+.js-animate.reveal-side {
+    transform: translateX(-10px);
+}
+
+.js-animate.reveal-soft {
+    filter: blur(3px);
 }
 
 .js-animate.in-view {
-    animation: revimarketReveal .48s cubic-bezier(.2,.8,.2,1) forwards;
+    animation: revimarketRevealUp .44s cubic-bezier(.2,.8,.2,1) forwards;
     animation-delay: var(--reveal-delay, 0ms);
+}
+
+.js-animate.reveal-scale.in-view {
+    animation-name: revimarketRevealScale;
+}
+
+.js-animate.reveal-side.in-view {
+    animation-name: revimarketRevealSide;
+}
+
+.js-animate.reveal-soft.in-view {
+    animation-name: revimarketRevealSoft;
 }
 
 .brand-icon {
@@ -448,9 +476,9 @@ html {
     inset: 0;
     pointer-events: none;
     background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.055) 42%, transparent 64%);
-    opacity: .48;
+    opacity: .30;
     transform: translateX(-120%);
-    animation: profileHeaderSweep 4.8s ease-in-out 1.1s infinite;
+    animation: profileHeaderSweep 1.15s ease-out .38s both;
 }
 
 .profile-page > * {
@@ -469,32 +497,32 @@ html {
 .profile-page .profile-tabs { animation-delay: .24s; }
 
 .container {
-    animation: siteFadeIn .42s ease-out both;
+    animation: siteFadeIn .32s ease-out both;
 }
 
 .hero .eyebrow,
 .hero h1,
 .hero-text,
 .hero .actions {
-    animation: heroTextReveal .62s cubic-bezier(.2,.8,.2,1) both;
+    animation: heroTextReveal .5s cubic-bezier(.2,.8,.2,1) both;
 }
 
 .hero .eyebrow { animation-delay: .08s; }
-.hero h1 { animation-delay: .18s; }
-.hero-text { animation-delay: .32s; }
-.hero .actions { animation-delay: .46s; }
+.hero h1 { animation-delay: .16s; }
+.hero-text { animation-delay: .26s; }
+.hero .actions { animation-delay: .36s; }
 
 .hero-card b,
 .hero-card span {
-    animation: heroStatReveal .54s cubic-bezier(.2,.8,.2,1) both;
+    animation: heroStatReveal .42s cubic-bezier(.2,.8,.2,1) both;
 }
 
 .hero-card b:nth-of-type(1),
-.hero-card span:nth-of-type(1) { animation-delay: .24s; }
+.hero-card span:nth-of-type(1) { animation-delay: .20s; }
 .hero-card b:nth-of-type(2),
-.hero-card span:nth-of-type(2) { animation-delay: .36s; }
+.hero-card span:nth-of-type(2) { animation-delay: .30s; }
 .hero-card b:nth-of-type(3),
-.hero-card span:nth-of-type(3) { animation-delay: .48s; }
+.hero-card span:nth-of-type(3) { animation-delay: .40s; }
 
 .profile-identity {
     display: flex;
@@ -550,14 +578,47 @@ html {
     opacity: .52;
 }
 
-@keyframes revimarketReveal {
+@keyframes revimarketRevealUp {
     from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes revimarketRevealScale {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes revimarketRevealSide {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes revimarketRevealSoft {
+    from {
+        opacity: 0;
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
     }
 }
 
@@ -575,8 +636,8 @@ html {
 @keyframes heroTextReveal {
     from {
         opacity: 0;
-        transform: translateY(18px);
-        filter: blur(6px);
+        transform: translateY(10px);
+        filter: blur(2px);
     }
     to {
         opacity: 1;
@@ -588,8 +649,8 @@ html {
 @keyframes heroStatReveal {
     from {
         opacity: 0;
-        transform: translateX(12px);
-        filter: blur(5px);
+        transform: translateX(8px);
+        filter: blur(2px);
     }
     to {
         opacity: 1;
@@ -627,8 +688,8 @@ html {
 @keyframes profileTextIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
-        filter: blur(4px);
+        transform: translateY(8px);
+        filter: blur(2px);
     }
     to {
         opacity: 1;

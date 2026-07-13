@@ -78,6 +78,22 @@ document.addEventListener('DOMContentLoaded', function () {
         '.neon-card:not(.hero-card), .card, .section-block, .auth-card, .detail-layout, .review-row, .admin-row, .stat-card, .product-card'
     );
 
+    function revealClassFor(item, index) {
+        if (item.classList.contains('admin-row') || item.classList.contains('review-row')) {
+            return 'reveal-side';
+        }
+
+        if (item.classList.contains('stat-card') || item.classList.contains('product-card')) {
+            return 'reveal-scale';
+        }
+
+        if (item.classList.contains('profile-page') || item.classList.contains('auth-card')) {
+            return 'reveal-soft';
+        }
+
+        return index % 4 === 0 ? 'reveal-soft' : 'reveal-up';
+    }
+
     if (!('IntersectionObserver' in window)) {
         animatedItems.forEach(function (item) {
             item.classList.add('in-view');
@@ -113,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }, { threshold: .08, rootMargin: '0px 0px -24px 0px' });
 
     animatedItems.forEach(function (item, index) {
-        item.classList.add('js-animate');
-        item.style.setProperty('--reveal-delay', Math.min(index * 35, 280) + 'ms');
+        item.classList.add('js-animate', revealClassFor(item, index));
+        item.style.setProperty('--reveal-delay', Math.min(index * 24, 180) + 'ms');
         observer.observe(item);
     });
 });
