@@ -13,6 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<MarketItem> MarketItems => Set<MarketItem>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
     public DbSet<UserCase> UserCases => Set<UserCase>();
     public DbSet<OrderCase> OrderCases => Set<OrderCase>();
     public DbSet<Wallet> Wallets => Set<Wallet>();
@@ -33,6 +34,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ChatMessage>().HasOne(x => x.Receiver).WithMany().HasForeignKey(x => x.ReceiverId).OnDelete(DeleteBehavior.Restrict);
         builder.Entity<SupportRequest>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
         builder.Entity<SupportRequest>().HasOne(x => x.Agent).WithMany().HasForeignKey(x => x.AgentId).OnDelete(DeleteBehavior.SetNull);
+        builder.Entity<SupportMessage>().HasOne(x => x.SupportRequest).WithMany(x => x.Messages).HasForeignKey(x => x.SupportRequestId).OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<SupportMessage>().HasOne(x => x.Sender).WithMany().HasForeignKey(x => x.SenderId).OnDelete(DeleteBehavior.SetNull);
         builder.Entity<UserCase>().HasOne(x => x.CreatedBy).WithMany().HasForeignKey(x => x.CreatedById).OnDelete(DeleteBehavior.SetNull);
         builder.Entity<UserCase>().HasOne(x => x.TargetUser).WithMany().HasForeignKey(x => x.TargetUserId).OnDelete(DeleteBehavior.SetNull);
         builder.Entity<UserCase>().HasOne(x => x.Agent).WithMany().HasForeignKey(x => x.AgentId).OnDelete(DeleteBehavior.SetNull);

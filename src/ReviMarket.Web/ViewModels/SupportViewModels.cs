@@ -15,4 +15,5 @@ public sealed class SupportQueueViewModel
 public sealed class SupportDetailsViewModel
 {
     public SupportRequest Request { get; set; } = new();
+    public List<SupportMessage> Messages { get; set; } = new();
 }

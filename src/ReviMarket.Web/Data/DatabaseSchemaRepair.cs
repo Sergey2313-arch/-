@@ -63,6 +63,16 @@ public static class DatabaseSchemaRepair
                 )
                 """);
 
+            await EnsureTableAsync(connection, "SupportMessages", """
+                CREATE TABLE "SupportMessages" (
+                    "Id" INTEGER NOT NULL CONSTRAINT "PK_SupportMessages" PRIMARY KEY AUTOINCREMENT,
+                    "SupportRequestId" INTEGER NOT NULL,
+                    "SenderId" TEXT NULL,
+                    "Text" TEXT NOT NULL,
+                    "CreatedAt" TEXT NOT NULL DEFAULT '2026-01-01 00:00:00'
+                )
+                """);
+
             await EnsureTableAsync(connection, "UserCases", """
                 CREATE TABLE "UserCases" (
                     "Id" INTEGER NOT NULL CONSTRAINT "PK_UserCases" PRIMARY KEY AUTOINCREMENT,
@@ -108,6 +118,7 @@ public static class DatabaseSchemaRepair
             await EnsureMarketItemColumnsAsync(connection);
             await EnsureChatMessageColumnsAsync(connection);
             await EnsureSupportRequestColumnsAsync(connection);
+            await EnsureSupportMessageColumnsAsync(connection);
             await EnsureUserCaseColumnsAsync(connection);
             await EnsureOrderCaseColumnsAsync(connection);
         }
@@ -159,6 +170,16 @@ public static class DatabaseSchemaRepair
         await AddColumnIfMissingAsync(connection, columns, "SupportRequests", "UserId", "TEXT NULL");
         await AddColumnIfMissingAsync(connection, columns, "SupportRequests", "AgentId", "TEXT NULL");
         await AddColumnIfMissingAsync(connection, columns, "SupportRequests", "CreatedAt", "TEXT NOT NULL DEFAULT '2026-01-01 00:00:00'");
+    }
+
+    private static async Task EnsureSupportMessageColumnsAsync(DbConnection connection)
+    {
+        if (!await TableExistsAsync(connection, "SupportMessages")) return;
+        var columns = await GetColumnsAsync(connection, "SupportMessages");
+        await AddColumnIfMissingAsync(connection, columns, "SupportMessages", "SupportRequestId", "INTEGER NOT NULL DEFAULT 0");
+        await AddColumnIfMissingAsync(connection, columns, "SupportMessages", "SenderId", "TEXT NULL");
+        await AddColumnIfMissingAsync(connection, columns, "SupportMessages", "Text", "TEXT NOT NULL DEFAULT ''");
+        await AddColumnIfMissingAsync(connection, columns, "SupportMessages", "CreatedAt", "TEXT NOT NULL DEFAULT '2026-01-01 00:00:00'");
     }
 
     private static async Task EnsureUserCaseColumnsAsync(DbConnection connection)

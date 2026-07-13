@@ -17,19 +17,30 @@
 
 @if (Model.Conversations.Any())
 {
-    <section class="section-block neon-card">
-        <h2>Диалоги</h2>
-        <div class="admin-list">
+    <section class="chat-list-panel neon-card">
+        <div class="chat-list-title">
+            <div>
+                <h2>Диалоги</h2>
+                <p>Последние сообщения и быстрый вход в переписку.</p>
+            </div>
+            <span class="tag">@Model.Conversations.Count диалогов</span>
+        </div>
+
+        <div class="conversation-list">
             @foreach (var conversation in Model.Conversations)
             {
-                <div class="admin-row">
-                    <div>
+                <a class="conversation-card" asp-action="Thread" asp-route-id="@conversation.User.Id">
+                    <span class="chat-avatar">@Initial(conversation.User)</span>
+                    <span class="conversation-main">
                         <b>@conversation.User.DisplayName</b>
-                        <p>@conversation.LatestMessage.Text</p>
-                        <small>@conversation.MessagesCount сообщений • @conversation.LatestMessage.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
-                    </div>
-                    <a class="btn btn-soft" asp-action="Thread" asp-route-id="@conversation.User.Id">Открыть</a>
-                </div>
+                        <small>@DisplayRole(conversation.User) · @DisplayLegalType(conversation.User)</small>
+                        <span>@ShortText(conversation.LatestMessage.Text)</span>
+                    </span>
+                    <span class="conversation-side">
+                        <small>@conversation.LatestMessage.CreatedAt.ToString("dd.MM HH:mm")</small>
+                        <em>@conversation.MessagesCount</em>
+                    </span>
+                </a>
             }
         </div>
     </section>
@@ -43,15 +54,24 @@ else
 }
 
 <section class="section-block neon-card">
-    <h2>Пользователи</h2>
-    <div class="grid">
+    <div class="chat-list-title">
+        <div>
+            <h2>Пользователи</h2>
+            <p>Можно написать заказчику, исполнителю или участнику команды.</p>
+        </div>
+    </div>
+
+    <div class="contact-grid">
         @foreach (var user in Model.Contacts)
         {
-            <article class="card">
-                <span class="tag">@DisplayRole(user)</span>
-                <h3>@user.DisplayName</h3>
-                <p>@DisplayLegalType(user) • ★ @user.Rating.ToString("0.00")</p>
-                <a class="btn btn-primary" asp-action="Thread" asp-route-id="@user.Id">Написать</a>
+            <article class="contact-card">
+                <span class="chat-avatar">@Initial(user)</span>
+                <div>
+                    <span class="tag">@DisplayRole(user)</span>
+                    <h3>@user.DisplayName</h3>
+                    <p>@DisplayLegalType(user) · ★ @user.Rating.ToString("0.00")</p>
+                    <a class="btn btn-primary" asp-action="Thread" asp-route-id="@user.Id">Написать</a>
+                </div>
             </article>
         }
     </div>
@@ -61,4 +81,12 @@ else
     string DisplayRole(ApplicationUser user) => user.AccountType == UserRoles.Creator ? "Исполнитель" : user.AccountType == UserRoles.Customer ? "Заказчик" : user.AccountType;
 
     string DisplayLegalType(ApplicationUser user) => user.LegalType == AccountLegalTypes.Business ? "ИП / юрлицо" : "физлицо";
+
+    string Initial(ApplicationUser user)
+    {
+        var name = string.IsNullOrWhiteSpace(user.DisplayName) ? user.UserName : user.DisplayName;
+        return string.IsNullOrWhiteSpace(name) ? "R" : name.Trim()[0].ToString().ToUpperInvariant();
+    }
+
+    string ShortText(string text) => text.Length <= 95 ? text : text[..95] + "...";
 }

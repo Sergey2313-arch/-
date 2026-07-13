@@ -78,6 +78,15 @@ public class SupportController : Controller
         _db.SupportRequests.Add(request);
         await _db.SaveChangesAsync();
 
+        _db.SupportMessages.Add(new SupportMessage
+        {
+            SupportRequestId = request.Id,
+            SenderId = request.UserId,
+            Text = text,
+            CreatedAt = request.CreatedAt
+        });
+        await _db.SaveChangesAsync();
+
         return RedirectToAction(nameof(Details), new { id = request.Id });
     }
 
@@ -92,7 +101,71 @@ public class SupportController : Controller
         if (request is null) return NotFound();
         if (!CanSee(request)) return NotFound();
 
-        return View(new SupportDetailsViewModel { Request = request });
+        var messages = await _db.SupportMessages
+            .Include(x => x.Sender)
+            .Where(x => x.SupportRequestId == request.Id)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync();
+
+        return View(new SupportDetailsViewModel { Request = request, Messages = messages });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reply(int id, string text)
+    {
+        var senderId = _users.GetUserId(User);
+        if (string.IsNullOrWhiteSpace(senderId)) return Challenge();
+
+        var request = await _db.SupportRequests.FirstOrDefaultAsync(x => x.Id == id);
+        if (request is null) return NotFound();
+        if (!CanSee(request)) return NotFound();
+
+        var cleanText = _textSecurity.CleanText(text, 1200);
+        if (cleanText.Length < 1)
+        {
+            TempData["Error"] = "Сообщение не может быть пустым.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        if (_textSecurity.LooksDangerous(text))
+        {
+            TempData["Error"] = "Сообщение похоже на вредоносный ввод и не отправлено.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var recentLimit = DateTime.UtcNow.AddMinutes(-1);
+        var recentCount = await _db.SupportMessages.CountAsync(x => x.SenderId == senderId && x.CreatedAt >= recentLimit);
+        if (recentCount >= 20)
+        {
+            TempData["Error"] = "Слишком много сообщений за минуту. Подожди немного.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var isStaff = StaffRoles.Any(User.IsInRole);
+        if (isStaff)
+        {
+            request.AgentId ??= senderId;
+            if (request.Status == CaseStatuses.Open)
+            {
+                request.Status = CaseStatuses.InProgress;
+            }
+        }
+        else if (request.Status == CaseStatuses.Done)
+        {
+            request.Status = CaseStatuses.Open;
+        }
+
+        _db.SupportMessages.Add(new SupportMessage
+        {
+            SupportRequestId = request.Id,
+            SenderId = senderId,
+            Text = cleanText,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Manager + "," + UserRoles.Owner + "," + UserRoles.CoOwner + "," + UserRoles.SupportAgent)]

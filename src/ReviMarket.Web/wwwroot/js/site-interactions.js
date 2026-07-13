@@ -75,15 +75,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var animatedItems = document.querySelectorAll(
-        '.neon-card:not(.hero-card), .card, .section-block, .auth-card, .detail-layout, .review-row, .admin-row, .stat-card, .product-card'
+        '.neon-card:not(.hero-card), .card, .section-block, .auth-card, .detail-layout, .review-row, .admin-row, .stat-card, .product-card, .conversation-card, .contact-card, .chat-message'
     );
 
     function revealClassFor(item, index) {
-        if (item.classList.contains('admin-row') || item.classList.contains('review-row')) {
+        if (item.classList.contains('admin-row') || item.classList.contains('review-row') || item.classList.contains('conversation-card')) {
             return 'reveal-side';
         }
 
-        if (item.classList.contains('stat-card') || item.classList.contains('product-card')) {
+        if (item.classList.contains('stat-card') || item.classList.contains('product-card') || item.classList.contains('contact-card')) {
             return 'reveal-scale';
         }
 

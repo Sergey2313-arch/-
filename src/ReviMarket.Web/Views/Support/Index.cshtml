@@ -9,7 +9,10 @@
         <h1>Поддержка</h1>
         <p>Обращения по заказам, оплатам, профилю, безопасности и работе биржи.</p>
     </div>
-    <a class="btn btn-primary" asp-action="Create">Новое обращение</a>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+        <a class="btn btn-primary" asp-action="Create">Новое обращение</a>
+    </div>
 </section>
 
 @if (!Model.Requests.Any())
@@ -21,23 +24,50 @@
 }
 else
 {
-    <section class="section-block neon-card">
-        <h2>Мои обращения</h2>
-        <div class="admin-list">
+    <section class="chat-list-panel neon-card">
+        <div class="chat-list-title">
+            <div>
+                <h2>Мои обращения</h2>
+                <p>Каждое обращение теперь работает как отдельный чат с поддержкой.</p>
+            </div>
+            <span class="tag">@Model.Requests.Count тикетов</span>
+        </div>
+
+        <div class="conversation-list">
             @foreach (var item in Model.Requests)
             {
-                <div class="admin-row">
-                    <div>
+                <a class="conversation-card support-ticket-link" asp-action="Details" asp-route-id="@item.Id">
+                    <span class="chat-avatar">S</span>
+                    <span class="conversation-main">
                         <b>@item.Title</b>
-                        <p>@item.Text</p>
-                        <small>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm") • агент: @(item.Agent?.DisplayName ?? "не назначен")</small>
-                    </div>
-                    <div class="review-actions">
-                        <span class="tag">@item.Status</span>
-                        <a class="btn btn-soft" asp-action="Details" asp-route-id="@item.Id">Открыть</a>
-                    </div>
-                </div>
+                        <small>@StatusLabel(item.Status) · агент: @(item.Agent?.DisplayName ?? "не назначен")</small>
+                        <span>@ShortText(item.Text)</span>
+                    </span>
+                    <span class="conversation-side">
+                        <small>@item.CreatedAt.ToString("dd.MM HH:mm")</small>
+                        <em>@PriorityLabel(item.Priority)</em>
+                    </span>
+                </a>
             }
         </div>
     </section>
+}
+
+@functions {
+    string StatusLabel(string status) => status switch
+    {
+        CaseStatuses.InProgress => "В работе",
+        CaseStatuses.Done => "Закрыт",
+        _ => "Открыт"
+    };
+
+    string PriorityLabel(string priority) => priority switch
+    {
+        "Low" => "низкий",
+        "High" => "высокий",
+        "Urgent" => "срочно",
+        _ => "обычный"
+    };
+
+    string ShortText(string text) => text.Length <= 100 ? text : text[..100] + "...";
 }
