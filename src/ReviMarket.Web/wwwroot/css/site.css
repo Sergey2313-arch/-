@@ -416,30 +416,6 @@ html {
     animation-name: revimarketRevealSoft;
 }
 
-.brand-icon {
-    animation: headerMarkIn .52s cubic-bezier(.2,.8,.2,1) both;
-}
-
-.brand b,
-.brand small,
-.nav a,
-.auth .btn,
-.auth button {
-    animation: headerTextIn .46s cubic-bezier(.2,.8,.2,1) both;
-}
-
-.brand b { animation-delay: .08s; }
-.brand small { animation-delay: .16s; }
-.nav a:nth-child(1) { animation-delay: .18s; }
-.nav a:nth-child(2) { animation-delay: .23s; }
-.nav a:nth-child(3) { animation-delay: .28s; }
-.nav a:nth-child(4) { animation-delay: .33s; }
-.nav a:nth-child(5) { animation-delay: .38s; }
-.nav a:nth-child(6) { animation-delay: .43s; }
-.nav a:nth-child(7) { animation-delay: .48s; }
-.auth .btn,
-.auth button { animation-delay: .52s; }
-
 .topbar {
     box-shadow: 0 10px 32px rgba(7, 3, 15, .18);
 }
@@ -655,32 +631,6 @@ html {
     to {
         opacity: 1;
         transform: translateX(0);
-        filter: blur(0);
-    }
-}
-
-@keyframes headerMarkIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px) scale(.88) rotate(-8deg);
-        filter: blur(5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1) rotate(0);
-        filter: blur(0);
-    }
-}
-
-@keyframes headerTextIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-        filter: blur(4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
         filter: blur(0);
     }
 }
