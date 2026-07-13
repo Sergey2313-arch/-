@@ -5,7 +5,6 @@
     var wallet = ViewBag.Wallet as Wallet;
     var createdOrders = ViewBag.CreatedOrders as List<MarketItem> ?? new();
     var takenOrders = ViewBag.TakenOrders as List<MarketItem> ?? new();
-    var deals = ViewBag.Deals as List<Deal> ?? new();
     var withdrawals = ViewBag.Withdrawals as List<WithdrawalRequest> ?? new();
     var earnedTotal = ViewBag.EarnedTotal is decimal earned ? earned : 0m;
     var spentTotal = ViewBag.SpentTotal is decimal spent ? spent : 0m;
@@ -18,7 +17,7 @@
     @if (currentUser is null)
     {
         <h1>Профиль</h1>
-        <p>Войди, чтобы видеть заказы, сделки и баланс.</p>
+        <p>Войди, чтобы видеть заказы и баланс.</p>
         <div class="profile-tabs">
             <a class="btn btn-primary" href="/Account/Login">Войти</a>
             <a class="btn btn-soft" href="/Account/Register">Регистрация</a>
@@ -26,8 +25,8 @@
     }
     else if (isCreator)
     {
-        <h1>Кабинет исполнителя</h1>
-        <p>@currentUser.DisplayName • исполнитель • @DisplayLegalType(currentUser) • @currentUser.Email</p>
+        <h1>@currentUser.DisplayName</h1>
+        <p class="profile-identity"><span class="profile-role">Исполнитель</span><span>@DisplayLegalType(currentUser)</span><span>@currentUser.Email</span></p>
         @if (currentUser.LegalType == AccountLegalTypes.Business)
         {
             <p>@currentUser.OrganizationName • ИНН @currentUser.Inn</p>
@@ -36,15 +35,14 @@
             <a class="btn btn-primary" href="/Orders">Найти работу</a>
             <a class="btn btn-soft" href="/Wallet">Кошелек</a>
             <a class="btn btn-soft" href="/Withdrawals">Вывод</a>
-            <a class="btn btn-soft" href="/Deals">Сделки</a>
             <a class="btn btn-soft" href="/Inbox">Чат</a>
             <a class="btn btn-soft" href="/Profile/Edit">Настройки</a>
         </div>
     }
     else
     {
-        <h1>Кабинет заказчика</h1>
-        <p>@currentUser.DisplayName • заказчик • @DisplayLegalType(currentUser) • @currentUser.Email</p>
+        <h1>@currentUser.DisplayName</h1>
+        <p class="profile-identity"><span class="profile-role">Заказчик</span><span>@DisplayLegalType(currentUser)</span><span>@currentUser.Email</span></p>
         @if (currentUser.LegalType == AccountLegalTypes.Business)
         {
             <p>@currentUser.OrganizationName • ИНН @currentUser.Inn</p>
@@ -52,7 +50,6 @@
         <div class="profile-tabs">
             <a class="btn btn-primary" href="/Orders/Create">Создать заказ</a>
             <a class="btn btn-soft" href="/Wallet">Кошелек</a>
-            <a class="btn btn-soft" href="/Deals">Сделки</a>
             <a class="btn btn-soft" href="/Inbox">Чат</a>
             <a class="btn btn-soft" href="/Profile/Edit">Настройки</a>
             @if (isStaff)
@@ -70,13 +67,11 @@
         @if (isCreator)
         {
             <a class="btn btn-soft" href="#profile-work">Моя работа</a>
-            <a class="btn btn-soft" href="#profile-deals">Сделки</a>
             <a class="btn btn-soft" href="#profile-withdrawals">Вывод</a>
         }
         else
         {
             <a class="btn btn-soft" href="#profile-orders">Мои заказы</a>
-            <a class="btn btn-soft" href="#profile-deals">Сделки</a>
         }
     </nav>
 }
@@ -100,20 +95,6 @@
                     <span class="price">@item.Price.ToString("N0") ₽</span>
                     <span class="tag">Заказчик: @(item.Owner?.DisplayName ?? "-")</span>
                     <a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a>
-                </article>
-            }
-        </div>
-    </section>
-    <section id="profile-deals" class="section-block neon-card profile-section">
-        <h2>Последние сделки</h2>
-        <div class="grid">
-            @foreach (var deal in deals)
-            {
-                <article class="card">
-                    <h3>Сделка #@deal.Id</h3>
-                    <p>@(deal.MarketItem?.Title ?? "Заказ")</p>
-                    <span class="price">@deal.ExecutorAmount.ToString("N0") ₽</span>
-                    <span class="tag">@deal.Status</span>
                 </article>
             }
         </div>
@@ -154,20 +135,6 @@
                     <span class="price">@item.Price.ToString("N0") ₽</span>
                     <span class="tag">@DisplayOrderStatus(item)</span>
                     <a class="btn btn-soft" href="/Orders/Details/@item.Id">Открыть</a>
-                </article>
-            }
-        </div>
-    </section>
-    <section id="profile-deals" class="section-block neon-card profile-section">
-        <h2>Последние сделки</h2>
-        <div class="grid">
-            @foreach (var deal in deals)
-            {
-                <article class="card">
-                    <h3>Сделка #@deal.Id</h3>
-                    <p>@(deal.MarketItem?.Title ?? "Заказ")</p>
-                    <span class="price">@deal.Amount.ToString("N0") ₽</span>
-                    <span class="tag">@deal.Status</span>
                 </article>
             }
         </div>

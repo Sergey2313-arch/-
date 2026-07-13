@@ -41,7 +41,6 @@ public class ProfileController : Controller
         ViewBag.Wallet = wallet;
         ViewBag.CreatedOrders = await _db.MarketItems.Include(x => x.AssignedExecutor).Where(x => x.Type == MarketItemTypes.Order && x.OwnerId == userId).OrderByDescending(x => x.CreatedAt).ToListAsync();
         ViewBag.TakenOrders = await _db.MarketItems.Include(x => x.Owner).Where(x => x.Type == MarketItemTypes.Order && x.AssignedExecutorId == userId).OrderByDescending(x => x.AssignedAt).ToListAsync();
-        ViewBag.Deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).Include(x => x.MarketItem).Where(x => x.CustomerId == userId || x.ExecutorId == userId).OrderByDescending(x => x.CreatedAt).Take(8).ToListAsync();
         ViewBag.Withdrawals = await _db.WithdrawalRequests.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedAt).Take(5).ToListAsync();
         var earnedAmounts = await _db.Deals
             .Where(x => x.ExecutorId == userId && x.Status == DealStatuses.Completed)

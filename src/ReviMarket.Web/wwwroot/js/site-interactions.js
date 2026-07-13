@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var animatedItems = document.querySelectorAll(
-        '.hero > div, .neon-card, .card, .section-block, .auth-card, .detail-layout, .review-row, .admin-row, .stat-card, .product-card'
+        '.neon-card:not(.hero-card), .card, .section-block, .auth-card, .detail-layout, .review-row, .admin-row, .stat-card, .product-card'
     );
 
     if (!('IntersectionObserver' in window)) {

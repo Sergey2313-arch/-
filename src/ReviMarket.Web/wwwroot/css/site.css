@@ -468,6 +468,55 @@ html {
 .profile-page p { animation-delay: .16s; }
 .profile-page .profile-tabs { animation-delay: .24s; }
 
+.container {
+    animation: siteFadeIn .42s ease-out both;
+}
+
+.hero .eyebrow,
+.hero h1,
+.hero-text,
+.hero .actions {
+    animation: heroTextReveal .62s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.hero .eyebrow { animation-delay: .08s; }
+.hero h1 { animation-delay: .18s; }
+.hero-text { animation-delay: .32s; }
+.hero .actions { animation-delay: .46s; }
+
+.hero-card b,
+.hero-card span {
+    animation: heroStatReveal .54s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.hero-card b:nth-of-type(1),
+.hero-card span:nth-of-type(1) { animation-delay: .24s; }
+.hero-card b:nth-of-type(2),
+.hero-card span:nth-of-type(2) { animation-delay: .36s; }
+.hero-card b:nth-of-type(3),
+.hero-card span:nth-of-type(3) { animation-delay: .48s; }
+
+.profile-identity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-identity span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.profile-role {
+    padding: 7px 10px;
+    border: 1px solid rgba(216,180,254,.28);
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(124,44,255,.30), rgba(255,43,214,.10));
+    color: #fff;
+    font-weight: 900;
+}
+
 .profile-section-tabs {
     position: sticky;
     top: 72px;
@@ -509,6 +558,43 @@ html {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes siteFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes heroTextReveal {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+        filter: blur(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes heroStatReveal {
+    from {
+        opacity: 0;
+        transform: translateX(12px);
+        filter: blur(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
     }
 }
 
