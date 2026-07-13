@@ -152,7 +152,9 @@
 
 .admin-main .admin-grid .card {
     min-width: 0;
-    align-content: start;
+    min-height: 380px;
+    grid-template-rows: auto minmax(86px, auto) minmax(112px, 1fr) auto;
+    align-content: stretch;
     overflow: hidden;
 }
 
@@ -165,11 +167,12 @@
 
 .admin-main .admin-grid .card p {
     overflow-wrap: anywhere;
+    align-self: start;
 }
 
 .admin-main .admin-grid .card .btn {
     align-self: end;
-    margin-top: auto;
+    width: 100%;
 }
 
 .admin-card {
