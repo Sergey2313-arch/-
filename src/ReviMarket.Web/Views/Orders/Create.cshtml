@@ -9,6 +9,11 @@
     <h1>Создать заказ</h1>
     <p>После создания заказ попадёт на проверку. После одобрения он появится в общей ленте “Работа”.</p>
 
+    <div class="section-actions profile-back-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+        <a class="btn btn-soft" asp-controller="Orders" asp-action="Index">К заказам</a>
+    </div>
+
     <form asp-action="Create" method="post" class="form">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="validation"></div>

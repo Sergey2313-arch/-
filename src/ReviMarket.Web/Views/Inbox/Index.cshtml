@@ -9,7 +9,10 @@
         <h1>Сообщения</h1>
         <p>Диалоги между заказчиками, исполнителями и пользователями ReviMarket.</p>
     </div>
-    <a class="btn btn-primary" asp-controller="Support" asp-action="Create">Написать в поддержку</a>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+        <a class="btn btn-primary" asp-controller="Support" asp-action="Create">Написать в поддержку</a>
+    </div>
 </section>
 
 @if (Model.Conversations.Any())

@@ -8,6 +8,10 @@
     <h1>Настройки профиля</h1>
     <p>Здесь можно изменить роль на бирже и данные физлица, ИП или юрлица.</p>
 
+    <div class="section-actions profile-back-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+    </div>
+
     <form asp-action="Edit" method="post" class="form">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="validation"></div>
@@ -68,6 +72,6 @@
         <input asp-for="LegalAddress" />
 
         <button class="btn btn-primary" type="submit">Сохранить</button>
-        <a class="btn btn-soft" href="/Profile">Назад</a>
+        <a class="btn btn-soft" href="/Profile">Назад в профиль</a>
     </form>
 </section>

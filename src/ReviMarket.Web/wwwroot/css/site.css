@@ -88,6 +88,17 @@ h2 { font-size: 30px; }
 .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
 
 .section-head { display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 20px; }
+.section-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    align-items: center;
+}
+.profile-back-actions {
+    justify-content: flex-start;
+    margin: 16px 0 2px;
+}
 .toolbar { display: flex; gap: 10px; padding: 14px; margin-bottom: 18px; }
 input, textarea, select {
     width: 100%; border: 1px solid var(--border); border-radius: 14px;
@@ -263,6 +274,8 @@ select option { color: #111; }
     .grid, .admin-grid, .role-choice { grid-template-columns: 1fr; }
     .category-blocks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .section-head, .toolbar { flex-direction: column; align-items: stretch; }
+    .section-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; }
+    .section-actions .btn { width: 100%; }
     .detail-layout { grid-template-columns: 1fr; padding: 18px; }
     .detail-main h1 { font-size: clamp(32px, 10vw, 44px); }
     .detail-sidebar { padding: 14px; }
@@ -270,6 +283,7 @@ select option { color: #111; }
 
 @media (max-width: 560px) {
     .category-blocks { grid-template-columns: 1fr; }
+    .section-actions { grid-template-columns: 1fr; }
 }
 
 html {
