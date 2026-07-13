@@ -271,3 +271,150 @@ select option { color: #111; }
 @media (max-width: 560px) {
     .category-blocks { grid-template-columns: 1fr; }
 }
+
+html {
+    scroll-behavior: smooth;
+}
+
+.nav a,
+.profile-tabs .btn,
+.admin-menu a,
+.category-block,
+.role-card,
+.withdraw-method {
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.nav a::after,
+.profile-tabs .btn::after,
+.admin-menu a::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--violet), var(--pink));
+    opacity: 0;
+    transform: scaleX(.35);
+    transform-origin: center;
+    transition: opacity .18s ease, transform .18s ease;
+}
+
+.nav a:hover,
+.nav a:focus-visible,
+.nav a.active,
+.nav a[aria-current="page"],
+.profile-tabs .btn:hover,
+.profile-tabs .btn:focus-visible,
+.profile-tabs .btn.active,
+.profile-tabs .btn[aria-current="page"],
+.admin-menu a:hover,
+.admin-menu a:focus-visible,
+.admin-menu a.active,
+.admin-menu a[aria-current="page"] {
+    color: #fff;
+    border-color: rgba(216,180,254,.44);
+    background: linear-gradient(135deg, rgba(124,44,255,.22), rgba(255,43,214,.08));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 10px 24px rgba(139,44,255,.10);
+}
+
+.nav a:hover::after,
+.nav a:focus-visible::after,
+.nav a.active::after,
+.nav a[aria-current="page"]::after,
+.profile-tabs .btn:hover::after,
+.profile-tabs .btn:focus-visible::after,
+.profile-tabs .btn.active::after,
+.profile-tabs .btn[aria-current="page"]::after,
+.admin-menu a:hover::after,
+.admin-menu a:focus-visible::after,
+.admin-menu a.active::after,
+.admin-menu a[aria-current="page"]::after {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
+.btn,
+.card,
+.stat-card,
+.review-row,
+.admin-row,
+.detail-info-list div,
+.detail-block,
+.product-card {
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.btn:hover,
+.category-block:hover,
+.role-card:hover,
+.withdraw-method:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active,
+.category-block:active,
+.role-card:active,
+.withdraw-method:active {
+    transform: translateY(0) scale(.99);
+}
+
+.card:hover,
+.product-card:hover,
+.review-row:hover,
+.admin-row:hover,
+.stat-card:hover,
+.detail-info-list div:hover {
+    transform: translateY(-3px);
+    border-color: rgba(216,180,254,.34);
+    box-shadow: 0 0 34px rgba(139,44,255,.16);
+}
+
+.is-pressing {
+    transform: translateY(1px) scale(.99);
+}
+
+.js-animate {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+.js-animate.in-view {
+    animation: revimarketReveal .48s cubic-bezier(.2,.8,.2,1) forwards;
+    animation-delay: var(--reveal-delay, 0ms);
+}
+
+@keyframes revimarketReveal {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+    }
+
+    .js-animate {
+        opacity: 1;
+        transform: none;
+    }
+}
