@@ -13,7 +13,10 @@
         <h1>Кошелёк ReviMarket</h1>
         <p>Beta-кошелёк: баланс, холд, счета на оплату и история операций.</p>
     </div>
-    <a class="btn btn-primary" asp-controller="Wallet" asp-action="TopUp">Создать счёт</a>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+        <a class="btn btn-primary" asp-controller="Wallet" asp-action="TopUp">Создать счёт</a>
+    </div>
 </section>
 
 <section class="admin-stats">

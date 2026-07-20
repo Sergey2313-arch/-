@@ -37,20 +37,22 @@
             <span class="brand-icon">R</span>
             <span><b>ReviMarket</b><small>работа • заказы • вакансии</small></span>
         </a>
-        <nav class="nav">
+        <nav class="nav" aria-label="Основная навигация">
             <a href="/Orders">Работа</a>
             <a href="/Board">Вакансии</a>
             <a href="/Creators">Исполнители</a>
             @if (SignInManager.IsSignedIn(User))
             {
+                <a href="/Inbox">Сообщения</a>
+                <a href="/Support">Поддержка</a>
                 <a href="/Profile">Профиль</a>
                 @if (canOpenPanel)
                 {
-                    <a href="/admin.html">Панель</a>
+                    <a href="/Panel">Панель</a>
                 }
             }
         </nav>
-        <div class="auth">
+        <div class="auth" aria-label="Аккаунт">
             @if (SignInManager.IsSignedIn(User))
             {
                 <form action="/Account/Logout" method="post">
@@ -82,6 +84,7 @@
     </footer>
 
     <script src="~/js/register-business-toggle.js" asp-append-version="true"></script>
+    <script src="~/js/site-interactions.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

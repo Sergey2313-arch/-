@@ -6,7 +6,7 @@ using ReviMarket.Web.Models;
 
 namespace ReviMarket.Web.Controllers;
 
-[Authorize(Roles = UserRoles.Admin + "," + UserRoles.Manager + "," + UserRoles.Moderator)]
+[Authorize(Roles = UserRoles.Owner + "," + UserRoles.CoOwner + "," + UserRoles.Admin + "," + UserRoles.Manager + "," + UserRoles.Moderator)]
 public class AdminQueueController : Controller
 {
     private readonly ApplicationDbContext _db;

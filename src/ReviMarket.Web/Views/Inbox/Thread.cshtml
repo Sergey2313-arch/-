@@ -1,0 +1,87 @@
+@model ChatThreadViewModel
+@{
+    ViewData["Title"] = $"Чат с {Model.OtherUser.DisplayName}";
+}
+
+<section class="section-head chat-page-head">
+    <div>
+        <p class="eyebrow">chat</p>
+        <h1>@Model.OtherUser.DisplayName</h1>
+        <p>@DisplayRole(Model.OtherUser) · @DisplayLegalType(Model.OtherUser)</p>
+    </div>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-action="Index">← Сообщения</a>
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">Профиль</a>
+    </div>
+</section>
+
+@if (TempData["Error"] is string error)
+{
+    <section class="admin-note">
+        <b>Сообщение не отправлено</b>
+        <span>@error</span>
+    </section>
+}
+
+<section class="chat-shell neon-card">
+    <div class="chat-header">
+        <div class="chat-person">
+            <span class="chat-avatar">@Initial(Model.OtherUser)</span>
+            <div>
+                <h2>@Model.OtherUser.DisplayName</h2>
+                <p>@DisplayRole(Model.OtherUser) · @DisplayLegalType(Model.OtherUser)</p>
+            </div>
+        </div>
+        <span class="tag">@MessagesLabel(Model.Messages.Count)</span>
+    </div>
+
+    <div class="chat-messages" aria-live="polite">
+        @if (!Model.Messages.Any())
+        {
+            <div class="chat-empty">
+                <b>Диалог пока пуст</b>
+                <p>Напиши первое сообщение. Здесь будет вся переписка между заказчиком и исполнителем.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var message in Model.Messages)
+            {
+                var mine = message.SenderId == Model.CurrentUser.Id;
+                <article class="chat-message @(mine ? "mine" : "theirs")">
+                    <div class="chat-bubble">
+                        <div class="chat-meta">
+                            <b>@(mine ? "Вы" : Model.OtherUser.DisplayName)</b>
+                            <span>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                        </div>
+                        <p>@message.Text</p>
+                    </div>
+                </article>
+            }
+        }
+    </div>
+
+    <form asp-action="Send" method="post" class="chat-composer">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="receiverId" value="@Model.OtherUser.Id" />
+        <textarea name="text" maxlength="1000" rows="4" placeholder="Написать сообщение"></textarea>
+        <div class="chat-composer-actions">
+            <span>До 1000 символов. Подозрительный код и спам блокируются.</span>
+            <button class="btn btn-primary" type="submit">Отправить</button>
+        </div>
+    </form>
+</section>
+
+@functions {
+    string DisplayRole(ApplicationUser user) => user.AccountType == UserRoles.Creator ? "Исполнитель" : user.AccountType == UserRoles.Customer ? "Заказчик" : user.AccountType;
+
+    string DisplayLegalType(ApplicationUser user) => user.LegalType == AccountLegalTypes.Business ? "ИП / юрлицо" : "физлицо";
+
+    string Initial(ApplicationUser user)
+    {
+        var name = string.IsNullOrWhiteSpace(user.DisplayName) ? user.UserName : user.DisplayName;
+        return string.IsNullOrWhiteSpace(name) ? "R" : name.Trim()[0].ToString().ToUpperInvariant();
+    }
+
+    string MessagesLabel(int count) => count == 1 ? "1 сообщение" : $"{count} сообщений";
+}

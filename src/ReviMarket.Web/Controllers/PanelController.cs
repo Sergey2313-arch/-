@@ -33,7 +33,9 @@ public class PanelController : Controller
         ViewBag.AllOrdersCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Order);
         ViewBag.InWorkOrdersCount = await _db.MarketItems.CountAsync(x => x.Type == MarketItemTypes.Order && x.OrderStatus == OrderStatuses.InWork);
         ViewBag.ActiveDealsCount = await _db.Deals.CountAsync(x => x.Status == DealStatuses.Funded || x.Status == DealStatuses.InProgress);
+        ViewBag.DisputesCount = await _db.Deals.CountAsync(x => x.Status == DealStatuses.Dispute);
         ViewBag.MessagesCount = await _db.ChatMessages.CountAsync(x => x.SenderId == userId || x.ReceiverId == userId);
+        ViewBag.OpenSupportCount = await _db.SupportRequests.CountAsync(x => x.Status != CaseStatuses.Done);
 
         return View();
     }

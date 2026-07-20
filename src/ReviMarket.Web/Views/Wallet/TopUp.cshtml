@@ -1,25 +1,52 @@
 @{
     ViewData["Title"] = "Пополнить баланс";
+    var paymentProvider = ViewBag.PaymentProvider as string ?? PaymentProviders.Test;
+    var isTestProvider = paymentProvider == PaymentProviders.Test;
+    var providerError = ViewBag.PaymentProviderError as string;
+    var minTopUpAmount = ViewBag.MinTopUpAmount is decimal minAmount ? minAmount : 100m;
+    var maxTopUpAmount = ViewBag.MaxTopUpAmount is decimal maxAmount ? maxAmount : 500000m;
 }
 
 <section class="auth-card neon-card">
     <p class="eyebrow">create invoice</p>
     <h1>Пополнить баланс</h1>
-    <p>Создай счёт на оплату. В beta-режиме используется demo-подтверждение. Позже сюда подключим ЮKassa или Т-Банк.</p>
+    <p>Создай счет на оплату. Деньги попадут на баланс после подтверждения платежа провайдером.</p>
+
+    <div class="section-actions profile-back-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+        <a class="btn btn-soft" asp-controller="Wallet" asp-action="Index">К кошельку</a>
+    </div>
 
     <form asp-action="TopUp" method="post" class="form">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="validation"></div>
 
         <label>Сумма</label>
-        <input name="amount" type="number" min="100" step="100" placeholder="Например 1000" />
+        <input name="amount" type="number" min="@minTopUpAmount" max="@maxTopUpAmount" step="100" placeholder="Например 1000" />
 
-        <button class="btn btn-primary" type="submit">Создать счёт</button>
+        <button class="btn btn-primary" type="submit" disabled="@(providerError is not null)">Создать счет</button>
     </form>
 </section>
 
 <section class="section-block neon-card">
-    <p class="eyebrow">payment flow</p>
-    <h2>Почти реальный сценарий</h2>
-    <p>Сайт создаёт счёт, пользователь подтверждает оплату, затем баланс обновляется и операция попадает в историю.</p>
+    <p class="eyebrow">payment provider</p>
+    <h2>@(isTestProvider ? "Тестовый режим" : $"Провайдер: {paymentProvider}")</h2>
+    @if (providerError is not null)
+    {
+        <div class="admin-note">
+            <b>Реальные платежи не настроены</b>
+            <span>@providerError</span>
+        </div>
+    }
+    <p>
+        @if (isTestProvider)
+        {
+            <span>Реальные списания отключены. Укажи настройки ЮKassa, чтобы счета открывались у платежного провайдера.</span>
+        }
+        else
+        {
+            <span>После создания счета пользователь будет перенаправлен на защищенную страницу оплаты YooKassa. Баланс пополнится только после подтверждения платежа через API или webhook.</span>
+        }
+    </p>
+    <p>Лимиты пополнения: от @minTopUpAmount.ToString("N0") ₽ до @maxTopUpAmount.ToString("N0") ₽.</p>
 </section>

@@ -25,6 +25,8 @@ public class SupportRequest
     public ApplicationUser? Agent { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public List<SupportMessage> Messages { get; set; } = new();
 }
 
 public static class CaseStatuses

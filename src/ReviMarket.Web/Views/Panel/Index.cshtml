@@ -4,11 +4,12 @@
     var accountType = currentUser?.AccountType ?? "User";
     var isAdmin = User.IsInRole(UserRoles.Admin) || accountType == UserRoles.Admin;
     var isManager = User.IsInRole(UserRoles.Manager) || accountType == UserRoles.Manager;
-    var isOwner = accountType == "Owner" || accountType == "CoOwner" || isManager;
+    var isOwner = accountType == UserRoles.Owner || accountType == UserRoles.CoOwner || isManager;
+    var canSeeAdmin = isOwner || isAdmin;
     var canSeeFinance = isOwner || isAdmin;
-    var canSeeModeration = isOwner || isAdmin || accountType == "Moderator";
-    var canSeeSupport = isOwner || isAdmin || accountType == "SupportAgent";
-    var canSeeLegal = isOwner || isAdmin || accountType == "Lawyer";
+    var canSeeModeration = isOwner || isAdmin || User.IsInRole(UserRoles.Moderator) || accountType == UserRoles.Moderator;
+    var canSeeSupport = isOwner || isAdmin || User.IsInRole(UserRoles.SupportAgent) || accountType == UserRoles.SupportAgent;
+    var canSeeDisputes = isOwner || isAdmin || User.IsInRole(UserRoles.Lawyer) || accountType == UserRoles.Lawyer;
     var canSeeTeam = isOwner || isAdmin;
 }
 
@@ -21,18 +22,19 @@
 
         <nav class="admin-menu">
             <a class="active" href="#dashboard">Dashboard</a>
-            @if (canSeeFinance) { <a href="#finance">Финансы</a> }
-            @if (canSeeModeration) { <a href="#orders-review">Проверка заказов</a> }
-            @if (canSeeSupport) { <a href="#support">Поддержка</a> }
-            @if (canSeeLegal) { <a href="#legal">Споры</a> }
-            @if (canSeeTeam) { <a href="#team">Команда</a> }
-            <a href="/Orders">Работа</a>
+            @if (canSeeAdmin) { <a href="/Admin">Администрация</a> }
+            @if (canSeeModeration) { <a href="/Moderation">Модерация</a> }
+            @if (canSeeSupport) { <a href="/Support/Queue">Поддержка</a> }
+            @if (canSeeDisputes) { <a href="/Disputes">Споры</a> }
+            @if (canSeeFinance) { <a href="/AdminFinance">Финансы</a> }
+            @if (canSeeTeam) { <a href="/Team">Команда</a> }
+            <a href="/Inbox">Сообщения</a>
             <a href="/Profile">Профиль</a>
         </nav>
 
         <div class="admin-note">
-            <b>Role based panel</b><br />
-            Панель показывает только нужные разделы по роли аккаунта.
+            <b>Доступ по ролям</b><br />
+            Разделы показываются в зависимости от роли аккаунта.
         </div>
     </aside>
 
@@ -40,8 +42,8 @@
         <section id="dashboard" class="admin-top">
             <div>
                 <p class="eyebrow">moderation / support / security</p>
-                <h1>Система администрации</h1>
-                <p>Единая панель для заказов, финансов, поддержки, споров и ролей.</p>
+                <h1>Панель управления</h1>
+                <p>Заказы, сделки, обращения, сообщения, модерация и команда.</p>
             </div>
             <div class="admin-badge"><b>@currentUser?.DisplayName</b><span>@accountType</span></div>
         </section>
@@ -50,57 +52,65 @@
             <article class="admin-stat neon-card"><span>Заказы</span><h3>@ViewBag.AllOrdersCount</h3><p>всего на бирже</p></article>
             <article class="admin-stat neon-card"><span>В работе</span><h3>@ViewBag.InWorkOrdersCount</h3><p>заказов с исполнителем</p></article>
             <article class="admin-stat neon-card"><span>Сделки</span><h3>@ViewBag.ActiveDealsCount</h3><p>активный холд</p></article>
-            <article class="admin-stat neon-card"><span>Сообщения</span><h3>@ViewBag.MessagesCount</h3><p>мои диалоги</p></article>
+            <article class="admin-stat neon-card"><span>Споры</span><h3>@ViewBag.DisputesCount</h3><p>юридический разбор</p></article>
+            <article class="admin-stat neon-card"><span>Поддержка</span><h3>@ViewBag.OpenSupportCount</h3><p>открытых обращений</p></article>
         </section>
 
-        @if (canSeeFinance)
-        {
-            <section id="finance" class="admin-section neon-card">
-                <div class="admin-section-head">
-                    <div><p class="eyebrow">finance</p><h2>Финансы и холд</h2><p>Проверка оборота, удержаний, комиссий, выводов и возвратов.</p></div>
-                    <a class="btn btn-primary" href="/AdminFinance">Открыть финансы</a>
-                </div>
-            </section>
-        }
-
-        @if (canSeeModeration)
-        {
-            <section id="orders-review" class="admin-section neon-card">
-                <div class="admin-section-head">
-                    <div><p class="eyebrow">orders check</p><h2>Проверка заказов</h2><p>Модерация заказов перед публикацией в общей ленте.</p></div>
-                    <a class="btn btn-primary" href="/AdminQueue">Открыть очередь</a>
-                </div>
-            </section>
-        }
-
-        @if (canSeeSupport)
-        {
-            <section id="support" class="admin-section neon-card">
-                <div class="admin-section-head">
-                    <div><p class="eyebrow">support</p><h2>Поддержка пользователей</h2><p>Помощь по заказам, оплате, холду, выводам и техническим вопросам.</p></div>
-                    <a class="btn btn-primary" href="/Inbox">Открыть чат</a>
-                </div>
-            </section>
-        }
-
-        @if (canSeeLegal)
-        {
-            <section id="legal" class="admin-section neon-card">
-                <div class="admin-section-head">
-                    <div><p class="eyebrow">legal cases</p><h2>Спорные заказы</h2><p>Разбор конфликтов внутри биржи. Внешние контакты и обход ReviMarket запрещены.</p></div>
-                    <a class="btn btn-soft" href="/AdminQueue">Проверить материалы</a>
-                </div>
-            </section>
-        }
-
-        @if (canSeeTeam)
-        {
-            <section id="team" class="admin-section neon-card">
-                <div class="admin-section-head">
-                    <div><p class="eyebrow">team roles</p><h2>Команда и роли</h2><p>Назначение админов, модераторов, юристов и агентов поддержки.</p></div>
-                    <a class="btn btn-primary" href="/Team">Открыть команду</a>
-                </div>
-            </section>
-        }
+        <section class="admin-grid">
+            @if (canSeeAdmin)
+            {
+                <article class="card">
+                    <span class="tag">Admin</span>
+                    <h3>Администрация</h3>
+                    <p>Пользователи, роли, блокировки, быстрые очереди и операционные разделы.</p>
+                    <a class="btn btn-primary" href="/Admin">Открыть</a>
+                </article>
+            }
+            @if (canSeeModeration)
+            {
+                <article class="card">
+                    <span class="tag">Moderation</span>
+                    <h3>Модерация</h3>
+                    <p>Проверка заказов, сообщений, жалоб и блокировок пользователей.</p>
+                    <a class="btn btn-primary" href="/Moderation">Открыть</a>
+                </article>
+            }
+            @if (canSeeSupport)
+            {
+                <article class="card">
+                    <span class="tag">Support</span>
+                    <h3>Поддержка</h3>
+                    <p>Очередь тикетов и связь с пользователями через чат.</p>
+                    <a class="btn btn-primary" href="/Support/Queue">Открыть</a>
+                </article>
+            }
+            @if (canSeeDisputes)
+            {
+                <article class="card">
+                    <span class="tag">Legal</span>
+                    <h3>Споры</h3>
+                    <p>Очередь спорных сделок, назначение юриста и решение по холду.</p>
+                    <a class="btn btn-primary" href="/Disputes">Открыть</a>
+                </article>
+            }
+            @if (canSeeFinance)
+            {
+                <article class="card">
+                    <span class="tag">Finance</span>
+                    <h3>Финансы</h3>
+                    <p>Холд, выплаты, комиссии и заявки на вывод.</p>
+                    <a class="btn btn-soft" href="/AdminFinance">Открыть</a>
+                </article>
+            }
+            @if (canSeeTeam)
+            {
+                <article class="card">
+                    <span class="tag">Team</span>
+                    <h3>Команда</h3>
+                    <p>Роли админов, модераторов и агентов поддержки.</p>
+                    <a class="btn btn-soft" href="/Team">Открыть</a>
+                </article>
+            }
+        </section>
     </main>
 </div>

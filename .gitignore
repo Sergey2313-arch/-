@@ -6,6 +6,9 @@ obj/
 *.suo
 *.log
 *.db
+*.db-shm
+*.db-wal
 src/ReviMarket.Web/wwwroot/uploads/
+src/ReviMarket.Web/App_Data/
 publish/
 artifacts/

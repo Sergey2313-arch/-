@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReviMarket.Web.Data;
 using ReviMarket.Web.Models;
+using ReviMarket.Web.Services.Payments;
 
 namespace ReviMarket.Web.Controllers;
 
@@ -10,10 +12,65 @@ namespace ReviMarket.Web.Controllers;
 public class PaymentWebhooksController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
+    private readonly PaymentLedger _ledger;
+    private readonly PaymentReconciliationService _reconciliation;
 
-    public PaymentWebhooksController(ApplicationDbContext db)
+    public PaymentWebhooksController(
+        ApplicationDbContext db,
+        PaymentLedger ledger,
+        PaymentReconciliationService reconciliation)
     {
         _db = db;
+        _ledger = ledger;
+        _reconciliation = reconciliation;
+    }
+
+    [HttpPost("yookassa")]
+    public async Task<IActionResult> YooKassa()
+    {
+        using var document = await JsonDocument.ParseAsync(Request.Body, cancellationToken: HttpContext.RequestAborted);
+        var root = document.RootElement;
+
+        var eventName = root.TryGetProperty("event", out var eventProperty)
+            ? eventProperty.GetString()
+            : null;
+
+        if (eventName is not ("payment.succeeded" or "payment.canceled" or "payment.waiting_for_capture"))
+        {
+            return Ok();
+        }
+
+        if (!root.TryGetProperty("object", out var paymentObject)
+            || !paymentObject.TryGetProperty("id", out var idProperty))
+        {
+            return BadRequest();
+        }
+
+        var providerPaymentId = idProperty.GetString();
+        if (string.IsNullOrWhiteSpace(providerPaymentId))
+        {
+            return BadRequest();
+        }
+
+        var invoice = await _db.PaymentInvoices
+            .FirstOrDefaultAsync(
+                x => x.Provider == PaymentProviders.YooKassa && x.ProviderPaymentId == providerPaymentId,
+                HttpContext.RequestAborted);
+
+        if (invoice is null)
+        {
+            return Ok();
+        }
+
+        var result = await _reconciliation.ReconcileInvoiceAsync(invoice, $"webhook:{eventName}", HttpContext.RequestAborted);
+        if (result.Error is not null)
+        {
+            return result.Error.Contains("configured", StringComparison.OrdinalIgnoreCase)
+                ? StatusCode(StatusCodes.Status503ServiceUnavailable)
+                : BadRequest();
+        }
+
+        return Ok();
     }
 
     [HttpPost("test-success/{invoiceId:int}")]
@@ -21,29 +78,10 @@ public class PaymentWebhooksController : ControllerBase
     {
         var invoice = await _db.PaymentInvoices.FirstOrDefaultAsync(x => x.Id == invoiceId);
         if (invoice is null) return NotFound();
-        if (invoice.Status == PaymentStatuses.Success) return Ok();
+        if (invoice.Provider != PaymentProviders.Test) return BadRequest();
 
-        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == invoice.UserId);
-        if (wallet is null)
-        {
-            wallet = new Wallet { UserId = invoice.UserId };
-            _db.Wallets.Add(wallet);
-        }
-
-        invoice.Status = PaymentStatuses.Success;
-        invoice.PaidAt = DateTime.UtcNow;
-        wallet.Balance += invoice.Amount;
-
-        _db.PaymentTransactions.Add(new PaymentTransaction
-        {
-            UserId = invoice.UserId,
-            Amount = invoice.Amount,
-            Type = PaymentTypes.TopUp,
-            Status = PaymentStatuses.Success,
-            Comment = "Payment invoice success"
-        });
-
-        await _db.SaveChangesAsync();
+        await _ledger.MarkInvoicePaidAsync(invoice, $"Тестовая оплата счета #{invoice.Id}", HttpContext.RequestAborted);
         return Ok();
     }
+
 }

@@ -12,15 +12,32 @@
     </div>
 </section>
 
+@if (!Model.Any())
+{
+    <section class="empty neon-card">
+        <h2>Исполнители скоро появятся</h2>
+        <p>Пока в базе нет активных профилей исполнителей. После регистрации исполнители появятся здесь автоматически.</p>
+        <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Стать исполнителем</a>
+    </section>
+}
+else
+{
 <div class="grid">
 @foreach (var user in Model)
 {
     var online = user.LastSeenAt is not null && user.LastSeenAt > onlineLimit;
     <article class="card">
-        <div class="card-top"><span class="tag">@(online ? "В сети" : "Не в сети")</span><span class="price">★ @user.Rating.ToString("0.00")</span></div>
+        <div class="card-top">
+            <span class="tag">@(online ? "В сети" : "Не в сети")</span>
+            <span class="price">★ @user.Rating.ToString("0.00")</span>
+        </div>
         <h3>@user.DisplayName</h3>
         <p>@user.ReviewsCount отзывов • на платформе с @user.CreatedAt.ToString("dd.MM.yyyy")</p>
-        <div class="card-bottom"><a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@user.Id">Профиль</a><a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Найти заказ</a></div>
+        <div class="card-bottom">
+            <a class="btn btn-soft" asp-controller="Profile" asp-action="Public" asp-route-id="@user.Id">Профиль</a>
+            <a class="btn btn-primary" asp-controller="Orders" asp-action="Index">Найти заказ</a>
+        </div>
     </article>
 }
 </div>
+}

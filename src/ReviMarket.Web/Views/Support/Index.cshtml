@@ -1,0 +1,73 @@
+@model SupportIndexViewModel
+@{
+    ViewData["Title"] = "Поддержка";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">support</p>
+        <h1>Поддержка</h1>
+        <p>Обращения по заказам, оплатам, профилю, безопасности и работе биржи.</p>
+    </div>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">← Назад в профиль</a>
+        <a class="btn btn-primary" asp-action="Create">Новое обращение</a>
+    </div>
+</section>
+
+@if (!Model.Requests.Any())
+{
+    <section class="empty neon-card">
+        <h2>Обращений пока нет</h2>
+        <p>Создай тикет, если нужна помощь команды ReviMarket.</p>
+    </section>
+}
+else
+{
+    <section class="chat-list-panel neon-card">
+        <div class="chat-list-title">
+            <div>
+                <h2>Мои обращения</h2>
+                <p>Каждое обращение теперь работает как отдельный чат с поддержкой.</p>
+            </div>
+            <span class="tag">@Model.Requests.Count тикетов</span>
+        </div>
+
+        <div class="conversation-list">
+            @foreach (var item in Model.Requests)
+            {
+                <a class="conversation-card support-ticket-link" asp-action="Details" asp-route-id="@item.Id">
+                    <span class="chat-avatar">S</span>
+                    <span class="conversation-main">
+                        <b>@item.Title</b>
+                        <small>@StatusLabel(item.Status) · агент: @(item.Agent?.DisplayName ?? "не назначен")</small>
+                        <span>@ShortText(item.Text)</span>
+                    </span>
+                    <span class="conversation-side">
+                        <small>@item.CreatedAt.ToString("dd.MM HH:mm")</small>
+                        <em>@PriorityLabel(item.Priority)</em>
+                    </span>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+@functions {
+    string StatusLabel(string status) => status switch
+    {
+        CaseStatuses.InProgress => "В работе",
+        CaseStatuses.Done => "Закрыт",
+        _ => "Открыт"
+    };
+
+    string PriorityLabel(string priority) => priority switch
+    {
+        "Low" => "низкий",
+        "High" => "высокий",
+        "Urgent" => "срочно",
+        _ => "обычный"
+    };
+
+    string ShortText(string text) => text.Length <= 100 ? text : text[..100] + "...";
+}

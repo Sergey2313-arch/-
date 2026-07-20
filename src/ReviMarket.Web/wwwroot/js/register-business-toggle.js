@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('form[action*="Register"]');
+    const form = document.querySelector('form[action*="Register"], form[action*="Edit"]');
     if (!form) return;
 
     const radios = form.querySelectorAll('input[name="LegalType"]');

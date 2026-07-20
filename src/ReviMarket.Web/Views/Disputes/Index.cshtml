@@ -1,0 +1,116 @@
+@model DisputeIndexViewModel
+@{
+    ViewData["Title"] = "Споры";
+}
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">legal disputes</p>
+        <h1>Споры для юристов</h1>
+        <p>Разбор спорных сделок: доказательства, стороны заказа, холд и итоговое решение по средствам.</p>
+    </div>
+    <div class="section-actions">
+        <a class="btn btn-soft" asp-controller="Panel" asp-action="Index">← Панель</a>
+        <a class="btn btn-soft" asp-controller="Moderation" asp-action="Index">Модерация</a>
+    </div>
+</section>
+
+@if (TempData["DisputeNotice"] is string notice)
+{
+    <section class="admin-note">
+        <b>Споры</b>
+        <span>@notice</span>
+    </section>
+}
+
+<section class="admin-stats">
+    <article class="admin-stat neon-card"><span>Открыто</span><h3>@Model.OpenCount</h3><p>ждут юриста</p></article>
+    <article class="admin-stat neon-card"><span>В работе</span><h3>@Model.InProgressCount</h3><p>назначен ответственный</p></article>
+    <article class="admin-stat neon-card"><span>Всего</span><h3>@Model.Items.Count</h3><p>спорных сделок</p></article>
+    <article class="admin-stat neon-card"><span>Холд</span><h3>@Model.Items.Sum(x => x.Deal.Amount).ToString("N0")</h3><p>рублей в споре</p></article>
+</section>
+
+@if (!Model.Items.Any())
+{
+    <section class="empty neon-card">
+        <h2>Споров пока нет</h2>
+        <p>Когда заказчик или исполнитель откроет спор по сделке, она появится здесь.</p>
+    </section>
+}
+else
+{
+    <section class="section-block neon-card">
+        <h2>Очередь споров</h2>
+        <div class="admin-list">
+            @foreach (var item in Model.Items)
+            {
+                var deal = item.Deal;
+                var disputeCase = item.Case;
+                <div class="admin-row dispute-row">
+                    <div>
+                        <b>Сделка #@deal.Id · @(deal.MarketItem?.Title ?? "заказ")</b>
+                        <p>@(disputeCase?.Text ?? "Спор открыт по сделке. Дело ожидает назначения юриста.")</p>
+                        <small>
+                            @DisplayCaseStatus(disputeCase?.Status) ·
+                            заказчик: @(deal.Customer?.DisplayName ?? "-") ·
+                            исполнитель: @(deal.Executor?.DisplayName ?? "-") ·
+                            сумма: @deal.Amount.ToString("N0") ₽ ·
+                            юрист: @(disputeCase?.Agent?.DisplayName ?? "не назначен")
+                        </small>
+                    </div>
+                    <div class="review-actions dispute-actions">
+                        @if (deal.MarketItemId is not null)
+                        {
+                            <a class="btn btn-soft" asp-controller="Orders" asp-action="Details" asp-route-id="@deal.MarketItemId">Заказ</a>
+                        }
+                        <a class="btn btn-soft" asp-controller="Inbox" asp-action="Thread" asp-route-id="@deal.CustomerId">Заказчик</a>
+                        <a class="btn btn-soft" asp-controller="Inbox" asp-action="Thread" asp-route-id="@deal.ExecutorId">Исполнитель</a>
+
+                        @if (disputeCase is not null)
+                        {
+                            <form asp-action="TakeCase" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@disputeCase.Id" />
+                                <button class="btn btn-soft" type="submit">Взять</button>
+                            </form>
+                            <form asp-action="SetCaseStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@disputeCase.Id" />
+                                <input type="hidden" name="status" value="@CaseStatuses.Open" />
+                                <button class="btn btn-soft" type="submit">Открыт</button>
+                            </form>
+                            <form asp-action="SetCaseStatus" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@disputeCase.Id" />
+                                <input type="hidden" name="status" value="@CaseStatuses.Done" />
+                                <button class="btn btn-soft" type="submit">Закрыть дело</button>
+                            </form>
+                        }
+
+                        <form asp-action="Resolve" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="dealId" value="@deal.Id" />
+                            <input type="hidden" name="decision" value="release" />
+                            <button class="btn btn-primary" type="submit">В пользу исполнителя</button>
+                        </form>
+                        <form asp-action="Resolve" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="dealId" value="@deal.Id" />
+                            <input type="hidden" name="decision" value="refund" />
+                            <button class="btn btn-soft" type="submit">Возврат заказчику</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@functions {
+    string DisplayCaseStatus(string? status) => status switch
+    {
+        CaseStatuses.InProgress => "в работе",
+        CaseStatuses.Done => "закрыто",
+        _ => "открыто"
+    };
+}

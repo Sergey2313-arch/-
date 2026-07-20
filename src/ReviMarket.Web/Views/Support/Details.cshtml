@@ -1,0 +1,170 @@
+@model SupportDetailsViewModel
+@{
+    ViewData["Title"] = Model.Request.Title;
+    var item = Model.Request;
+    var isStaff = User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager) || User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.CoOwner) || User.IsInRole(UserRoles.SupportAgent);
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+<section class="section-head chat-page-head">
+    <div>
+        <p class="eyebrow">support chat</p>
+        <h1>@item.Title</h1>
+        <p>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm") · @PriorityLabel(item.Priority) · @StatusLabel(item.Status)</p>
+    </div>
+    <div class="section-actions">
+        @if (isStaff)
+        {
+            <a class="btn btn-soft" asp-action="Queue">← Очередь</a>
+        }
+        else
+        {
+            <a class="btn btn-soft" asp-action="Index">← Мои обращения</a>
+        }
+        <a class="btn btn-soft" asp-controller="Profile" asp-action="Index">Профиль</a>
+    </div>
+</section>
+
+@if (TempData["Error"] is string error)
+{
+    <section class="admin-note">
+        <b>Ответ не отправлен</b>
+        <span>@error</span>
+    </section>
+}
+
+<section class="support-workspace">
+    <aside class="support-sidebar neon-card">
+        <div>
+            <p class="eyebrow">ticket</p>
+            <h2>Обращение #@item.Id</h2>
+            <p>Переписка с техподдержкой хранится прямо в этом тикете.</p>
+        </div>
+
+        <div class="detail-info-list">
+            <div><span>Автор</span><b>@(item.User?.DisplayName ?? "Пользователь")</b></div>
+            <div><span>Агент</span><b>@(item.Agent?.DisplayName ?? "не назначен")</b></div>
+            <div><span>Статус</span><b>@StatusLabel(item.Status)</b></div>
+            <div><span>Приоритет</span><b>@PriorityLabel(item.Priority)</b></div>
+        </div>
+
+        @if (isStaff)
+        {
+            <div class="support-actions">
+                <form asp-action="Take" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <button class="btn btn-primary" type="submit">Взять в работу</button>
+                </form>
+
+                <form asp-action="SetStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <input type="hidden" name="status" value="@CaseStatuses.Open" />
+                    <button class="btn btn-soft" type="submit">Открыт</button>
+                </form>
+
+                <form asp-action="SetStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <input type="hidden" name="status" value="@CaseStatuses.InProgress" />
+                    <button class="btn btn-soft" type="submit">В работе</button>
+                </form>
+
+                <form asp-action="SetStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <input type="hidden" name="status" value="@CaseStatuses.Done" />
+                    <button class="btn btn-soft" type="submit">Закрыть</button>
+                </form>
+            </div>
+        }
+    </aside>
+
+    <div class="chat-shell support-chat neon-card">
+        <div class="chat-header">
+            <div class="chat-person">
+                <span class="chat-avatar">S</span>
+                <div>
+                    <h2>Техподдержка ReviMarket</h2>
+                    <p>@(isStaff ? "Ответ агентом поддержки" : "Ответ придёт в этом окне")</p>
+                </div>
+            </div>
+            <span class="tag">@StatusLabel(item.Status)</span>
+        </div>
+
+        <div class="chat-messages" aria-live="polite">
+            @if (Model.Messages.Any())
+            {
+                @foreach (var message in Model.Messages)
+                {
+                    var mine = message.SenderId == currentUserId;
+                    <article class="chat-message @(mine ? "mine" : "theirs")">
+                        <div class="chat-bubble">
+                            <div class="chat-meta">
+                                <b>@SenderName(message, item)</b>
+                                <span>@message.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                            </div>
+                            <p>@message.Text</p>
+                        </div>
+                    </article>
+                }
+            }
+            else
+            {
+                var mine = item.UserId == currentUserId;
+                <article class="chat-message @(mine ? "mine" : "theirs")">
+                    <div class="chat-bubble">
+                        <div class="chat-meta">
+                            <b>@(item.User?.DisplayName ?? "Пользователь")</b>
+                            <span>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                        </div>
+                        <p>@item.Text</p>
+                    </div>
+                </article>
+            }
+        </div>
+
+        <form asp-action="Reply" method="post" class="chat-composer">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@item.Id" />
+            <textarea name="text" maxlength="1200" rows="4" placeholder="Ответить в поддержку"></textarea>
+            <div class="chat-composer-actions">
+                <span>До 1200 символов. Сообщение увидят участники обращения и модерация при проверке.</span>
+                <button class="btn btn-primary" type="submit">Отправить</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@functions {
+    string StatusLabel(string status) => status switch
+    {
+        CaseStatuses.InProgress => "В работе",
+        CaseStatuses.Done => "Закрыт",
+        _ => "Открыт"
+    };
+
+    string PriorityLabel(string priority) => priority switch
+    {
+        "Low" => "Низкий",
+        "High" => "Высокий",
+        "Urgent" => "Срочный",
+        _ => "Обычный"
+    };
+
+    string SenderName(SupportMessage message, SupportRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(message.Sender?.DisplayName))
+        {
+            return message.Sender.DisplayName;
+        }
+
+        if (message.SenderId == request.UserId)
+        {
+            return request.User?.DisplayName ?? "Пользователь";
+        }
+
+        return "Поддержка";
+    }
+}
