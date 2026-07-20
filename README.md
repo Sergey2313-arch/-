@@ -1,5 +1,7 @@
 # ReviMarket
 
+[![ReviMarket .NET CI](https://github.com/Sergey2313-arch/-/actions/workflows/dotnet-ci.yml/badge.svg)](https://github.com/Sergey2313-arch/-/actions/workflows/dotnet-ci.yml)
+
 **ReviMarket** — учебный full-stack marketplace / freelance-платформа на **ASP.NET Core MVC и .NET 8**.
 
 Проект развивается как портфолио-приложение: пользователи могут создавать аккаунты, работать с каталогом заказов и цифровых услуг, общаться внутри платформы и управлять данными через личный кабинет.
