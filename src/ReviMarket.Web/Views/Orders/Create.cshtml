@@ -1,4 +1,4 @@
-@model MarketItem
+@model CreateOrderViewModel
 @{
     ViewData["Title"] = "Создать заказ";
     var categories = ViewBag.Categories as string[] ?? MarketCategories.All;
@@ -13,22 +13,26 @@
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="validation"></div>
 
-        <label>Название</label>
+        <label asp-for="Title">Название</label>
         <input asp-for="Title" placeholder="Например: сделать дизайн карточек" />
+        <span asp-validation-for="Title" class="validation"></span>
 
-        <label>Описание / ТЗ</label>
+        <label asp-for="Description">Описание / ТЗ</label>
         <textarea asp-for="Description" placeholder="Что нужно сделать, сроки, требования, результат"></textarea>
+        <span asp-validation-for="Description" class="validation"></span>
 
-        <label>Бюджет</label>
-        <input asp-for="Price" type="number" min="100" step="100" />
+        <label asp-for="Price">Бюджет</label>
+        <input asp-for="Price" type="number" min="100" max="10000000" step="100" />
+        <span asp-validation-for="Price" class="validation"></span>
 
-        <label>Категория</label>
+        <label asp-for="Category">Категория</label>
         <select asp-for="Category">
             @foreach (var category in categories)
             {
                 <option value="@category">@category</option>
             }
         </select>
+        <span asp-validation-for="Category" class="validation"></span>
 
         <button class="btn btn-primary" type="submit">Отправить на проверку</button>
     </form>
