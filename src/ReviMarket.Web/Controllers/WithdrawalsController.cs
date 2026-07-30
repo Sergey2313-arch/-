@@ -22,8 +22,11 @@ public class WithdrawalsController : Controller
     public async Task<IActionResult> Index()
     {
         var uid = _users.GetUserId(User)!;
-        ViewBag.Wallet = await GetWallet(uid);
-        return View(await _db.WithdrawalRequests.Where(x => x.UserId == uid).OrderByDescending(x => x.CreatedAt).ToListAsync());
+        ViewBag.Wallet = await GetOrCreateWalletAsync(uid);
+        return View(await _db.WithdrawalRequests
+            .Where(x => x.UserId == uid)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync());
     }
 
     [HttpPost]
@@ -31,26 +34,65 @@ public class WithdrawalsController : Controller
     public async Task<IActionResult> Create(decimal amount, string paymentInfo)
     {
         var uid = _users.GetUserId(User)!;
-        var wallet = await GetWallet(uid);
-        if (amount < 100 || amount > wallet.Balance || string.IsNullOrWhiteSpace(paymentInfo)) return RedirectToAction(nameof(Index));
+        paymentInfo = (paymentInfo ?? string.Empty).Trim();
 
-        wallet.Balance -= amount;
-        wallet.HoldBalance += amount;
+        if (amount is < 100 or > 1_000_000 || paymentInfo.Length is < 3 or > 300)
+        {
+            return RedirectToAction(nameof(Index));
+        }
 
-        _db.WithdrawalRequests.Add(new WithdrawalRequest { UserId = uid, Amount = amount, PaymentInfo = paymentInfo.Trim() });
-        _db.PaymentTransactions.Add(new PaymentTransaction { UserId = uid, Amount = amount, Type = PaymentTypes.Withdraw, Status = PaymentStatuses.Pending, Comment = "Заявка на вывод средств" });
+        await GetOrCreateWalletAsync(uid);
+        await using var tx = await _db.Database.BeginTransactionAsync();
+
+        var reserved = await _db.Wallets
+            .Where(x => x.UserId == uid && x.Balance >= amount)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Balance, x => x.Balance - amount)
+                .SetProperty(x => x.HoldBalance, x => x.HoldBalance + amount));
+
+        if (reserved == 0)
+        {
+            await tx.RollbackAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        _db.WithdrawalRequests.Add(new WithdrawalRequest
+        {
+            UserId = uid,
+            Amount = amount,
+            PaymentInfo = paymentInfo
+        });
+        _db.PaymentTransactions.Add(new PaymentTransaction
+        {
+            UserId = uid,
+            Amount = amount,
+            Type = PaymentTypes.Withdraw,
+            Status = PaymentStatuses.Pending,
+            Comment = "Заявка на вывод средств"
+        });
 
         await _db.SaveChangesAsync();
+        await tx.CommitAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task<Wallet> GetWallet(string userId)
+    private async Task<Wallet> GetOrCreateWalletAsync(string userId)
     {
         var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
         if (wallet is not null) return wallet;
+
         wallet = new Wallet { UserId = userId };
         _db.Wallets.Add(wallet);
-        await _db.SaveChangesAsync();
-        return wallet;
+
+        try
+        {
+            await _db.SaveChangesAsync();
+            return wallet;
+        }
+        catch (DbUpdateException)
+        {
+            _db.Entry(wallet).State = EntityState.Detached;
+            return await _db.Wallets.SingleAsync(x => x.UserId == userId);
+        }
     }
 }
