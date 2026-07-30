@@ -42,10 +42,11 @@ jobs:
         run: dotnet ef migrations add InitialCreate --project src/ReviMarket.Web/ReviMarket.Web.csproj --startup-project src/ReviMarket.Web/ReviMarket.Web.csproj --output-dir Data/Migrations --configuration Release --no-build
 
       - name: Commit generated migration
-        if: ${{ hashFiles('src/ReviMarket.Web/Data/Migrations/*_InitialCreate.cs') == '' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/ReviMarket.Web/Data/Migrations
-          git commit -m "Add initial EF Core migration"
-          git push origin HEAD:${{ github.head_ref }}
+          if ! git diff --cached --quiet; then
+            git commit -m "Add initial EF Core migration"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
