@@ -12,34 +12,55 @@ public class WalletController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IWebHostEnvironment _environment;
 
-    public WalletController(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
+    public WalletController(
+        ApplicationDbContext db,
+        UserManager<ApplicationUser> userManager,
+        IWebHostEnvironment environment)
     {
         _db = db;
         _userManager = userManager;
+        _environment = environment;
     }
 
     public async Task<IActionResult> Index()
     {
         var userId = _userManager.GetUserId(User)!;
         var wallet = await GetOrCreateWalletAsync(userId);
-        var transactions = await _db.PaymentTransactions.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedAt).Take(15).ToListAsync();
-        var invoices = await _db.PaymentInvoices.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedAt).Take(10).ToListAsync();
+        var transactions = await _db.PaymentTransactions
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(15)
+            .ToListAsync();
+        var invoices = await _db.PaymentInvoices
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(10)
+            .ToListAsync();
+
         ViewBag.Transactions = transactions;
         ViewBag.Invoices = invoices;
+        ViewBag.DemoPaymentsEnabled = _environment.IsDevelopment();
         return View(wallet);
     }
 
     [HttpGet]
-    public IActionResult TopUp() => View();
+    public IActionResult TopUp()
+    {
+        if (!_environment.IsDevelopment()) return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        return View();
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TopUp(decimal amount)
     {
-        if (amount < 100)
+        if (!_environment.IsDevelopment()) return StatusCode(StatusCodes.Status503ServiceUnavailable);
+
+        if (amount is < 100 or > 1_000_000)
         {
-            ModelState.AddModelError(string.Empty, "Минимальная сумма пополнения — 100 ₽.");
+            ModelState.AddModelError(string.Empty, "Сумма должна быть от 100 ₽ до 1 000 000 ₽.");
             return View();
         }
 
@@ -51,7 +72,7 @@ public class WalletController : Controller
             Provider = PaymentProviders.Test,
             Status = PaymentStatuses.Pending,
             ProviderPaymentId = $"demo-{Guid.NewGuid():N}",
-            ConfirmationUrl = $"/Payments/Checkout/0"
+            ConfirmationUrl = "/Payments/Checkout/0"
         };
 
         _db.PaymentInvoices.Add(invoice);
@@ -69,9 +90,19 @@ public class WalletController : Controller
     {
         var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
         if (wallet is not null) return wallet;
+
         wallet = new Wallet { UserId = userId, Balance = 0, HoldBalance = 0 };
         _db.Wallets.Add(wallet);
-        await _db.SaveChangesAsync();
-        return wallet;
+
+        try
+        {
+            await _db.SaveChangesAsync();
+            return wallet;
+        }
+        catch (DbUpdateException)
+        {
+            _db.Entry(wallet).State = EntityState.Detached;
+            return await _db.Wallets.SingleAsync(x => x.UserId == userId);
+        }
     }
 }
