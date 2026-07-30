@@ -50,9 +50,9 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var db = services.GetRequiredService<ApplicationDbContext>();
-    var migrations = await db.Database.GetMigrationsAsync();
+    var hasMigrations = db.Database.GetMigrations().Any();
 
-    if (migrations.Any())
+    if (hasMigrations)
     {
         await db.Database.MigrateAsync();
     }
