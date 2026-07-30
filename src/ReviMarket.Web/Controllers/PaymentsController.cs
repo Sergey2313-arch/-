@@ -12,18 +12,28 @@ public class PaymentsController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<ApplicationUser> _users;
+    private readonly IWebHostEnvironment _environment;
 
-    public PaymentsController(ApplicationDbContext db, UserManager<ApplicationUser> users)
+    public PaymentsController(
+        ApplicationDbContext db,
+        UserManager<ApplicationUser> users,
+        IWebHostEnvironment environment)
     {
         _db = db;
         _users = users;
+        _environment = environment;
     }
 
     [HttpGet]
     public async Task<IActionResult> Checkout(int id)
     {
+        if (!_environment.IsDevelopment()) return StatusCode(StatusCodes.Status503ServiceUnavailable);
+
         var uid = _users.GetUserId(User)!;
-        var invoice = await _db.PaymentInvoices.FirstOrDefaultAsync(x => x.Id == id && x.UserId == uid);
+        var invoice = await _db.PaymentInvoices
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == uid && x.Provider == PaymentProviders.Test);
+
         if (invoice is null) return NotFound();
         return View(invoice);
     }
@@ -32,22 +42,38 @@ public class PaymentsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ConfirmDemo(int id)
     {
-        var uid = _users.GetUserId(User)!;
-        var invoice = await _db.PaymentInvoices.FirstOrDefaultAsync(x => x.Id == id && x.UserId == uid);
-        if (invoice is null) return NotFound();
-        if (invoice.Status == PaymentStatuses.Success) return RedirectToAction("Index", "Wallet");
+        if (!_environment.IsDevelopment()) return NotFound();
 
-        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == uid);
-        if (wallet is null)
-        {
-            wallet = new Wallet { UserId = uid };
-            _db.Wallets.Add(wallet);
-        }
+        var uid = _users.GetUserId(User)!;
+        await GetOrCreateWalletAsync(uid);
 
         await using var tx = await _db.Database.BeginTransactionAsync();
-        invoice.Status = PaymentStatuses.Success;
-        invoice.PaidAt = DateTime.UtcNow;
-        wallet.Balance += invoice.Amount;
+        var paidAt = DateTime.UtcNow;
+
+        var claimed = await _db.PaymentInvoices
+            .Where(x => x.Id == id
+                && x.UserId == uid
+                && x.Provider == PaymentProviders.Test
+                && x.Status == PaymentStatuses.Pending)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Status, PaymentStatuses.Success)
+                .SetProperty(x => x.PaidAt, paidAt));
+
+        if (claimed == 0)
+        {
+            await tx.RollbackAsync();
+            return RedirectToAction("Index", "Wallet");
+        }
+
+        var invoice = await _db.PaymentInvoices
+            .AsNoTracking()
+            .SingleAsync(x => x.Id == id && x.UserId == uid);
+
+        await _db.Wallets
+            .Where(x => x.UserId == uid)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Balance, x => x.Balance + invoice.Amount));
+
         _db.PaymentTransactions.Add(new PaymentTransaction
         {
             UserId = uid,
@@ -56,8 +82,29 @@ public class PaymentsController : Controller
             Status = PaymentStatuses.Success,
             Comment = $"Демо-оплата счёта #{invoice.Id}"
         });
+
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
         return RedirectToAction("Index", "Wallet");
+    }
+
+    private async Task<Wallet> GetOrCreateWalletAsync(string userId)
+    {
+        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
+        if (wallet is not null) return wallet;
+
+        wallet = new Wallet { UserId = userId };
+        _db.Wallets.Add(wallet);
+
+        try
+        {
+            await _db.SaveChangesAsync();
+            return wallet;
+        }
+        catch (DbUpdateException)
+        {
+            _db.Entry(wallet).State = EntityState.Detached;
+            return await _db.Wallets.SingleAsync(x => x.UserId == userId);
+        }
     }
 }

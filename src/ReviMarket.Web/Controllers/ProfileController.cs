@@ -27,22 +27,41 @@ public class ProfileController : Controller
 
         var userId = _userManager.GetUserId(User)!;
         var user = await _userManager.GetUserAsync(User);
-        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
-        if (wallet is null)
-        {
-            wallet = new Wallet { UserId = userId };
-            _db.Wallets.Add(wallet);
-            await _db.SaveChangesAsync();
-        }
+        var wallet = await GetOrCreateWalletAsync(userId);
 
         ViewBag.User = user;
         ViewBag.Wallet = wallet;
-        ViewBag.CreatedOrders = await _db.MarketItems.Include(x => x.AssignedExecutor).Where(x => x.Type == MarketItemTypes.Order && x.OwnerId == userId).OrderByDescending(x => x.CreatedAt).ToListAsync();
-        ViewBag.TakenOrders = await _db.MarketItems.Include(x => x.Owner).Where(x => x.Type == MarketItemTypes.Order && x.AssignedExecutorId == userId).OrderByDescending(x => x.AssignedAt).ToListAsync();
-        ViewBag.Deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).Include(x => x.MarketItem).Where(x => x.CustomerId == userId || x.ExecutorId == userId).OrderByDescending(x => x.CreatedAt).Take(8).ToListAsync();
-        ViewBag.Withdrawals = await _db.WithdrawalRequests.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedAt).Take(5).ToListAsync();
-        ViewBag.EarnedTotal = await _db.Deals.Where(x => x.ExecutorId == userId && x.Status == DealStatuses.Completed).Select(x => (decimal?)x.ExecutorAmount).SumAsync() ?? 0m;
-        ViewBag.SpentTotal = await _db.Deals.Where(x => x.CustomerId == userId && x.Status == DealStatuses.Completed).Select(x => (decimal?)x.Amount).SumAsync() ?? 0m;
+        ViewBag.CreatedOrders = await _db.MarketItems
+            .Include(x => x.AssignedExecutor)
+            .Where(x => x.Type == MarketItemTypes.Order && x.OwnerId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+        ViewBag.TakenOrders = await _db.MarketItems
+            .Include(x => x.Owner)
+            .Where(x => x.Type == MarketItemTypes.Order && x.AssignedExecutorId == userId)
+            .OrderByDescending(x => x.AssignedAt)
+            .ToListAsync();
+        ViewBag.Deals = await _db.Deals
+            .Include(x => x.Customer)
+            .Include(x => x.Executor)
+            .Include(x => x.MarketItem)
+            .Where(x => x.CustomerId == userId || x.ExecutorId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(8)
+            .ToListAsync();
+        ViewBag.Withdrawals = await _db.WithdrawalRequests
+            .Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+        ViewBag.EarnedTotal = await _db.Deals
+            .Where(x => x.ExecutorId == userId && x.Status == DealStatuses.Completed)
+            .Select(x => (decimal?)x.ExecutorAmount)
+            .SumAsync() ?? 0m;
+        ViewBag.SpentTotal = await _db.Deals
+            .Where(x => x.CustomerId == userId && x.Status == DealStatuses.Completed)
+            .Select(x => (decimal?)x.Amount)
+            .SumAsync() ?? 0m;
 
         return View();
     }
@@ -53,8 +72,36 @@ public class ProfileController : Controller
         if (string.IsNullOrWhiteSpace(id)) return NotFound();
         var user = await _userManager.FindByIdAsync(id);
         if (user is null) return NotFound();
-        ViewBag.Reviews = await _db.UserReviews.Include(x => x.Author).Include(x => x.Deal).ThenInclude(x => x!.MarketItem).Where(x => x.TargetUserId == id).OrderByDescending(x => x.CreatedAt).Take(20).ToListAsync();
+
+        ViewBag.Reviews = await _db.UserReviews
+            .Include(x => x.Author)
+            .Include(x => x.Deal)
+            .ThenInclude(x => x!.MarketItem)
+            .Where(x => x.TargetUserId == id)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(20)
+            .ToListAsync();
         ViewBag.IsOnline = user.LastSeenAt is not null && user.LastSeenAt > DateTime.UtcNow.AddMinutes(-5);
         return View(user);
+    }
+
+    private async Task<Wallet> GetOrCreateWalletAsync(string userId)
+    {
+        var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
+        if (wallet is not null) return wallet;
+
+        wallet = new Wallet { UserId = userId };
+        _db.Wallets.Add(wallet);
+
+        try
+        {
+            await _db.SaveChangesAsync();
+            return wallet;
+        }
+        catch (DbUpdateException)
+        {
+            _db.Entry(wallet).State = EntityState.Detached;
+            return await _db.Wallets.SingleAsync(x => x.UserId == userId);
+        }
     }
 }

@@ -6,15 +6,17 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'tests/**'
       - '.github/workflows/dotnet-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'src/**'
+      - 'tests/**'
       - '.github/workflows/dotnet-ci.yml'
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +29,10 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore src/ReviMarket.Web/ReviMarket.Web.csproj
+        run: dotnet restore tests/ReviMarket.Web.Tests/ReviMarket.Web.Tests.csproj
 
-      - name: Build
+      - name: Build web application
         run: dotnet build src/ReviMarket.Web/ReviMarket.Web.csproj --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test tests/ReviMarket.Web.Tests/ReviMarket.Web.Tests.csproj --configuration Release --no-restore --verbosity normal

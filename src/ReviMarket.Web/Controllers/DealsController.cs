@@ -22,7 +22,14 @@ public class DealsController : Controller
     public async Task<IActionResult> Index()
     {
         var uid = _users.GetUserId(User)!;
-        var deals = await _db.Deals.Include(x => x.Customer).Include(x => x.Executor).Include(x => x.MarketItem).Where(x => x.CustomerId == uid || x.ExecutorId == uid).OrderByDescending(x => x.CreatedAt).ToListAsync();
+        var deals = await _db.Deals
+            .Include(x => x.Customer)
+            .Include(x => x.Executor)
+            .Include(x => x.MarketItem)
+            .Where(x => x.CustomerId == uid || x.ExecutorId == uid)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
         ViewBag.MyReviews = await _db.UserReviews.Where(x => x.AuthorId == uid).ToListAsync();
         return View(deals);
     }
@@ -39,35 +46,99 @@ public class DealsController : Controller
     public async Task<IActionResult> Complete(int id)
     {
         var uid = _users.GetUserId(User)!;
-        var deal = await _db.Deals.Include(x => x.MarketItem).FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == uid);
-        if (deal is null || deal.Status != DealStatuses.Funded) return NotFound();
+        var deal = await _db.Deals
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.CustomerId == uid);
 
-        var customerWallet = await GetWallet(deal.CustomerId);
-        var executorWallet = await GetWallet(deal.ExecutorId);
+        if (deal is null) return NotFound();
+
+        await GetOrCreateWalletAsync(deal.CustomerId);
+        await GetOrCreateWalletAsync(deal.ExecutorId);
 
         await using var tx = await _db.Database.BeginTransactionAsync();
-        customerWallet.HoldBalance -= deal.Amount;
-        executorWallet.Balance += deal.ExecutorAmount;
-        deal.Status = DealStatuses.Completed;
-        deal.CompletedAt = DateTime.UtcNow;
-        if (deal.MarketItem is not null) deal.MarketItem.OrderStatus = OrderStatuses.Done;
+        var completedAt = DateTime.UtcNow;
 
-        _db.PaymentTransactions.Add(new PaymentTransaction { UserId = deal.ExecutorId, Amount = deal.ExecutorAmount, Type = PaymentTypes.Release, Status = PaymentStatuses.Success });
-        _db.PaymentTransactions.Add(new PaymentTransaction { UserId = deal.CustomerId, Amount = deal.CommissionAmount, Type = PaymentTypes.Commission, Status = PaymentStatuses.Success });
-        _db.PlatformTransactions.Add(new PlatformTransaction { Amount = deal.CommissionAmount, Type = PlatformTransactionTypes.Commission, DealId = deal.Id });
+        var claimed = await _db.Deals
+            .Where(x => x.Id == id && x.CustomerId == uid && x.Status == DealStatuses.Funded)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Status, DealStatuses.Completed)
+                .SetProperty(x => x.CompletedAt, completedAt));
+
+        if (claimed == 0)
+        {
+            await tx.RollbackAsync();
+            return Conflict("Сделка уже завершена или недоступна");
+        }
+
+        var holdReleased = await _db.Wallets
+            .Where(x => x.UserId == deal.CustomerId && x.HoldBalance >= deal.Amount)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.HoldBalance, x => x.HoldBalance - deal.Amount));
+
+        if (holdReleased == 0)
+        {
+            await tx.RollbackAsync();
+            return Conflict("Недостаточно средств в резерве сделки");
+        }
+
+        await _db.Wallets
+            .Where(x => x.UserId == deal.ExecutorId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.Balance, x => x.Balance + deal.ExecutorAmount));
+
+        if (deal.MarketItemId is not null)
+        {
+            await _db.MarketItems
+                .Where(x => x.Id == deal.MarketItemId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.OrderStatus, OrderStatuses.Done));
+        }
+
+        _db.PaymentTransactions.Add(new PaymentTransaction
+        {
+            UserId = deal.ExecutorId,
+            Amount = deal.ExecutorAmount,
+            Type = PaymentTypes.Release,
+            Status = PaymentStatuses.Success,
+            Comment = $"Выплата по сделке #{deal.Id}"
+        });
+        _db.PaymentTransactions.Add(new PaymentTransaction
+        {
+            UserId = deal.CustomerId,
+            Amount = deal.CommissionAmount,
+            Type = PaymentTypes.Commission,
+            Status = PaymentStatuses.Success,
+            Comment = $"Комиссия по сделке #{deal.Id}"
+        });
+        _db.PlatformTransactions.Add(new PlatformTransaction
+        {
+            Amount = deal.CommissionAmount,
+            Type = PlatformTransactionTypes.Commission,
+            DealId = deal.Id
+        });
 
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task<Wallet> GetWallet(string userId)
+    private async Task<Wallet> GetOrCreateWalletAsync(string userId)
     {
         var wallet = await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
         if (wallet is not null) return wallet;
+
         wallet = new Wallet { UserId = userId };
         _db.Wallets.Add(wallet);
-        await _db.SaveChangesAsync();
-        return wallet;
+
+        try
+        {
+            await _db.SaveChangesAsync();
+            return wallet;
+        }
+        catch (DbUpdateException)
+        {
+            _db.Entry(wallet).State = EntityState.Detached;
+            return await _db.Wallets.SingleAsync(x => x.UserId == userId);
+        }
     }
 }
