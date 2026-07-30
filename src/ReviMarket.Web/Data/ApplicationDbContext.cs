@@ -50,6 +50,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<UserReview>().HasOne(x => x.Author).WithMany().HasForeignKey(x => x.AuthorId).OnDelete(DeleteBehavior.Restrict);
         builder.Entity<UserReview>().HasOne(x => x.TargetUser).WithMany().HasForeignKey(x => x.TargetUserId).OnDelete(DeleteBehavior.Restrict);
         builder.Entity<UserReview>().HasOne(x => x.Deal).WithMany().HasForeignKey(x => x.DealId).OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<Wallet>().HasIndex(x => x.UserId).IsUnique();
+        builder.Entity<Deal>().HasIndex(x => x.MarketItemId).IsUnique();
+        builder.Entity<PaymentInvoice>().HasIndex(x => x.ProviderPaymentId).IsUnique();
+        builder.Entity<PlatformTransaction>().HasIndex(x => x.DealId).IsUnique();
         builder.Entity<UserReview>().HasIndex(x => new { x.AuthorId, x.TargetUserId, x.DealId }).IsUnique();
     }
 }
