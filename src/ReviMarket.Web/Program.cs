@@ -14,12 +14,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        options.Password.RequiredLength = 6;
-        options.Password.RequireDigit = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireUppercase = false;
+        options.Password.RequiredLength = 10;
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
         options.Password.RequireNonAlphanumeric = false;
+
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
         options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = builder.Configuration.GetValue<bool>("Identity:RequireConfirmedEmail");
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -29,6 +35,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = true;
 });
 
 builder.Services.AddControllersWithViews();
@@ -39,7 +50,18 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var db = services.GetRequiredService<ApplicationDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    var migrations = await db.Database.GetMigrationsAsync();
+
+    if (migrations.Any())
+    {
+        await db.Database.MigrateAsync();
+    }
+    else
+    {
+        await db.Database.EnsureCreatedAsync();
+    }
+
+    await SchemaHardening.ApplyAsync(db);
     await SeedData.InitializeAsync(services);
 }
 
@@ -59,8 +81,7 @@ app.Use(async (context, next) =>
 {
     if (context.User.Identity?.IsAuthenticated == true)
     {
-        using var scope = context.RequestServices.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var userManager = context.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
         var user = await userManager.GetUserAsync(context.User);
 
         if (user is null)
@@ -87,3 +108,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program;
