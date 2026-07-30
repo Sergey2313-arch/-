@@ -1,0 +1,39 @@
+name: Generate EF migration artifact
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '.github/workflows/generate-migration.yml'
+
+jobs:
+  generate-migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore src/ReviMarket.Web/ReviMarket.Web.csproj
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 8.0.10
+
+      - name: Build
+        run: dotnet build src/ReviMarket.Web/ReviMarket.Web.csproj --configuration Release --no-restore
+
+      - name: Generate initial migration
+        run: dotnet ef migrations add InitialCreate --project src/ReviMarket.Web/ReviMarket.Web.csproj --startup-project src/ReviMarket.Web/ReviMarket.Web.csproj --output-dir Data/Migrations --configuration Release --no-build
+
+      - name: Upload migration
+        uses: actions/upload-artifact@v4
+        with:
+          name: revimarket-initial-migration
+          path: src/ReviMarket.Web/Data/Migrations
