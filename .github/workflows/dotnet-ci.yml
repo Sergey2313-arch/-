@@ -31,3 +31,13 @@ jobs:
 
       - name: Build
         run: dotnet build src/ReviMarket.Web/ReviMarket.Web.csproj --configuration Release --no-restore
+
+      - name: Publish self-contained preview
+        run: dotnet publish src/ReviMarket.Web/ReviMarket.Web.csproj --configuration Release --runtime linux-x64 --self-contained true --output publish
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: revimarket-linux-x64
+          path: publish/
+          if-no-files-found: error
