@@ -18,10 +18,13 @@ public class CreatorsController : Controller
     {
         var creators = await _db.Users
             .Where(x => x.AccountType == UserRoles.Creator)
+            .ToListAsync();
+
+        creators = creators
             .OrderByDescending(x => x.Rating)
             .ThenByDescending(x => x.ReviewsCount)
             .ThenByDescending(x => x.LastSeenAt)
-            .ToListAsync();
+            .ToList();
 
         ViewBag.OnlineLimit = DateTime.UtcNow.AddMinutes(-5);
         return View(creators);
